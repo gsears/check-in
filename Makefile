@@ -17,3 +17,6 @@ reset_db:
 
 dev:
 	yarn encore dev --watch
+
+dev-hot:
+	yarn encore dev-server --hot
