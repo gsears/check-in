@@ -14,3 +14,9 @@ migrate:
 reset_db:
 	./bin/console doctrine:schema:drop --full-database --force
 	./bin/console doctrine:migrations:migrate -n
+
+dev:
+	yarn encore dev --watch
+
+dev-hot:
+	yarn encore dev-server --hot
