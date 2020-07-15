@@ -22,8 +22,6 @@ class SecurityControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
-        var_dump($crawler);
-
         $form = $crawler->selectButton('Sign in')->form();
 
         $client->submit($form, [
