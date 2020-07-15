@@ -79,7 +79,8 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": "./bin/phpunit"
+        "test": "./bin/phpunit",
+        "fixtures": "./bin/console doctrine:fixtures:load --no-interaction"
     },
     "conflict": {
         "symfony/symfony": "*"
