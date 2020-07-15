@@ -26,6 +26,9 @@ jobs:
     - name: Install dependencies
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
+    
+    - name: Create fixtures
+      run: composer run-script fixtures
 
     - name: Run test suite
       run: composer run-script test
