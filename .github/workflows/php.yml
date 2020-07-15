@@ -8,11 +8,9 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
+    # Dockerhub image
     container: andrewmackrodt/php
-
     # Service containers to run with `container-job`
     services:
       # Label used to access the service container
