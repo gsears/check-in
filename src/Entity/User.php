@@ -28,6 +28,16 @@ class User implements UserInterface
     private $email;
 
     /**
+     * @ORM\Column(type="string", length=180)
+     */
+    private $forename;
+
+    /**
+     * @ORM\Column(type="string", length=180)
+     */
+    private $surname;
+
+    /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -55,6 +65,35 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getForename(): ?string
+    {
+        return $this->forename;
+    }
+
+    public function setForename(string $forename): self
+    {
+        $this->forename = $forename;
+
+        return $this;
+    }
+
+    public function getSurname(): ?string
+    {
+        return $this->surname;
+    }
+
+    public function setSurname(string $surname): self
+    {
+        $this->surname = $surname;
+
+        return $this;
+    }
+
+    public function getFullname(): ?string
+    {
+        return $this->forename . ' ' . $this->surname;
+    }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -66,6 +105,7 @@ class User implements UserInterface
     }
 
     /**
+     * Used to return the security roles for this user.
      * @see UserInterface
      */
     public function getRoles(): array
