@@ -30,7 +30,6 @@ class SecurityControllerTest extends WebTestCase
             'password' => 'password',
         ]);
 
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
-        $this->assertRegExp('/\/courses$/', $client->getResponse()->headers->get('Location'));
+        $this->assertResponseRedirects('/courses', 302);
     }
 }
