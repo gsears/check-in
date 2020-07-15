@@ -39,4 +39,9 @@ class Instructor
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return "INSTRUCTOR - " . $this->getUser();
+    }
 }

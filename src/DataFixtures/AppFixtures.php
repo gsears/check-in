@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Instructor;
 use App\Entity\Student;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -20,6 +21,7 @@ class AppFixtures extends Fixture
     const PASSWORD = '$2y$13$M5wzRvyIISgDAjtGJEna5.mnz5QAgsoExUOPEwacu/cOFSz861fjC';
 
     private $logger;
+    private $manager;
     private $faker;
 
     /**
@@ -32,45 +34,57 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager)
     {
+        $this->manager = $manager;
+
         // Creates faker for mocking data
         $this->faker = Faker\Factory::create('en_GB');
-        $students = $this->loadStudents($manager);
-        foreach ($students as $student) {
-            printf($student);
-        }
 
+        // Create students
+        $students = $this->loadStudents();
+        $this->printArray('Students', $students);
+
+        // Create instructors
+        $instructors = $this->loadInstructors();
+        $this->printArray('Instructors', $instructors);
+
+        // Commit to db
         $manager->flush();
     }
 
-    private function loadStudents(ObjectManager $manager)
+    private function createUser(callable $roleSpecificConfigFunction)
+    {
+         $user = new User();
+         $forename = $this->faker->firstname;
+         $surname = $this->faker->lastname;
+         $user->setForename($forename);
+         $user->setSurname($surname);
+         $user->setPassword(self::PASSWORD);
+
+         $roleSpecificConfigFunction($user);
+
+         // Add to db commit
+         $this->manager->persist($user);
+
+    }
+
+    private function loadStudents()
     {
         $students = [];
 
         for ($i = 0; $i < 10; $i++) {
-            // Create student
             $student = new Student();
             $guid = $this->faker->unique()->randomNumber(7);
             $student->setGuid($guid);
 
             // Add to db
-            $manager->persist($student);
+            $this->manager->persist($student);
 
-            // Create user
-            $user = new User();
-            $forename = $this->faker->firstname;
-            $surname = $this->faker->lastname;
-            $firstSurnameLetter = strtolower($surname[0]);
+            $this->createUser(function($user) use ($guid, $student) {
+                $firstSurnameLetter = strtolower($user->getSurname()[0]);
+                $user->setEmail($guid . $firstSurnameLetter . '@student.gla.ac.uk');
+                $user->setStudent($student);
+            });
 
-            $user->setForename($forename);
-            $user->setSurname($surname);
-            $user->setEmail($guid . $firstSurnameLetter . '@student.gla.ac.uk');
-            $user->setPassword(self::PASSWORD);
-            $user->setStudent($student);
-
-            // Add to db
-            $manager->persist($user);
-
-            // Add student to students array
             $students[] = $student;
         }
 
@@ -79,6 +93,41 @@ class AppFixtures extends Fixture
 
     private function loadInstructors()
     {
+        $instructors = [];
 
+        for ($i = 0; $i < 5; $i++) {
+            $instructor = new Instructor();
+
+            // Add to db
+            $this->manager->persist($instructor);
+
+            $this->createUser(function($user) use ($instructor) {
+                $email = strtolower($user->getForename() . '.' . $user->getSurname() . '@glasgow.ac.uk');
+                $user->setEmail($email);
+                $user->setInstructor($instructor);
+            });
+
+            $instructors[] = $instructor;
+        }
+
+        return $instructors;
+
+    }
+
+    // HELPER FUNCTIONS
+
+    /**
+     * Helper function for printing fixtures that have been generated.
+     *
+     * @param string $title to display above fixtures
+     * @param array $array of objects to print
+     * @return void
+     */
+    private function printArray(string $title, array $array) {
+        printf("%s\n-----\n \n", $title);
+        foreach ($array as $str) {
+            printf($str);
+        }
+        printf("\n");
     }
 }

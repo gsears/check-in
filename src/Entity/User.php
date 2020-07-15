@@ -242,7 +242,7 @@ class User implements UserInterface
 
     public function __toString() : string
     {
-        return sprintf("USER - Name: %s - Email: %s\n",
+        return sprintf("Name: %s - Email: %s\n",
             $this->getFullname(),
             $this->getEmail());
     }

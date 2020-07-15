@@ -50,6 +50,6 @@ class Student
 
     public function __toString(): string
     {
-        return $this->getUser();
+        return "STUDENT - " . $this->getUser();
     }
 }
