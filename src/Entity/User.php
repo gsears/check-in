@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Security\Roles;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -47,6 +49,16 @@ class User implements UserInterface
      * @ORM\Column(type="string")
      */
     private $password;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Student::class, mappedBy="appuser", cascade={"persist", "remove"})
+     */
+    private $student;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Instructor::class, mappedBy="appuser", cascade={"persist", "remove"})
+     */
+    private $instructor;
 
     public function getId(): ?int
     {
@@ -124,6 +136,32 @@ class User implements UserInterface
         return $this;
     }
 
+    public function addRole($role)
+    {
+        if (!in_array($role, $this->roles)) {
+            $this->roles[] = $role;
+        }
+
+        return $this;
+    }
+
+    public function removeRole($role)
+    {
+        if (!in_array($role, $this->roles, true)) {
+            return;
+        }
+
+        unset($this->roles[array_search($role, $this->roles)]);
+        $this->roles = array_values($this->roles);
+
+        return $this;
+    }
+
+    public function hasRole($role)
+    {
+        return in_array($role, $this->getRoles(), true);
+    }
+
     /**
      * @see UserInterface
      */
@@ -154,5 +192,58 @@ class User implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getStudent(): ?Student
+    {
+        return $this->student;
+    }
+
+    public function setStudent(Student $student): self
+    {
+        // at present, a role can only be as an instructor or as a student
+        if ($this->instructor !== null) {
+            throw new Exception("Cannot set a instructor as a student.", 1);
+        }
+
+        $this->student = $student;
+        $this->addRole(Roles::STUDENT);
+
+        // set the owning side of the relation if necessary
+        if ($student->getUser() !== $this) {
+            $student->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function getInstructor(): ?Instructor
+    {
+        return $this->instructor;
+    }
+
+    public function setInstructor(Instructor $instructor): self
+    {
+        // at present, a role can only be as an instructor or as a student
+        if ($this->student !== null) {
+            throw new Exception("Cannot set a student as an instructor.", 1);
+        }
+
+        $this->instructor = $instructor;
+        $this->addRole(Roles::INSTRUCTOR);
+
+        // set the owning side of the relation if necessary
+        if ($instructor->getUser() !== $this) {
+            $instructor->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function __toString() : string
+    {
+        return sprintf("USER - Name: %s - Email: %s\n",
+            $this->getFullname(),
+            $this->getEmail());
     }
 }
