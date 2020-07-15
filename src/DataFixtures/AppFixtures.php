@@ -20,6 +20,9 @@ class AppFixtures extends Fixture
     // 'password', pre-hashed for speed
     const PASSWORD = '$2y$13$M5wzRvyIISgDAjtGJEna5.mnz5QAgsoExUOPEwacu/cOFSz861fjC';
 
+    const TEST_STUDENT_USERNAME = 'test@student.gla.ac.uk';
+    const TEST_INSTUCTOR_USERNAME = 'test@glasgow.ac.uk';
+
     private $logger;
     private $manager;
     private $faker;
@@ -38,6 +41,9 @@ class AppFixtures extends Fixture
 
         // Creates faker for mocking data
         $this->faker = Faker\Factory::create('en_GB');
+
+        $testUsers = $this->loadFunctionalTestUsers();
+        $this->printArray('Test Users', $testUsers);
 
         // Create students
         $students = $this->loadStudents();
@@ -67,47 +73,83 @@ class AppFixtures extends Fixture
 
     }
 
-    private function loadStudents()
+    private function loadFunctionalTestUsers() : array
+    {
+        $testStudentGuid = $this->faker->unique()->passthrough(1234567);
+        $testStudentEmail = self::TEST_STUDENT_USERNAME;
+        $testStudent = $this->createStudent(
+            $guid = $testStudentGuid,
+            $email = $testStudentEmail
+        );
+
+        $testInstructorEmail = self::TEST_INSTUCTOR_USERNAME;
+        $testInstructor = $this->createInstructor(
+            $email = $testInstructorEmail
+        );
+
+        return [
+            'student' => $testStudent,
+            'instructor' => $testInstructor
+        ];
+    }
+
+    private function createStudent($guid = null, $email = null) : Student
+    {
+        $student = new Student();
+        $guid = $guid ? $guid : $this->faker->unique()->randomNumber(7);
+        $student->setGuid($guid);
+
+        // Add to db
+        $this->manager->persist($student);
+
+        $this->createUser(function($user) use ($guid, $email, $student) {
+            if (!$email) {
+                $firstSurnameLetter = strtolower($user->getSurname()[0]);
+                $email = $guid . $firstSurnameLetter . '@student.gla.ac.uk';
+            }
+            $user->setEmail($email);
+            $user->setStudent($student);
+        });
+
+        return $student;
+    }
+
+    private function loadStudents() : array
     {
         $students = [];
 
         for ($i = 0; $i < 10; $i++) {
-            $student = new Student();
-            $guid = $this->faker->unique()->randomNumber(7);
-            $student->setGuid($guid);
-
-            // Add to db
-            $this->manager->persist($student);
-
-            $this->createUser(function($user) use ($guid, $student) {
-                $firstSurnameLetter = strtolower($user->getSurname()[0]);
-                $user->setEmail($guid . $firstSurnameLetter . '@student.gla.ac.uk');
-                $user->setStudent($student);
-            });
-
-            $students[] = $student;
+            $students[] = $this->createStudent();
         }
 
         return $students;
     }
 
-    private function loadInstructors()
+    private function createInstructor($email = null) : Instructor
+    {
+        $instructor = new Instructor();
+
+        // Add to db
+        $this->manager->persist($instructor);
+
+        $this->createUser(function($user) use ($email, $instructor) {
+            if (!$email) {
+                $email = $user->getForename() . '.' . $user->getSurname() . '@glasgow.ac.uk';
+                $email = strtolower($email);
+            }
+            $user->setEmail($email);
+            $user->setInstructor($instructor);
+        });
+
+        return $instructor;
+    }
+
+    private function loadInstructors() : array
     {
         $instructors = [];
 
         for ($i = 0; $i < 5; $i++) {
-            $instructor = new Instructor();
-
-            // Add to db
-            $this->manager->persist($instructor);
-
-            $this->createUser(function($user) use ($instructor) {
-                $email = strtolower($user->getForename() . '.' . $user->getSurname() . '@glasgow.ac.uk');
-                $user->setEmail($email);
-                $user->setInstructor($instructor);
-            });
-
-            $instructors[] = $instructor;
+            $instructors[] = $this->createInstructor();
         }
 
         return $instructors;
