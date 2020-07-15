@@ -10,10 +10,28 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: andrewmackrodt/php
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:11
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: checkin
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - uses: actions/checkout@v2
-      
+
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v2
@@ -27,5 +45,15 @@ jobs:
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
 
+    - name: Reset db
+      run: composer run-script reset-db
+
+    - name: Create fixtures
+      run: composer run-script fixtures
+      env:
+        DATABASE_URL: postgresql://postgres:checkin@localhost:5432/postgres?serverVersion=11&charset=utf8
+
     - name: Run test suite
       run: composer run-script test
+      env:
+        DATABASE_URL: postgresql://postgres:checkin@localhost:5432/postgres?serverVersion=11&charset=utf8

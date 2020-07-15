@@ -79,7 +79,13 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": "./bin/phpunit"
+        "make-migrations": "./bin/console make:migration",
+        "reset-db": [
+            "./bin/console doctrine:schema:drop --full-database --force",
+            "./bin/console doctrine:migrations:migrate -n"
+        ],
+        "test": "./bin/phpunit",
+        "fixtures": "./bin/console doctrine:fixtures:load --no-interaction"
     },
     "conflict": {
         "symfony/symfony": "*"
