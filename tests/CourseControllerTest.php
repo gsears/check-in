@@ -11,6 +11,6 @@ class CourseControllerTest extends WebTestCase
     public function testUnauthorisedUsersRedirected() {
         $client = static::createClient();
         $crawler = $client->request('GET', '/courses');
-        $this->assertResponseRedirects('/login', 301);
+        $this->assertResponseRedirects('/login', 302);
     }
 }
