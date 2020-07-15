@@ -49,7 +49,7 @@ jobs:
       run: make reset_db
 
     - name: Create fixtures
-      run: composer run-script fixtures
+      run: make fixtures
 
     - name: Run test suite
-      run: composer run-script test
+      run: make test

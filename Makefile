@@ -20,3 +20,9 @@ dev:
 
 dev-hot:
 	yarn encore dev-server --hot
+
+fixtures:
+	php bin/console doctrine:fixtures:load --no-interaction
+
+test:
+	./bin/phpunit --exclude-group database
