@@ -23,3 +23,6 @@ dev-hot:
 
 fixtures:
 	php bin/console doctrine:fixtures:load --no-interaction
+
+test:
+	./bin/phpunit --exclude-group database
