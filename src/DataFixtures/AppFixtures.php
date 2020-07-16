@@ -9,6 +9,7 @@ use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\Student;
 use App\Entity\User;
+use App\Entity\XYQuestion;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Exception;
@@ -19,6 +20,8 @@ use Faker;
 
 /**
  * Populates the database with dummy data for testing and evaluation.
+ *
+ * TODO: Some extra blurb saying why this is a monolithic file
  */
 class AppFixtures extends Fixture
 {
@@ -62,30 +65,52 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const AFFECTIVE_FIELD_INTEREST = 'interest';
+    const AFFECTIVE_FIELD_DIFFICULTY = 'difficulty';
+    const AFFECTIVE_FIELD_FAMILIARITY = 'familiarity';
+    const AFFECTIVE_FIELD_PLAN = 'ability to plan';
+    const AFFECTIVE_FIELD_IMPROVEMENT = 'improvement';
+    const AFFECTIVE_FIELD_SATISFACTION = 'satisfaction';
+
     const AFFECTIVE_FIELDS = [
-        'interest' => [
-            'high' => 'interesting',
-            'low' => 'boring'
-        ],
-        'difficulty' => [
+        self::AFFECTIVE_FIELD_DIFFICULTY => [
             'high' => 'hard',
             'low' => 'easy'
         ],
-        'familiarity' => [
+        self::AFFECTIVE_FIELD_INTEREST => [
+            'high' => 'interesting',
+            'low' => 'boring'
+        ],
+        self::AFFECTIVE_FIELD_FAMILIARITY => [
             'high' => 'familiar',
             'low' => 'unfamiliar'
         ],
-        'ability to plan' => [
+        self::AFFECTIVE_FIELD_PLAN  => [
             'high' => 'easy to plan',
             'low' => 'unable to plan'
         ],
-        'improvement' => [
+        self::AFFECTIVE_FIELD_IMPROVEMENT => [
             'high' => 'skills improved',
             'low' => 'skills not improved'
         ],
-        'satisfaction' => [
+        self::AFFECTIVE_FIELD_SATISFACTION => [
             'high' => 'triumphant',
             'low' => 'frustrated'
+        ]
+    ];
+
+    const XY_QUESTIONS = [
+        "interest-difficulty" => [
+            "text" => "How interesting did you find the task? How difficult did you *personally* find it?",
+            "fields" => [self::AFFECTIVE_FIELD_INTEREST, self::AFFECTIVE_FIELD_DIFFICULTY],
+        ],
+        'planning-familiarity' => [
+            "text" => "How easy was it to plan how you'd execute the task? How familiar was the material?",
+            "fields" => [self::AFFECTIVE_FIELD_PLAN, self::AFFECTIVE_FIELD_FAMILIARITY],
+        ],
+        'satisfaction-improvement' => [
+            "text" => "How did you feel while executing the task? Do you feel like your skills have improved?",
+            "fields" =>  [self::AFFECTIVE_FIELD_SATISFACTION, self::AFFECTIVE_FIELD_IMPROVEMENT],
         ]
     ];
 
@@ -128,6 +153,10 @@ class AppFixtures extends Fixture
         // Create affective fields for XY questions
         $affectiveFields = $this->loadAffectiveFields();
         $this->printArray('Affective Fields', $affectiveFields);
+
+        // Create XY questions
+        $xyQuestions = $this->loadXYQuestions($affectiveFields);
+        $this->printArray('XY Questions', $xyQuestions);
 
         // Commit to db
         $manager->flush();
@@ -353,10 +382,35 @@ class AppFixtures extends Fixture
                 }
             }
             $this->manager->persist($affectiveField);
-            $affectiveFields[] = $affectiveField;
+            $affectiveFields[$name] = $affectiveField;
         }
 
         return $affectiveFields;
+    }
+
+    public function loadXYQuestions($affectiveFields) : array
+    {
+        $xyQuestions = [];
+
+        foreach (self::XY_QUESTIONS as $name => $props) {
+            $xyQuestion = new XYQuestion();
+            $xyQuestion->setName($name);
+            $xyQuestion->setQuestionText($props['text']);
+
+            $xFieldName = $props['fields'][0];
+            $xField = $affectiveFields[$xFieldName];
+            $xyQuestion->setXField($xField);
+
+            $yFieldName = $props['fields'][1];
+            $yField = $affectiveFields[$yFieldName];
+            $xyQuestion->setYField($yField);
+
+            $this->manager->persist($xyQuestion);
+
+            $xyQuestions[$name] = $xyQuestion;
+        }
+
+        return $xyQuestions;
     }
 
     // HELPER FUNCTIONS

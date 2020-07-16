@@ -36,8 +36,8 @@ class AffectiveField
     {
         return sprintf("Affective Field: %s <- %s -> %s\n",
             $this->getLowLabel(),
-            $this->getHighLabel(),
-            $this->getName());
+            $this->getName(),
+            $this->getHighLabel());
     }
 
     public function getId(): ?int
