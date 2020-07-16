@@ -9,6 +9,7 @@ use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\LabSurvey;
 use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabSurveyXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
@@ -66,6 +67,8 @@ class AppFixtures extends Fixture
             'end' => '26 March 2021',
         ]
     ];
+
+    const SIMULATED_CURRENT_DATE = "2pm 20 November 2020";
 
     const AFFECTIVE_FIELD_INTEREST = 'interest';
     const AFFECTIVE_FIELD_DIFFICULTY = 'difficulty';
@@ -165,6 +168,10 @@ class AppFixtures extends Fixture
         // Create lab surveys
         $labSurveys = $this->loadLabSurveys($courseInstances, $xyQuestions);
         $this->printArray('Lab Surveys', $labSurveys);
+
+        // Create lab xy responses
+        $labXYResponses = $this->loadLabSurveyXYQuestionResponses($courseInstances);
+        $this->printArray('Lab XY Responses', $labXYResponses);
 
         // Commit to db
         $manager->flush();
@@ -445,16 +452,18 @@ class AppFixtures extends Fixture
 
                 $labSurvey
                     ->setLabName('Lab ' . strval($i + 1))
-                    ->setStartDateTime($labStartDate)
-                    ->setCourseInstance($courseInstance);
+                    ->setStartDateTime($labStartDate);
+
+                $courseInstance->addLabSurvey($labSurvey);
 
                 // Add stock XY Questions for each lab instance
                 foreach ($xyQuestions as $xyQuestion) {
                     $labSurveyXYQuestion = new LabSurveyXYQuestion();
 
                     $labSurveyXYQuestion
-                        ->setXyQuestion($xyQuestion)
-                        ->setLabSurvey($labSurvey);
+                        ->setXyQuestion($xyQuestion);
+
+                    $labSurvey->addXyQuestion($labSurveyXYQuestion);
 
                     $this->manager->persist($labSurveyXYQuestion);
                 }
@@ -464,6 +473,61 @@ class AppFixtures extends Fixture
             }
         }
         return $labSurveys;
+    }
+
+    public function loadLabSurveyXYQuestionResponses($courseInstances) {
+        $responses = [];
+
+        $cutoffDate = date_create(self::SIMULATED_CURRENT_DATE);
+
+        foreach ($courseInstances as $courseInstance) {
+            // Get all enrolled students on that course
+            $students = $courseInstance->getEnrolments()->map(function($e) {
+                return $e->getStudent();
+            });
+
+            // For each courseInstance starting before the simulated date...
+            if($courseInstance->getStartDate() <= $cutoffDate) {
+
+                // For each lab before the cutoff date / time...
+                $labSurveys = $courseInstance->getLabSurveys()->filter(
+                    function($lab) use ($cutoffDate) {
+                        return $lab->getStartDateTime() <= $cutoffDate;
+                    }
+                )->toArray();
+
+                foreach ($labSurveys as $labSurvey) {
+
+                    // each student...
+                    foreach ($students as $student) {
+                        // has an 80% chance of a student completing a survey...
+                        if(rand(0, 10) < 8) {
+                            $labSurveyXYQuestions = $labSurvey->getXyQuestions()->toArray();
+                            // 90% chance of completing an XY question
+                            foreach ($labSurveyXYQuestions as $xyQuestion) {
+
+                                if(rand(0, 10) < 9) {
+                                    $response = new LabSurveyXYQuestionResponse();
+
+                                    $response
+                                        ->setXValue(rand(0, 10))
+                                        ->setYValue(rand(0, 10));
+
+                                    $student->addLabSurveyXYQuestionResponse($response);
+                                    $xyQuestion->addResponse($response);
+
+                                    $this->manager->persist($response);
+
+                                    $responses[] = $response;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $responses;
     }
 
     // HELPER FUNCTIONS

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LabXYQuestionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -29,6 +31,16 @@ class LabSurveyXYQuestion
      */
     private $xyQuestion;
 
+    /**
+     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestionResponse::class, mappedBy="labSurveyXYQuestion")
+     */
+    private $responses;
+
+    public function __construct()
+    {
+        $this->responses = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -54,6 +66,37 @@ class LabSurveyXYQuestion
     public function setXyQuestion(?XYQuestion $xyQuestion): self
     {
         $this->xyQuestion = $xyQuestion;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|LabSurveyXYQuestionResponse[]
+     */
+    public function getResponses(): Collection
+    {
+        return $this->responses;
+    }
+
+    public function addResponse(LabSurveyXYQuestionResponse $response): self
+    {
+        if (!$this->responses->contains($response)) {
+            $this->responses[] = $response;
+            $response->setLabSurveyXYQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResponse(LabSurveyXYQuestionResponse $response): self
+    {
+        if ($this->responses->contains($response)) {
+            $this->responses->removeElement($response);
+            // set the owning side to null (unless already changed)
+            if ($response->getLabSurveyXYQuestion() === $this) {
+                $response->setLabSurveyXYQuestion(null);
+            }
+        }
 
         return $this;
     }
