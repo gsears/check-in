@@ -511,10 +511,12 @@ class AppFixtures extends Fixture
 
                                     $response
                                         ->setXValue(rand(0, 10))
-                                        ->setYValue(rand(0, 10));
+                                        ->setYValue(rand(0, 10))
+                                        ->setStudent($student)
+                                        ->setLabSurveyXYQuestion($xyQuestion);
 
-                                    $student->addLabSurveyXYQuestionResponse($response);
-                                    $xyQuestion->addResponse($response);
+                                    // $student->addLabSurveyXYQuestionResponse($response);
+                                    // $xyQuestion->addResponse($response);
 
                                     $this->manager->persist($response);
 
