@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Course;
 use App\Entity\Instructor;
 use App\Entity\Student;
 use App\Entity\User;
@@ -22,6 +23,28 @@ class AppFixtures extends Fixture
 
     const TEST_STUDENT_USERNAME = 'test@student.gla.ac.uk';
     const TEST_INSTUCTOR_USERNAME = 'test@glasgow.ac.uk';
+
+    const COURSE_TITLE_TEMPLATES = [
+        '%s Theory and Applications',
+        'Advanced %s',
+        'Introductory %s',
+        '%s and %s',
+        '%s Engineering',
+        'Functional %s',
+    ];
+
+    const COURSE_TITLE_SUBJECTS = [
+        'Cloud Storage',
+        'Big Data',
+        'Java',
+        'Python',
+        'Algorithms',
+        'Database',
+        'Software',
+        'Quantum Computing',
+        'Systems',
+        'Networking',
+    ];
 
     private $logger;
     private $manager;
@@ -52,6 +75,10 @@ class AppFixtures extends Fixture
         // Create instructors
         $instructors = $this->loadInstructors();
         $this->printArray('Instructors', $instructors);
+
+        // Create courses
+        $courses = $this->loadCourses();
+        $this->printArray('Courses', $courses);
 
         // Commit to db
         $manager->flush();
@@ -154,6 +181,38 @@ class AppFixtures extends Fixture
 
         return $instructors;
 
+    }
+
+    private function createCourse() : Course
+    {
+        $course = new Course();
+
+        $courseCode = $this->faker->unique()->numerify('COMPSCI####');
+        $course->setCode($courseCode);
+
+        $name = sprintf(
+            self::COURSE_TITLE_TEMPLATES[array_rand(self::COURSE_TITLE_TEMPLATES)],
+            self::COURSE_TITLE_SUBJECTS[array_rand(self::COURSE_TITLE_SUBJECTS)]
+        );
+        $course->setName($name);
+
+        $description = $this->faker->optional()->text($maxNbChars = 400);
+        $course->setDescription($description);
+
+        $this->manager->persist($course);
+
+        return $course;
+    }
+
+    private function loadCourses() : array
+    {
+        $courses = [];
+
+        for ($i = 0; $i < 10; $i++) {
+            $course[] = $this->createCourse();
+        }
+
+        return $courses;
     }
 
     // HELPER FUNCTIONS
