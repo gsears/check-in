@@ -133,19 +133,21 @@ class AppFixtures extends Fixture
         $testInstructor = $testUsers['instructor'];
 
         // Create students
-        $students = array_merge($this->loadStudents(), [$testStudent]);
+        $students = $this->loadStudents();
         $this->printArray('Students', $students);
+        $allStudents = array_merge($students, [$testStudent]);
 
         // Create instructors
-        $instructors = array_merge($this->loadInstructors(), [$testInstructor]);
-        $this->printArray('Instructors', $instructors);
+        $instructors = $this->loadInstructors();
+        $allInstructors = array_merge($instructors, [$testInstructor]);
+        $this->printArray('Instructors', $allInstructors);
 
         // Create courses
         $courses = $this->loadCourses();
         $this->printArray('Courses', $courses);
 
         // Create course instances, assign instructors and students
-        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $instructors, $students);
+        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents);
         $courseInstances = $courseInstancesAndEnrolments['courseInstances'];
         $this->printArray('Course Instances', $courseInstances);
 
