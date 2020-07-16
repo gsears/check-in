@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\AffectiveField;
 use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Enrolment;
@@ -10,6 +11,7 @@ use App\Entity\Student;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -60,6 +62,33 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const AFFECTIVE_FIELDS = [
+        'interest' => [
+            'high' => 'interesting',
+            'low' => 'boring'
+        ],
+        'difficulty' => [
+            'high' => 'hard',
+            'low' => 'easy'
+        ],
+        'familiarity' => [
+            'high' => 'familiar',
+            'low' => 'unfamiliar'
+        ],
+        'ability to plan' => [
+            'high' => 'easy to plan',
+            'low' => 'unable to plan'
+        ],
+        'improvement' => [
+            'high' => 'skills improved',
+            'low' => 'skills not improved'
+        ],
+        'satisfaction' => [
+            'high' => 'triumphant',
+            'low' => 'frustrated'
+        ]
+    ];
+
     private $manager;
     private $faker;
 
@@ -88,13 +117,17 @@ class AppFixtures extends Fixture
         $courses = $this->loadCourses();
         $this->printArray('Courses', $courses);
 
-        // Create course instances
+        // Create course instances, assign instructors and students
         $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $instructors, $students);
         $courseInstances = $courseInstancesAndEnrolments['courseInstances'];
         $this->printArray('Course Instances', $courseInstances);
 
         $enrolements = $courseInstancesAndEnrolments['enrolments'];
         $this->printArray('Enrolments', $enrolements);
+
+        // Create affective fields for XY questions
+        $affectiveFields = $this->loadAffectiveFields();
+        $this->printArray('Affective Fields', $affectiveFields);
 
         // Commit to db
         $manager->flush();
@@ -297,6 +330,33 @@ class AppFixtures extends Fixture
             'courseInstances' => $courseInstances,
             'enrolments' => $enrolments,
         ];
+    }
+
+    public function loadAffectiveFields() : array
+    {
+        $affectiveFields = [];
+
+        foreach (self::AFFECTIVE_FIELDS as $name => $labels) {
+            $affectiveField = new AffectiveField();
+            $affectiveField->setName($name);
+            foreach ($labels as $position => $label) {
+                switch ($position) {
+                    case 'high':
+                        $affectiveField->setHighLabel($label);
+                        break;
+                    case 'low':
+                        $affectiveField->setLowLabel($label);
+                        break;
+                    default:
+                        throw new Exception("Invalid affective field position", 1);
+                        break;
+                }
+            }
+            $this->manager->persist($affectiveField);
+            $affectiveFields[] = $affectiveField;
+        }
+
+        return $affectiveFields;
     }
 
     // HELPER FUNCTIONS
