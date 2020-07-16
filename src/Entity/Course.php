@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CourseRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -25,6 +27,23 @@ class Course
      * @ORM\Column(type="string", length=65535, nullable=true)
      */
     private $description;
+
+    /**
+     * @ORM\OneToMany(targetEntity=CourseInstance::class, mappedBy="course", orphanRemoval=true)
+     */
+    private $courseInstances;
+
+    public function __construct()
+    {
+        $this->courseInstances = new ArrayCollection();
+    }
+
+    public function __toString() : string
+    {
+        return sprintf("Code: %s - Name: %s\n",
+            $this->getCode(),
+            $this->getName());
+    }
 
     public function getCode(): ?string
     {
@@ -60,5 +79,41 @@ class Course
         $this->description = $description;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|CourseInstance[]
+     */
+    public function getCourseInstances(): Collection
+    {
+        return $this->courseInstances;
+    }
+
+    public function addCourseInstance(CourseInstance $courseInstance): self
+    {
+        if (!$this->courseInstances->contains($courseInstance)) {
+            $this->courseInstances[] = $courseInstance;
+            $courseInstance->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourseInstance(CourseInstance $courseInstance): self
+    {
+        if ($this->courseInstances->contains($courseInstance)) {
+            $this->courseInstances->removeElement($courseInstance);
+            // set the owning side to null (unless already changed)
+            if ($courseInstance->getCourse() === $this) {
+                $courseInstance->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __(Type $var = null)
+    {
+        # code...
     }
 }
