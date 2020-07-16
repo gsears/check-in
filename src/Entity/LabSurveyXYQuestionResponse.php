@@ -40,9 +40,12 @@ class LabSurveyXYQuestionResponse
 
     public function __toString() : string
     {
-        return sprintf("Response from Student %s\n%sResponse: {%d,%d}\n\n",
+        $labSurveyXYQuestion = $this->getLabSurveyXYQuestion();
+
+        return sprintf("Response from Student %s for '%s'\n%sResponse: {%d,%d}\n\n",
             $this->getStudent()->getGuid(),
-            $this->getLabSurveyXYQuestion()->getLabSurvey(),
+            $labSurveyXYQuestion->getXYQuestion()->getName(),
+            $labSurveyXYQuestion->getLabSurvey(),
             $this->getXValue(),
             $this->getYValue()
         );
