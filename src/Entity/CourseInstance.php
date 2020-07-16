@@ -45,18 +45,24 @@ class CourseInstance
      */
     private $enrolments;
 
+    /**
+     * @ORM\OneToMany(targetEntity=LabSurvey::class, mappedBy="courseInstance", orphanRemoval=true)
+     */
+    private $labSurveys;
+
     public function __construct()
     {
         $this->instructors = new ArrayCollection();
         $this->enrolments = new ArrayCollection();
+        $this->labSurveys = new ArrayCollection();
     }
 
     public function __toString() : string
     {
         return sprintf("Course Instance: %sStartDate: %s - EndDate: %s\n \nInstructors Assigned:\n- %s\Students Assigned:\n- %s\n",
             $this->getCourse(),
-            date_format($this->getStartDate(), "dd/mm/yy"),
-            date_format($this->getEndDate(), "dd/mm/yy"),
+            date_format($this->getStartDate(), "d/m/y"),
+            date_format($this->getEndDate(), "d/m/y"),
             join("- ", $this->getInstructors()->toArray()),
             join("- ", $this->getEnrolments()->map(function($enrolment){
                 return $enrolment->getStudent();
@@ -155,6 +161,37 @@ class CourseInstance
             // set the owning side to null (unless already changed)
             if ($enrolment->getCourseInstance() === $this) {
                 $enrolment->setCourseInstance(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|LabSurvey[]
+     */
+    public function getLabSurveys(): Collection
+    {
+        return $this->labSurveys;
+    }
+
+    public function addLabSurvey(LabSurvey $labSurvey): self
+    {
+        if (!$this->labSurveys->contains($labSurvey)) {
+            $this->labSurveys[] = $labSurvey;
+            $labSurvey->setCourseInstance($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabSurvey(LabSurvey $labSurvey): self
+    {
+        if ($this->labSurveys->contains($labSurvey)) {
+            $this->labSurveys->removeElement($labSurvey);
+            // set the owning side to null (unless already changed)
+            if ($labSurvey->getCourseInstance() === $this) {
+                $labSurvey->setCourseInstance(null);
             }
         }
 

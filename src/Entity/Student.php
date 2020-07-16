@@ -31,9 +31,15 @@ class Student
      */
     private $enrolments;
 
+    /**
+     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestionResponse::class, mappedBy="student")
+     */
+    private $labSurveyXYQuestionResponses;
+
     public function __construct()
     {
         $this->enrolments = new ArrayCollection();
+        $this->labSurveyXYQuestionResponses = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -90,6 +96,37 @@ class Student
             // set the owning side to null (unless already changed)
             if ($enrolment->getStudent() === $this) {
                 $enrolment->setStudent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|LabSurveyXYQuestionResponse[]
+     */
+    public function getLabSurveyXYQuestionResponses(): Collection
+    {
+        return $this->labSurveyXYQuestionResponses;
+    }
+
+    public function addLabSurveyXYQuestionResponse(LabSurveyXYQuestionResponse $labSurveyXYQuestionResponse): self
+    {
+        if (!$this->labSurveyXYQuestionResponses->contains($labSurveyXYQuestionResponse)) {
+            $this->labSurveyXYQuestionResponses[] = $labSurveyXYQuestionResponse;
+            $labSurveyXYQuestionResponse->setStudent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabSurveyXYQuestionResponse(LabSurveyXYQuestionResponse $labSurveyXYQuestionResponse): self
+    {
+        if ($this->labSurveyXYQuestionResponses->contains($labSurveyXYQuestionResponse)) {
+            $this->labSurveyXYQuestionResponses->removeElement($labSurveyXYQuestionResponse);
+            // set the owning side to null (unless already changed)
+            if ($labSurveyXYQuestionResponse->getStudent() === $this) {
+                $labSurveyXYQuestionResponse->setStudent(null);
             }
         }
 

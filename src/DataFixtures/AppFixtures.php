@@ -7,6 +7,8 @@ use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
+use App\Entity\LabSurvey;
+use App\Entity\LabSurveyXYQuestion;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
@@ -56,12 +58,12 @@ class AppFixtures extends Fixture
 
     const TERM_DATES = [
         'firstTerm' => [
-            'start' => '20 September 2020',
-            'end' => '06 December 2020',
+            'start' => '21 September 2020',
+            'end' => '04 December 2020',
         ],
         'secondTerm' => [
-            'start' => '13 January 2021',
-            'end' => '27 March 2021',
+            'start' => '11 January 2021',
+            'end' => '26 March 2021',
         ]
     ];
 
@@ -157,6 +159,10 @@ class AppFixtures extends Fixture
         // Create XY questions
         $xyQuestions = $this->loadXYQuestions($affectiveFields);
         $this->printArray('XY Questions', $xyQuestions);
+
+        // Create lab surveys
+        $labSurveys = $this->loadLabSurveys($courseInstances, $xyQuestions);
+        $this->printArray('Lab Surveys', $labSurveys);
 
         // Commit to db
         $manager->flush();
@@ -394,16 +400,18 @@ class AppFixtures extends Fixture
 
         foreach (self::XY_QUESTIONS as $name => $props) {
             $xyQuestion = new XYQuestion();
-            $xyQuestion->setName($name);
-            $xyQuestion->setQuestionText($props['text']);
 
             $xFieldName = $props['fields'][0];
             $xField = $affectiveFields[$xFieldName];
-            $xyQuestion->setXField($xField);
 
             $yFieldName = $props['fields'][1];
             $yField = $affectiveFields[$yFieldName];
-            $xyQuestion->setYField($yField);
+
+            $xyQuestion
+                ->setName($name)
+                ->setQuestionText($props['text'])
+                ->setXField($xField)
+                ->setYField($yField);
 
             $this->manager->persist($xyQuestion);
 
@@ -411,6 +419,49 @@ class AppFixtures extends Fixture
         }
 
         return $xyQuestions;
+    }
+
+    public function loadLabSurveys(array $courseInstances, array $xyQuestions) : array
+    {
+        $labSurveys = [];
+
+        foreach ($courseInstances as $courseInstance) {
+            // Copy as we don't want to mutate the original
+            $courseStart = clone $courseInstance->getStartDate();
+
+            // Set a random day in the week for the lab at random time
+            $courseStart
+                ->modify('+' . rand(0, 4) . 'day')
+                ->setTime(rand(9, 16), 0);
+
+            // Create 10 labs every week for each course
+            for ($i = 0; $i < 10; $i++) {
+                $labSurvey = new LabSurvey();
+
+                $labStartDate = clone $courseStart;
+                $labStartDate->modify('+' . $i . 'week');
+
+                $labSurvey
+                    ->setLabName('Lab ' . strval($i + 1))
+                    ->setStartDateTime($labStartDate)
+                    ->setCourseInstance($courseInstance);
+
+                // Add stock XY Questions for each lab instance
+                foreach ($xyQuestions as $xyQuestion) {
+                    $labSurveyXYQuestion = new LabSurveyXYQuestion();
+
+                    $labSurveyXYQuestion
+                        ->setXyQuestion($xyQuestion)
+                        ->setLabSurvey($labSurvey);
+
+                    $this->manager->persist($labSurveyXYQuestion);
+                }
+
+                $this->manager->persist($labSurvey);
+                $labSurveys[] = $labSurvey;
+            }
+        }
+        return $labSurveys;
     }
 
     // HELPER FUNCTIONS
