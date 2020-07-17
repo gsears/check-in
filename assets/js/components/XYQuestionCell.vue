@@ -4,6 +4,7 @@
       :name="name"
       type="checkbox"
       :checked="count"
+      :disabled="disabled"
       @change="handleChange($event)"
       :value="value"
     />
@@ -15,6 +16,10 @@
 export default {
   props: {
     name: String,
+    disabled: {
+        type: Boolean,
+        default: false
+    },
     xValue: Number,
     yValue: Number,
     count: {
@@ -75,6 +80,10 @@ export default {
   top: 0;
   cursor: pointer;
   opacity: 1;
+}
+
+.wrapper input:disabled {
+    cursor: initial;
 }
 
 .wrapper label {

@@ -5,6 +5,7 @@
         v-for="col in xMax - xMin + 1"
         :key="col"
         :name="name"
+        :disabled="disableCells"
         :size=1.5
         :count="getCellCount(xVal(col), yVal(row))"
         :x-value="xVal(col)" :y-value="yVal(row)"
@@ -24,6 +25,7 @@ export default {
   },
   props: {
     name: String,
+    disableCells: Boolean,
     selectedArray: Array,
     xMin: Number,
     xMax: Number,

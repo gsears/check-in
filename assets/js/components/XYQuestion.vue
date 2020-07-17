@@ -6,6 +6,7 @@
         v-for="(x, col) in 4"
         :key="x"
         :name="name"
+        :disableCells="disableCells"
         :selectedArray="selected"
         :xMin="xMinVal(col)"
         :xMax="xMaxVal(col)"
@@ -30,6 +31,9 @@ export default {
     multiselect: {
         type: Boolean,
         default: false
+    },
+    disableCells: {
+        default: false,
     },
     xRanges: {
       default: 4

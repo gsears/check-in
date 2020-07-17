@@ -22,6 +22,7 @@ new Vue({
     props: {
       name: "xytest",
       multiselect: true,
+      disableCells: true
     }
   }),
 });
