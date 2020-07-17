@@ -14,16 +14,14 @@ import '../css/app.scss';
 // console.log('Hello Webpack Encore! Edit me in assets/js/app.js');
 
 import Vue from 'vue';
-import XYQuestionRange from '@c/XYQuestionRange.vue';
+import XYQuestion from '@c/XYQuestion.vue';
 
 new Vue({
   el: '#app',
-  render: h => h(XYQuestionRange, {
+  render: h => h(XYQuestion, {
     props: {
-      xMin: -10,
-      xMax: -6,
-      yMin: -10,
-      yMax: -6,
+      name: "xytest",
+      multiselect: true,
     }
   }),
 });

@@ -1,13 +1,13 @@
 <template>
-  <div id="app">
-    {{ message }}
-    <div class="row" v-for="y in yMax - yMin + 1" :key="y">
+  <div class="range">
+    <div class="y-row" v-for="row in yMax - yMin + 1" :key="row">
       <XYQuestionCell
-        v-for="x in xMax - xMin + 1"
-        :key="x"
+        v-for="col in xMax - xMin + 1"
+        :key="col"
+        :name="name"
         :size=1.5
-        :count=20
-        :x-value="xMin + x - 1" :y-value="yMax-y + 1"
+        :count="getCellCount(xVal(col), yVal(row))"
+        :x-value="xVal(col)" :y-value="yVal(row)"
         @change="handleChange($event)">
       </XYQuestionCell>
     </div>
@@ -23,14 +23,12 @@ export default {
     XYQuestionCell
   },
   props: {
+    name: String,
+    selectedArray: Array,
     xMin: Number,
     xMax: Number,
     yMin: Number,
     yMax: Number,
-    xLabelLow: String,
-    xLabelHigh: String,
-    yLabelLow: String,
-    yLabelHigh: String,
   },
   data() {
     return {
@@ -38,20 +36,27 @@ export default {
     };
   },
   methods: {
+    xVal(col) {
+      return this.xMin + col - 1;
+    },
+    yVal(row) {
+      return this.yMax-row + 1;
+    },
+    getCellCount(x, y) {
+      return this.selectedArray.filter(coordinates => {
+        return coordinates.x === x && coordinates.y === y;
+      }).length;
+    },
     handleChange(e) {
-            console.log('onChange', e);
-        }
+      this.$emit('change', e);
+    }
   }
 };
 </script>
 
-<style>
-#app {
-  font-size: 18px;
-  font-family: "Roboto", sans-serif;
-  color: blue;
-  min-width: max-content;
-  white-space: nowrap;
+<style scoped>
+.range {
+  display: inline-block;
 }
 
 .row {
