@@ -1,3 +1,5 @@
+
+var path = require('path');
 var Encore = require('@symfony/webpack-encore');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
@@ -73,4 +75,13 @@ Encore
     //.addEntry('admin', './assets/js/admin.js')
 ;
 
-module.exports = Encore.getWebpackConfig();
+var webpackConfig = Encore.getWebpackConfig();
+
+// Set aliases for easy importing
+webpackConfig.resolve.alias = {
+    ...webpackConfig.resolve.alias,
+    '@': path.resolve('./assets/js/'),
+    '@c': path.resolve('./assets/js/components')
+};
+
+module.exports = webpackConfig;

@@ -14,9 +14,16 @@ import '../css/app.scss';
 // console.log('Hello Webpack Encore! Edit me in assets/js/app.js');
 
 import Vue from 'vue';
-import App from './App.vue';
+import XYQuestionRange from '@c/XYQuestionRange.vue';
 
 new Vue({
   el: '#app',
-  render: h => h(App),
+  render: h => h(XYQuestionRange, {
+    props: {
+      xMin: -10,
+      xMax: -6,
+      yMin: -10,
+      yMax: -6,
+    }
+  }),
 });
