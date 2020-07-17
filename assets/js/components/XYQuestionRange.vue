@@ -6,7 +6,7 @@
         :key="col"
         :name="name"
         :disabled="disableCells"
-        :size=1.5
+        :size="cellSizeInRem"
         :count="getCellCount(xVal(col), yVal(row))"
         :x-value="xVal(col)" :y-value="yVal(row)"
         @change="handleChange($event)">
@@ -26,6 +26,7 @@ export default {
   props: {
     name: String,
     disableCells: Boolean,
+    cellSizeInRem: Number,
     selectedArray: Array,
     xMin: Number,
     xMax: Number,

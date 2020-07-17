@@ -1,19 +1,45 @@
 <template>
-  <div class="wrapper">
-    <div class="y-row" ref="rows" v-for="(y, row) in 4" :key="y">
-      <XYQuestionRange
-        class="x-range"
-        v-for="(x, col) in 4"
-        :key="x"
-        :name="name"
-        :disableCells="disableCells"
-        :selectedArray="selected"
-        :xMin="xMinVal(col)"
-        :xMax="xMaxVal(col)"
-        :yMin="yMinVal(row)"
-        :yMax="yMaxVal(row)"
-        @change="handleChange($event)"
-      ></XYQuestionRange>
+  <div class="container">
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-xs-6">
+        <h2 class="h5">{{yLabelHigh}}</h2>
+      </div>
+      <div class="col">
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col"><h2 class="h5 text-right">{{xLabelLow}}</h2></div>
+      <div class="col-xs-6">
+        <div class="grid-wrapper">
+          <div class="y-row" ref="rows" v-for="(y, row) in 4" :key="y">
+            <XYQuestionRange
+              class="x-range"
+              v-for="(x, col) in 4"
+              :key="x"
+              :name="name"
+              :disableCells="disableCells"
+              :cellSizeInRem="cellSizeInRem"
+              :selectedArray="selected"
+              :xMin="xMinVal(col)"
+              :xMax="xMaxVal(col)"
+              :yMin="yMinVal(row)"
+              :yMax="yMaxVal(row)"
+              @change="handleChange($event)"
+            ></XYQuestionRange>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+           <h2 class="h5 text-left">{{xLabelHigh}}</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-xs-6">
+        <h2 class="h5">{{yLabelLow}}</h2>
+      </div>
+      <div class="col"></div>
     </div>
   </div>
 </template>
@@ -29,11 +55,15 @@ export default {
   props: {
     name: String,
     multiselect: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     disableCells: {
-        default: false,
+      default: false
+    },
+    cellSizeInRem: {
+      type: Number,
+      default: 1.5
     },
     xRanges: {
       default: 4
@@ -115,30 +145,28 @@ export default {
       return selected;
     },
     handleChange(e) {
-        if (e.checked) {
-            if(this.multiselect) {
-                this.selected.push(e.coordinates);
-            } else {
-                this.selected = [e.coordinates];
-            }
-
+      if (e.checked) {
+        if (this.multiselect) {
+          this.selected.push(e.coordinates);
         } else {
-            var index = this.selected.findIndex(obj => {
-                return obj.x === e.coordinates.x &&
-                    obj.y === e.coordinates.y;
-            });
-
-            console.log("match!", index);
-
-            this.selected.splice(index, 1);
+          this.selected = [e.coordinates];
         }
+      } else {
+        var index = this.selected.findIndex(obj => {
+          return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
+        });
+
+        console.log("match!", index);
+
+        this.selected.splice(index, 1);
+      }
     }
   }
 };
 </script>
 
 <style scoped>
-.wrapper {
+.grid-wrapper {
   line-height: 0%;
 }
 

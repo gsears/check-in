@@ -21,8 +21,9 @@ new Vue({
   render: h => h(XYQuestion, {
     props: {
       name: "xytest",
-      multiselect: true,
-      disableCells: true
+      multiselect: false,
+      disableCells: false,
+      cellSizeInRem: 1.2
     }
   }),
 });
