@@ -13,7 +13,7 @@ class CourseController extends AbstractController
      */
     public function index()
     {
-        $this->denyAccessUnlessGranted([Roles::STUDENT, Roles::INSTRUCTOR]);
+        $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
 
         return $this->render('course/index.html.twig', [
             'controller_name' => 'CourseController',
