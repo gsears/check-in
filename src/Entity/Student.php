@@ -36,10 +36,16 @@ class Student
      */
     private $labSurveyXYQuestionResponses;
 
+    /**
+     * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="student", orphanRemoval=true)
+     */
+    private $labSurveyResponses;
+
     public function __construct()
     {
         $this->enrolments = new ArrayCollection();
         $this->labSurveyXYQuestionResponses = new ArrayCollection();
+        $this->labSurveyResponses = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -103,30 +109,30 @@ class Student
     }
 
     /**
-     * @return Collection|LabSurveyXYQuestionResponse[]
+     * @return Collection|LabSurveyResponse[]
      */
-    public function getLabSurveyXYQuestionResponses(): Collection
+    public function getLabSurveyResponses(): Collection
     {
-        return $this->labSurveyXYQuestionResponses;
+        return $this->labSurveyResponses;
     }
 
-    public function addLabSurveyXYQuestionResponse(LabSurveyXYQuestionResponse $labSurveyXYQuestionResponse): self
+    public function addLabSurveyResponse(LabSurveyResponse $labSurveyResponse): self
     {
-        if (!$this->labSurveyXYQuestionResponses->contains($labSurveyXYQuestionResponse)) {
-            $this->labSurveyXYQuestionResponses[] = $labSurveyXYQuestionResponse;
-            $labSurveyXYQuestionResponse->setStudent($this);
+        if (!$this->labSurveyResponses->contains($labSurveyResponse)) {
+            $this->labSurveyResponses[] = $labSurveyResponse;
+            $labSurveyResponse->setStudent($this);
         }
 
         return $this;
     }
 
-    public function removeLabSurveyXYQuestionResponse(LabSurveyXYQuestionResponse $labSurveyXYQuestionResponse): self
+    public function removeLabSurveyResponse(LabSurveyResponse $labSurveyResponse): self
     {
-        if ($this->labSurveyXYQuestionResponses->contains($labSurveyXYQuestionResponse)) {
-            $this->labSurveyXYQuestionResponses->removeElement($labSurveyXYQuestionResponse);
+        if ($this->labSurveyResponses->contains($labSurveyResponse)) {
+            $this->labSurveyResponses->removeElement($labSurveyResponse);
             // set the owning side to null (unless already changed)
-            if ($labSurveyXYQuestionResponse->getStudent() === $this) {
-                $labSurveyXYQuestionResponse->setStudent(null);
+            if ($labSurveyResponse->getStudent() === $this) {
+                $labSurveyResponse->setStudent(null);
             }
         }
 

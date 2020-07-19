@@ -8,6 +8,7 @@ use App\Entity\CourseInstance;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\LabSurvey;
+use App\Entity\LabSurveyResponse;
 use App\Entity\LabSurveyXYQuestion;
 use App\Entity\LabSurveyXYQuestionResponse;
 use App\Entity\Student;
@@ -106,14 +107,17 @@ class AppFixtures extends Fixture
 
     const XY_QUESTIONS = [
         "interest-difficulty" => [
+            "index" => 1,
             "text" => "How interesting did you find the task? How difficult did you *personally* find it?",
             "fields" => [self::AFFECTIVE_FIELD_INTEREST, self::AFFECTIVE_FIELD_DIFFICULTY],
         ],
         'planning-familiarity' => [
+            "index" => 2,
             "text" => "How easy was it to plan how you'd execute the task? How familiar was the material?",
             "fields" => [self::AFFECTIVE_FIELD_PLAN, self::AFFECTIVE_FIELD_FAMILIARITY],
         ],
         'satisfaction-improvement' => [
+            "index" => 3,
             "text" => "How did you feel while executing the task? Do you feel like your skills have improved?",
             "fields" =>  [self::AFFECTIVE_FIELD_SATISFACTION, self::AFFECTIVE_FIELD_IMPROVEMENT],
         ]
@@ -170,8 +174,8 @@ class AppFixtures extends Fixture
         $this->printArray('Lab Surveys', $labSurveys);
 
         // Create lab xy responses
-        $labXYResponses = $this->loadLabSurveyXYQuestionResponses($courseInstances);
-        $this->printArray('Lab XY Responses', $labXYResponses);
+        $labSurveyResponses = $this->loadLabSurveyResponses($courseInstances);
+        $this->printArray('Lab Survey Responses', $labSurveyResponses);
 
         // Commit to db
         $manager->flush();
@@ -451,14 +455,17 @@ class AppFixtures extends Fixture
                 $labStartDate->modify('+' . $i . 'week');
 
                 $labSurvey
-                    ->setLabName('Lab ' . strval($i + 1))
+                    ->setName('Lab ' . strval($i + 1))
                     ->setStartDateTime($labStartDate);
 
                 $courseInstance->addLabSurvey($labSurvey);
 
                 // Add stock XY Questions for each lab instance
-                foreach ($xyQuestions as $xyQuestion) {
+                foreach ($xyQuestions as $name => $xyQuestion) {
                     $labSurveyXYQuestion = new LabSurveyXYQuestion();
+
+                    // Set the question order by index
+                    $labSurveyXYQuestion->setIndex(self::XY_QUESTIONS[$name]['index']);
 
                     $labSurveyXYQuestion
                         ->setXyQuestion($xyQuestion);
@@ -475,7 +482,7 @@ class AppFixtures extends Fixture
         return $labSurveys;
     }
 
-    public function loadLabSurveyXYQuestionResponses($courseInstances) {
+    public function loadLabSurveyResponses($courseInstances) {
         $responses = [];
 
         $cutoffDate = date_create(self::SIMULATED_CURRENT_DATE);
@@ -497,38 +504,43 @@ class AppFixtures extends Fixture
                 )->toArray();
 
                 foreach ($labSurveys as $labSurvey) {
-
                     // each student...
                     foreach ($students as $student) {
-                        // has an 80% chance of a student completing a survey...
+                        // has an 80% chance of a student completing a lab survey...
                         if(rand(0, 10) < 8) {
+                            $labSurveyResponse = new LabSurveyResponse();
+                            $labSurveyResponse
+                                ->setStudent($student)
+                                ->setLabSurvey($labSurvey);
+                            $this->manager->persist($labSurveyResponse);
+
+                            // SET THE SURVEY QUESTIONS
+                            // ------------------------
+                            // XY
                             $labSurveyXYQuestions = $labSurvey->getXyQuestions()->toArray();
                             // 90% chance of completing an XY question
                             foreach ($labSurveyXYQuestions as $xyQuestion) {
-
                                 if(rand(0, 10) < 9) {
-                                    $response = new LabSurveyXYQuestionResponse();
+                                    $xyResponse = new LabSurveyXYQuestionResponse();
 
-                                    $response
+                                    $xyResponse
                                         ->setXValue(rand(0, 10))
                                         ->setYValue(rand(0, 10))
-                                        ->setStudent($student)
                                         ->setLabSurveyXYQuestion($xyQuestion);
 
-                                    // $student->addLabSurveyXYQuestionResponse($response);
-                                    // $xyQuestion->addResponse($response);
+                                    $labSurveyResponse->addXyQuestionResponse($xyResponse);
 
-                                    $this->manager->persist($response);
-
-                                    $responses[] = $response;
+                                    $this->manager->persist($xyResponse);
                                 }
                             }
+
+
+                            $responses[] = $labSurveyResponse;
                         }
                     }
                 }
             }
         }
-
         return $responses;
     }
 

@@ -28,24 +28,20 @@ class LabSurveyXYQuestionResponse
     private $yValue;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Student::class, inversedBy="labSurveyXYQuestionResponses")
-     * @ORM\JoinColumn(nullable=false, referencedColumnName="guid")
-     */
-    private $student;
-
-    /**
      * @ORM\ManyToOne(targetEntity=LabSurveyXYQuestion::class, inversedBy="responses")
      */
     private $labSurveyXYQuestion;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=LabSurveyResponse::class, inversedBy="xyQuestionResponses")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $labSurveyResponse;
+
     public function __toString() : string
     {
-        $labSurveyXYQuestion = $this->getLabSurveyXYQuestion();
-
-        return sprintf("Response from Student %s for '%s'\n%sResponse: {%d,%d}\n\n",
-            $this->getStudent()->getGuid(),
-            $labSurveyXYQuestion->getXYQuestion()->getName(),
-            $labSurveyXYQuestion->getLabSurvey(),
+        return sprintf("Response for '%s': {%d,%d}\n",
+            $this->getLabSurveyXYQuestion()->getXYQuestion()->getName(),
             $this->getXValue(),
             $this->getYValue()
         );
@@ -80,18 +76,6 @@ class LabSurveyXYQuestionResponse
         return $this;
     }
 
-    public function getStudent(): ?Student
-    {
-        return $this->student;
-    }
-
-    public function setStudent(?Student $student): self
-    {
-        $this->student = $student;
-
-        return $this;
-    }
-
     public function getLabSurveyXYQuestion(): ?LabSurveyXYQuestion
     {
         return $this->labSurveyXYQuestion;
@@ -100,6 +84,18 @@ class LabSurveyXYQuestionResponse
     public function setLabSurveyXYQuestion(?LabSurveyXYQuestion $labSurveyXYQuestion): self
     {
         $this->labSurveyXYQuestion = $labSurveyXYQuestion;
+
+        return $this;
+    }
+
+    public function getLabSurveyResponse(): ?LabSurveyResponse
+    {
+        return $this->labSurveyResponse;
+    }
+
+    public function setLabSurveyResponse(?LabSurveyResponse $labSurveyResponse): self
+    {
+        $this->labSurveyResponse = $labSurveyResponse;
 
         return $this;
     }

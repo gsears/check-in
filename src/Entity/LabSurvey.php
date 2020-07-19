@@ -22,7 +22,7 @@ class LabSurvey
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $labName;
+    private $name;
 
     /**
      * @ORM\Column(type="datetime")
@@ -40,20 +40,29 @@ class LabSurvey
      */
     private $xyQuestions;
 
+    /**
+     * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="labSurvey", orphanRemoval=true)
+     */
+    private $responses;
+
     public function __construct()
     {
         $this->xyQuestions = new ArrayCollection();
+        $this->responses = new ArrayCollection();
     }
 
-    public function __toString() : string
+    public function __toString(): string
     {
         $courseInstance  = $this->getCourseInstance();
         $course = $courseInstance->getCourse();
 
-        return sprintf("Lab Survey - %s - %s\nCourse - %s\n",
-            $this->getLabName(),
+        return sprintf(
+            "Lab Survey - %s - %s\nCourse - %s\nQuestions:\n%s\n\n",
+            $this->getName(),
             date_format($this->getStartDateTime(), "l d/m/y H:i"),
-            $course->getCode() . ' ' . $courseInstance->getId());
+            $course->getCode() . ' ' . $courseInstance->getId(),
+            join("\n", $this->getQuestions()->toArray())
+        );
     }
 
     public function getId(): ?int
@@ -61,14 +70,14 @@ class LabSurvey
         return $this->id;
     }
 
-    public function getLabName(): ?string
+    public function getName(): ?string
     {
-        return $this->labName;
+        return $this->name;
     }
 
-    public function setLabName(string $labName): self
+    public function setName(string $labName): self
     {
-        $this->labName = $labName;
+        $this->name = $labName;
 
         return $this;
     }
@@ -122,6 +131,46 @@ class LabSurvey
             // set the owning side to null (unless already changed)
             if ($xyQuestion->getLabSurvey() === $this) {
                 $xyQuestion->setLabSurvey(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns all the question in this survey of all types
+     * @return Collection|SurveyQuestionInterface[]
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->getXyQuestions();
+    }
+
+    /**
+     * @return Collection|LabSurveyResponse[]
+     */
+    public function getResponses(): Collection
+    {
+        return $this->responses;
+    }
+
+    public function addResponse(LabSurveyResponse $response): self
+    {
+        if (!$this->responses->contains($response)) {
+            $this->responses[] = $response;
+            $response->setLabSurvey($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResponse(LabSurveyResponse $response): self
+    {
+        if ($this->responses->contains($response)) {
+            $this->responses->removeElement($response);
+            // set the owning side to null (unless already changed)
+            if ($response->getLabSurvey() === $this) {
+                $response->setLabSurvey(null);
             }
         }
 

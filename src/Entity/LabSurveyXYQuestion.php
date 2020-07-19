@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=LabSurveyXYQuestionRepository::class)
  */
-class LabSurveyXYQuestion
+class LabSurveyXYQuestion // implements SurveyQuestionInterface
 {
     /**
      * @ORM\Id()
@@ -36,9 +36,23 @@ class LabSurveyXYQuestion
      */
     private $responses;
 
+    /**
+     * The order of the question in the survey
+     *
+     * @ORM\Column(type="integer")
+     */
+    private $index;
+
     public function __construct()
     {
         $this->responses = new ArrayCollection();
+    }
+
+    public function __toString() : string
+    {
+        return sprintf('Q%d : %s',
+            $this->getIndex(),
+            $this->getXyQuestion()->getName());
     }
 
     public function getId(): ?int
@@ -97,6 +111,18 @@ class LabSurveyXYQuestion
                 $response->setLabSurveyXYQuestion(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getIndex(): ?int
+    {
+        return $this->index;
+    }
+
+    public function setIndex(int $index): self
+    {
+        $this->index = $index;
 
         return $this;
     }
