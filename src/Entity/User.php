@@ -225,6 +225,11 @@ class User implements UserInterface
         return $this;
     }
 
+    public function isStudent(): bool
+    {
+        return (bool) $this->student;
+    }
+
     public function getInstructor(): ?Instructor
     {
         return $this->instructor;
@@ -246,5 +251,10 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    public function isInstructor(): bool
+    {
+        return (bool) $this->instructor;
     }
 }

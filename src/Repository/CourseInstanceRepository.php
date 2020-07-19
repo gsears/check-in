@@ -19,22 +19,38 @@ class CourseInstanceRepository extends ServiceEntityRepository
         parent::__construct($registry, CourseInstance::class);
     }
 
-    // /**
-    //  * @return CourseInstance[] Returns an array of CourseInstance objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * Finds all CourseInstance objects which match the student.
+     * @return CourseInstance[] Returns an array of CourseInstance objects
+     */
+
+    public function findByStudent($student)
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
+            ->join('c.enrolments', 'e')
+            ->andWhere('e.student = :student')
+            ->setParameter('student', $student)
             ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
+
+    /**
+     * Finds all CourseInstance objects which match the instructor.
+     * @return CourseInstance[] Returns an array of CourseInstance objects
+     */
+
+    public function findByInstructor($instructor)
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.instructors', 'i')
+            ->andWhere('i = :instructor')
+            ->setParameter('instructor', $instructor)
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     /*
     public function findOneBySomeField($value): ?CourseInstance
