@@ -19,22 +19,8 @@ class XYQuestionRepository extends ServiceEntityRepository
         parent::__construct($registry, XYQuestion::class);
     }
 
-    // /**
-    //  * @return XYQuestion[] Returns an array of XYQuestion objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('x')
-            ->andWhere('x.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('x.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+
+
 
     /*
     public function findOneBySomeField($value): ?XYQuestion

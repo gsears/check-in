@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=XYQuestionRepository::class)
  */
-class XYQuestion
+class XYQuestion implements QuestionInterface
 {
     /**
      * @ORM\Id()

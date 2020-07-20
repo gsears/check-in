@@ -431,6 +431,7 @@ class AppFixtures extends Fixture
             $xyQuestions[$name] = $xyQuestion;
         }
 
+        $this->manager->flush();
         return $xyQuestions;
     }
 
@@ -466,6 +467,7 @@ class AppFixtures extends Fixture
 
                     // Set the question order by index
                     $labSurveyXYQuestion->setIndex(self::XY_QUESTIONS[$name]['index']);
+
 
                     $labSurveyXYQuestion
                         ->setXyQuestion($xyQuestion);

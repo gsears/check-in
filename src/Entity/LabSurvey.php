@@ -138,12 +138,21 @@ class LabSurvey
     }
 
     /**
-     * Returns all the question in this survey of all types
+     * Returns all the question in this survey of all types in order
      * @return Collection|SurveyQuestionInterface[]
      */
     public function getQuestions(): Collection
     {
-        return $this->getXyQuestions();
+        // Join here.
+        $collection = $this->getXyQuestions();
+
+        // Order here.
+        $iterator = $collection->getIterator();
+        $iterator->uasort(function ($a, $b) {
+            return ($a->getIndex() < $b->getIndex()) ? -1 : 1;
+        });
+
+        return new ArrayCollection(iterator_to_array($iterator));
     }
 
     /**

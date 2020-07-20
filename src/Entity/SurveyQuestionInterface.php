@@ -7,4 +7,6 @@ interface SurveyQuestionInterface {
     public function getIndex() : int;
 
     public function setIndex(int $index) : SurveyQuestionInterface;
+
+    public function getQuestion() : QuestionInterface;
 }

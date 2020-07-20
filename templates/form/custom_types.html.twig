@@ -1,14 +1,14 @@
 
 
-{% block xyquestion_row %}
-    row
+{% block lab_survey_response_row %}
+    <h1>{{lab.name}}</h1>
+    <small>{{lab.courseInstance.course.code}}</small>
 {% endblock %}
 
-{% block xyquestion_label %}
-    <h1>{{name}}</h1>
-    <p>{{questionText}}</p>
+{% block lab_survey_response_label %}
+    label
 {% endblock %}
 
-{% block xyquestion_widget %}
-    hello
+{% block lab_survey_response_widget %}
+    widgh
 {% endblock %}

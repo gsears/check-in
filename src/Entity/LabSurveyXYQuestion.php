@@ -7,10 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
- * @ORM\Entity(repositoryClass=LabSurveyXYQuestionRepository::class)
+ * @ORM\Entity(repositoryClass=App\Repository\LabSurveyXYQuestionRepository::class)
  */
-class LabSurveyXYQuestion // implements SurveyQuestionInterface
+class LabSurveyXYQuestion implements SurveyQuestionInterface
 {
     /**
      * @ORM\Id()
@@ -40,6 +42,7 @@ class LabSurveyXYQuestion // implements SurveyQuestionInterface
      * The order of the question in the survey
      *
      * @ORM\Column(type="integer")
+     * @Assert\NotNull
      */
     private $index;
 
@@ -115,7 +118,7 @@ class LabSurveyXYQuestion // implements SurveyQuestionInterface
         return $this;
     }
 
-    public function getIndex(): ?int
+    public function getIndex(): int
     {
         return $this->index;
     }
@@ -125,5 +128,9 @@ class LabSurveyXYQuestion // implements SurveyQuestionInterface
         $this->index = $index;
 
         return $this;
+    }
+
+    public function getQuestion(): QuestionInterface {
+        return $this->xyQuestion;
     }
 }

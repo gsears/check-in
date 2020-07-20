@@ -4,11 +4,13 @@ namespace App\Controller;
 
 use App\Entity\CourseInstance;
 use App\Entity\LabSurvey;
+use App\Entity\LabSurveyResponse;
 use App\Entity\LabSurveyXYQuestion;
 use App\Entity\LabSurveyXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
+use App\Form\Type\LabSurveyResponseType;
 use App\Form\Type\XYQuestionType;
 use App\Security\Roles;
 use App\Security\Voter\CourseInstanceVoter;
@@ -124,10 +126,12 @@ class CourseController extends AbstractController
 
     /**
      * Optional
-     * @Route("/courses/{courseId}/{instanceId}/lab/{labId}/{studentId}/{page}", name="lab_survey_question", requirements={"page"="\d+"})
+     * @Route("/courses/{courseId}/{instanceId}/lab/{labId}/{studentId}", name="lab_survey_response")
      */
-    public function completeLabSurvey(Request $request, $courseId, $instanceId, $labId, $studentId, int $page = 1)
+    public function completeLabSurvey(Request $request, $courseId, $instanceId, $labId, $studentId)
     {
+        // Security and sanity checks:
+
         $entityManager = $this->getDoctrine();
 
         $courseInstanceRepo = $entityManager
@@ -145,8 +149,7 @@ class CourseController extends AbstractController
 
         $lab = $labRepo->find($labId);
 
-        // Check if exists
-        if(!($this->coursePathExists($courseInstance, $courseId) && $lab && $student && $page > 0)) {
+        if(!($this->coursePathExists($courseInstance, $courseId) && $lab && $student)) {
             throw $this->createNotFoundException('This lab survey does not exist');
         }
 
@@ -155,57 +158,22 @@ class CourseController extends AbstractController
          // Check if the user is the owning student
          $this->denyAccessUnlessGranted(StudentVoter::EDIT, $student);
 
-         // Check if we have been refered to by the previous question if not first question
-         if($page > 1) {
-            $referer = $request->headers->get('referer');
-            $refererRequest= Request::create($referer);
 
-            $hasMatchingPaths = $refererRequest->getBasePath() !== $request->getBasePath();
-            $hasPageNumber = preg_match("/\/(\d+)$/",$refererRequest->getUri(), $matches);
-            $hasPreviousPageNumber = $matches[1] !== ($page - 1);
+        // Generate form:
 
-            if(!($hasMatchingPaths && $hasPageNumber && $hasPreviousPageNumber)) {
-                return new Response(Response::HTTP_UNAUTHORIZED);
-            }
-        }
+        // Create new response object
+        $labSurveyResponse = new LabSurveyResponse();
+        $labSurveyResponse->setLabSurvey($lab);
+        $labSurveyResponse->setStudent($student);
 
-        $surveyQuestions = $lab->getQuestions();
+        $form = $this->createForm(LabSurveyResponseType::class,  $labSurveyResponse);
 
-        $surveyQuestion = $surveyQuestions->filter(function($q) use ($page) {
-            return $q->getIndex() === $page;
-        })->first();
-
-        dump($surveyQuestion);
-
-        // Check if exists
-        if(!$surveyQuestion) {
-            throw $this->createNotFoundException('This lab survey does not exist');
-        }
-
-        // May be null
-        $nextSurveyQuestion = $surveyQuestions->filter(function($q) use ($page) {
-            return $q->getIndex() === $page + 1;
-        })->first();
-
-        if($surveyQuestion instanceof LabSurveyXYQuestion) {
-            $form = $this->createForm(XYQuestionType::class, $surveyQuestion->getXyQuestion());
-        }
-
-        if ($nextSurveyQuestion) {
-            $redirect = $this->generateUrl('lab_survey_question', [
-                'courseId' => $courseId,
-                'instanceId' => $instanceId,
-                'studentId' => $studentId,
-                'labId' => $labId,
-                'page' => $page + 1
-            ]);
-        } else {
-            $redirect = $this->generateUrl('view_course_student_summary', [
-                'courseId' => $courseId,
-                'instanceId' => $instanceId,
-                'studentId' => $studentId
-            ]);
-        }
+        // Return to course summary page after submission.
+        $redirect = $this->generateUrl('view_course_student_summary', [
+            'courseId' => $courseId,
+            'instanceId' => $instanceId,
+            'studentId' => $studentId
+        ]);
 
          return $this->render('labsurvey/page.html.twig', [
             'form' => $form->createView(),
