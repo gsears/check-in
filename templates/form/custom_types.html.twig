@@ -29,8 +29,13 @@
 
                     var y = document.querySelectorAll("[data-id='{{y_field_id}}']")[0];
                     y.value = values[0].y;
-                }
+                },
             {% endif %}
+
+            xLabelHigh: '{{x_label_high}}',
+             xLabelLow: '{{x_label_low}}',
+            yLabelHigh: '{{y_label_high}}',
+             yLabelLow: '{{y_label_low}}',
         });
 
     });
