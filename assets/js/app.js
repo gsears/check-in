@@ -16,7 +16,7 @@ import '../css/app.scss';
 import Vue from 'vue';
 import XYQuestion from '@c/XYQuestion.vue';
 
-global.XYQuestionWidgetFactory = (el, opts) => {
+global.XYQuestionWidgetFactory = (el, initialData, opts) => {
 
   const defaultOpts = {
     multiselect: false,
@@ -24,12 +24,21 @@ global.XYQuestionWidgetFactory = (el, opts) => {
     cellSizeInRem: 1.2
   };
 
+  if(initialData) {
+    if(!Array.isArray(initialData)) {
+      initialData = [initialData];
+    }
+  } else {
+    initialData = [];
+  }
+
   return new Vue({
     el,
     render: h => h(XYQuestion, {
       props: {
         ...defaultOpts,
         ...opts,
+        initialData
       }
     })
   });

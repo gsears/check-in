@@ -21,7 +21,18 @@
     // Waits until js and everything else is ready and loads
     // an instance of the XY selector.
     addLoadEvent(() => {
-         XYQuestionWidgetFactory('#xy-{{id}}');
+        XYQuestionWidgetFactory('#xy-{{id}}', {{values}}, {
+            {% if x_field_id and y_field_id %}
+                onChange: (values) => {
+                    var x = document.querySelectorAll("[data-id='{{x_field_id}}']")[0];
+                    x.value = values[0].x;
+
+                    var y = document.querySelectorAll("[data-id='{{y_field_id}}']")[0];
+                    y.value = values[0].y;
+                }
+            {% endif %}
+        });
+
     });
     </script>
 {% endblock %}

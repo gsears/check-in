@@ -54,6 +54,8 @@ export default {
   },
   props: {
     name: String,
+    onChange: Function,
+    initialData: Array, // Data array
     multiselect: {
       type: Boolean,
       default: false
@@ -96,24 +98,7 @@ export default {
   },
   data() {
     return {
-      selected: [
-        {
-          x: 3,
-          y: 4
-        },
-        {
-          x: 3,
-          y: 4
-        },
-        {
-          x: -2,
-          y: 0
-        },
-        {
-          x: -10,
-          y: -10
-        }
-      ]
+      selected: [...this.initialData] // Copy
     };
   },
   methods: {
@@ -155,11 +140,11 @@ export default {
         var index = this.selected.findIndex(obj => {
           return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
         });
-
-        console.log("match!", index);
-
         this.selected.splice(index, 1);
       }
+
+      // Run the callback with the updated selection.
+      this.onChange([...this.selected]);
     }
   }
 };

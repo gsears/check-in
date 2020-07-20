@@ -1,5 +1,5 @@
 <?php
-
+namespace App\Form\Type;
 class XYCoordinates
 {
     private $x;

@@ -21,11 +21,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class XYQuestionType extends AbstractType
 {
-    private $serializer;
-
-    public function __construct(SerializerInterface $serializer) {
-        $this->serializer = $serializer;
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -44,31 +39,26 @@ class XYQuestionType extends AbstractType
         $resolver->setDefaults([
             'data_class' => XYQuestion::class,
             'id' => null,
-            'initial_values' => null,
+            'values' => null,
             'x_label_low' => null,
             'x_label_high' => null,
             'y_label_low' => null,
             'y_label_high' => null,
+            'x_field_id' => null,
+            'y_field_id' => null,
         ]);
 
         // Validate this form by requiring all of the below
         $resolver
             ->setAllowedTypes('id', 'string')
-            ->setAllowedTypes('initial_values', ['XYCoordinates[]', 'XYCoodinates', 'null'])
+            ->setAllowedTypes('values', 'string')
             ->setAllowedTypes('x_label_low', 'string')
             ->setAllowedTypes('x_label_high', 'string')
             ->setAllowedTypes('y_label_low', 'string')
-            ->setAllowedTypes('y_label_high', 'string');
-    }
-
-    /**
-     * Creates json from the coordinates
-     *
-     * @param [type] $coordinates
-     * @return void
-     */
-    private function parseCoordinates($coordinates)
-    {
-        return $this->serializer->serialize($coordinates, 'json');
+            ->setAllowedTypes('y_label_high', 'string')
+            // Add references to any hidden fields in the parent form
+            // to populate using javascript.
+            ->setAllowedTypes('x_field_id', ['string', null])
+            ->setAllowedTypes('y_field_id', ['string', null]);
     }
 }
