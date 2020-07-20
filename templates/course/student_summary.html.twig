@@ -1,0 +1,11 @@
+{% extends "course/course_instance_base.html.twig" %}
+
+{% import 'course/macros.html.twig' as macros %}
+
+{% block content %}
+<h1>USER: {{user.fullname}}</h1>
+<h2>{{student.guid}} - {{student.user.fullname}}</h2>
+{{macros.instructorList(courseInstance.instructors)}}
+{{macros.labTable("pending labs", pendingLabs, 'survey', courseInstance, student)}}
+{{macros.labTable("completed labs", completedLabs)}}
+{% endblock %}

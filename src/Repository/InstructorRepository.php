@@ -19,22 +19,23 @@ class InstructorRepository extends ServiceEntityRepository
         parent::__construct($registry, Instructor::class);
     }
 
-    // /**
-    //  * @return Instructor[] Returns an array of Instructor objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return Instructor[] Returns an array of Instructor objects
+     */
+
+    public function findByStudent($student)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
+            ->join('i.courseInstances', 'c')
+            ->join('c.enrolments', 'e')
+            ->andWhere('e.student = :student')
+            ->setParameter('student', $student)
             ->orderBy('i.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?Instructor

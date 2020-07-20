@@ -3,10 +3,19 @@
 namespace App\Controller;
 
 use App\Entity\CourseInstance;
+use App\Entity\LabSurvey;
+use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\Student;
 use App\Entity\User;
+use App\Entity\XYQuestion;
+use App\Form\Type\XYQuestionType;
 use App\Security\Roles;
 use App\Security\Voter\CourseInstanceVoter;
+use App\Security\Voter\StudentVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class CourseController extends AbstractController
@@ -22,17 +31,22 @@ class CourseController extends AbstractController
             $courseInstances = $this->getDoctrine()
                 ->getRepository(CourseInstance::class)
                 ->findByStudent($user->getStudent());
+
+            return $this->render('course/courses_student.html.twig', [
+                'courseInstances' => $courseInstances,
+                'studentId' => $user->getStudent()->getGuid()
+            ]);
         }
 
         if($user->isInstructor()) {
             $courseInstances = $this->getDoctrine()
                 ->getRepository(CourseInstance::class)
                 ->findByInstructor($user->getInstructor());
-        }
 
-        return $this->render('course/index.html.twig', [
-            'courseInstances' => $courseInstances,
-        ]);
+            return $this->render('course/courses_instructor.html.twig', [
+                'courseInstances' => $courseInstances
+            ]);
+        }
     }
 
     /**
@@ -47,17 +61,165 @@ class CourseController extends AbstractController
             ->getRepository(CourseInstance::class)
             ->find($instanceId);
 
-        // ...and courseid matches up with the instance id
-        $courseCode = $courseInstance->getCourse()->getCode();
-
-        if(!$courseInstance || $courseCode !== $courseId) {
+        if(!$this->coursePathExists($courseInstance, $courseId)) {
             throw $this->createNotFoundException('This course does not exist');
+        }
+
+        // Only instructors can access
+        $this->denyAccessUnlessGranted(Roles::INSTRUCTOR);
+
+        return $this->render('course/course_summary.html.twig', ['courseInstance' => $courseInstance]);
+    }
+
+     /**
+     * Includes course ID in the URL for readability.
+     *
+     * @Route("/courses/{courseId}/{instanceId}/{studentId}", name="view_course_student_summary")
+     */
+    public function viewCourseStudentSummary($courseId, $instanceId, $studentId)
+    {
+        $entityManager = $this->getDoctrine();
+
+        $courseInstanceRepo = $entityManager
+            ->getRepository(CourseInstance::class);
+
+        $courseInstance = $courseInstanceRepo->find($instanceId);
+
+        $studentRepo = $entityManager
+            ->getRepository(Student::class);
+
+        $student = $studentRepo->find($studentId);
+
+        // ...and courseid matches up with the instance id
+        if(!($this->coursePathExists($courseInstance, $courseId) && $student)) {
+            throw $this->createNotFoundException('The course with this student does not exist');
         }
 
         // Check permission to view course instance
         $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
+        // Check if instructor on that course or the same student
+        $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
 
-        // renders templates/lucky/number.html.twig
-        return $this->render('course/view.html.twig', ['courseInstance' => $courseInstance]);
+        $labSurveyRepo = $entityManager
+            ->getRepository(LabSurvey::class);
+
+        $labs = $labSurveyRepo
+            ->findByCourseInstance($courseInstance);
+
+        $completedLabs = $labSurveyRepo
+            -> findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
+
+        $pendingLabs = array_filter($labs, function($lab) use ($completedLabs) {
+            return !in_array($lab, $completedLabs);
+        });
+
+        return $this->render('course/student_summary.html.twig', [
+            'user' => $this->getUser(),
+            'courseInstance' => $courseInstance,
+            'pendingLabs' => $pendingLabs,
+            'completedLabs' => $completedLabs,
+            'student' => $student
+        ]);
+    }
+
+    /**
+     * Optional
+     * @Route("/courses/{courseId}/{instanceId}/lab/{labId}/{studentId}/{page}", name="lab_survey_question", requirements={"page"="\d+"})
+     */
+    public function completeLabSurvey(Request $request, $courseId, $instanceId, $labId, $studentId, int $page = 1)
+    {
+        $entityManager = $this->getDoctrine();
+
+        $courseInstanceRepo = $entityManager
+            ->getRepository(CourseInstance::class);
+
+        $courseInstance = $courseInstanceRepo->find($instanceId);
+
+        $studentRepo = $entityManager
+            ->getRepository(Student::class);
+
+        $student = $studentRepo->find($studentId);
+
+        $labRepo = $entityManager
+            ->getRepository(LabSurvey::class);
+
+        $lab = $labRepo->find($labId);
+
+        // Check if exists
+        if(!($this->coursePathExists($courseInstance, $courseId) && $lab && $student && $page > 0)) {
+            throw $this->createNotFoundException('This lab survey does not exist');
+        }
+
+         // Check permission to view course instance
+         $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
+         // Check if the user is the owning student
+         $this->denyAccessUnlessGranted(StudentVoter::EDIT, $student);
+
+         // Check if we have been refered to by the previous question if not first question
+         if($page > 1) {
+            $referer = $request->headers->get('referer');
+            $refererRequest= Request::create($referer);
+
+            $hasMatchingPaths = $refererRequest->getBasePath() !== $request->getBasePath();
+            $hasPageNumber = preg_match("/\/(\d+)$/",$refererRequest->getUri(), $matches);
+            $hasPreviousPageNumber = $matches[1] !== ($page - 1);
+
+            if(!($hasMatchingPaths && $hasPageNumber && $hasPreviousPageNumber)) {
+                return new Response(Response::HTTP_UNAUTHORIZED);
+            }
+        }
+
+        $surveyQuestions = $lab->getQuestions();
+
+        $surveyQuestion = $surveyQuestions->filter(function($q) use ($page) {
+            return $q->getIndex() === $page;
+        })->first();
+
+        dump($surveyQuestion);
+
+        // Check if exists
+        if(!$surveyQuestion) {
+            throw $this->createNotFoundException('This lab survey does not exist');
+        }
+
+        // May be null
+        $nextSurveyQuestion = $surveyQuestions->filter(function($q) use ($page) {
+            return $q->getIndex() === $page + 1;
+        })->first();
+
+        if($surveyQuestion instanceof LabSurveyXYQuestion) {
+            $form = $this->createForm(XYQuestionType::class, $surveyQuestion->getXyQuestion());
+        }
+
+        if ($nextSurveyQuestion) {
+            $redirect = $this->generateUrl('lab_survey_question', [
+                'courseId' => $courseId,
+                'instanceId' => $instanceId,
+                'studentId' => $studentId,
+                'labId' => $labId,
+                'page' => $page + 1
+            ]);
+        } else {
+            $redirect = $this->generateUrl('view_course_student_summary', [
+                'courseId' => $courseId,
+                'instanceId' => $instanceId,
+                'studentId' => $studentId
+            ]);
+        }
+
+         return $this->render('labsurvey/page.html.twig', [
+            'form' => $form->createView(),
+            'redirect' => $redirect
+        ]);
+    }
+
+    private function coursePathExists($courseInstance, $courseId) : bool
+    {
+            if($courseInstance) {
+                $courseCode = $courseInstance->getCourse()->getCode();
+                return $courseCode === $courseId;
+            }
+
+            return false;
     }
 }

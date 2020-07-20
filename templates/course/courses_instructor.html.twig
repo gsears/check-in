@@ -1,0 +1,14 @@
+{% extends "course/courses_base.html.twig" %}
+
+{% block course_list %}
+    <ul>
+{% for courseInstance in courseInstances %}
+    {% set href = path('view_course', {
+        courseId: courseInstance.course.code,
+        instanceId: courseInstance.id
+    }) %}
+
+    <li><a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.id}}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -32,11 +32,6 @@ class Student
     private $enrolments;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestionResponse::class, mappedBy="student")
-     */
-    private $labSurveyXYQuestionResponses;
-
-    /**
      * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="student", orphanRemoval=true)
      */
     private $labSurveyResponses;
