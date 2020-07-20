@@ -18,7 +18,7 @@
             <td>{{lab.startDateTime | date("H:i")}}</td>
             <td>
             {% if linkTarget is same as('survey') %}
-            <a class="btn btn-primary" href="{{path('lab_survey_question', {
+            <a class="btn btn-primary" href="{{path('lab_survey_response', {
               courseId: courseInstance.course.code,
               instanceId: courseInstance.id,
               labId: lab.id,

@@ -1,5 +1,3 @@
-
-
 {% block lab_survey_response_row %}
     <h1>{{lab.name}}</h1>
     <small>{{lab.courseInstance.course.code}}</small>
@@ -11,4 +9,19 @@
 
 {% block lab_survey_response_widget %}
     widgh
+{% endblock %}
+
+{# This widget creates an instance of the vue component from forms #}
+{% block xy_question_widget %}
+    <div id="xy-{{id}}">
+        Loading...
+    </div>
+
+    <script>
+    // Waits until js and everything else is ready and loads
+    // an instance of the XY selector.
+    addLoadEvent(() => {
+         XYQuestionWidgetFactory('#xy-{{id}}');
+    });
+    </script>
 {% endblock %}

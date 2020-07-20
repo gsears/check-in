@@ -163,8 +163,17 @@ class CourseController extends AbstractController
 
         // Create new response object
         $labSurveyResponse = new LabSurveyResponse();
-        $labSurveyResponse->setLabSurvey($lab);
-        $labSurveyResponse->setStudent($student);
+        $lab->addResponse($labSurveyResponse);
+        $student->addLabSurveyResponse($labSurveyResponse);
+
+        // Add dummy responses for each XYQuestion in the lab survey
+        foreach ($lab->getXyQuestions()->toArray() as $xyQuestion) {
+
+            $xyQuestionResponse = new LabSurveyXYQuestionResponse();
+            $xyQuestion->addResponse($xyQuestionResponse);
+            $labSurveyResponse->addXyQuestionResponse($xyQuestionResponse);
+            // other values will be obtained via the form object
+        }
 
         $form = $this->createForm(LabSurveyResponseType::class,  $labSurveyResponse);
 

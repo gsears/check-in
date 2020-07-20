@@ -16,14 +16,23 @@ import '../css/app.scss';
 import Vue from 'vue';
 import XYQuestion from '@c/XYQuestion.vue';
 
-new Vue({
-  el: '#app',
-  render: h => h(XYQuestion, {
-    props: {
-      name: "xytest",
-      multiselect: false,
-      disableCells: false,
-      cellSizeInRem: 1.2
-    }
-  }),
-});
+global.XYQuestionWidgetFactory = (el, opts) => {
+
+  const defaultOpts = {
+    multiselect: false,
+    disableCells: false,
+    cellSizeInRem: 1.2
+  };
+
+  return new Vue({
+    el,
+    render: h => h(XYQuestion, {
+      props: {
+        ...defaultOpts,
+        ...opts,
+      }
+    })
+  });
+}
+
+
