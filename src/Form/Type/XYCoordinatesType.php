@@ -92,12 +92,16 @@ class XYCoordinatesType extends AbstractType implements DataMapperInterface
         dump("here");
         /** @var FormInterface[] $forms */
         $forms = iterator_to_array($forms);
+        $xValue = $forms['xValue']->getData();
+        $yValue = $forms['yValue']->getData();
 
-        dump($viewData);
-
-        $viewData = new XYCoordinates(
-            $forms['xValue']->getData(),
-            $forms['yValue']->getData(),
-        );
+        if ($xValue && $yValue) {
+            $viewData = new XYCoordinates(
+                $xValue,
+                $yValue
+            );
+        } else {
+            $viewData;
+        }
     }
 }
