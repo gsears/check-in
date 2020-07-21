@@ -3,13 +3,14 @@
     <div class="row">
       <div class="col"></div>
       <div class="col-xs-6">
-        <h2 class="h5">{{yLabelHigh}}</h2>
+        <h2 class="h5">{{ yLabelHigh }}</h2>
       </div>
-      <div class="col">
-      </div>
+      <div class="col"></div>
     </div>
     <div class="row align-items-center">
-      <div class="col"><h2 class="h5 text-right">{{xLabelLow}}</h2></div>
+      <div class="col">
+        <h2 class="h5 text-right">{{ xLabelLow }}</h2>
+      </div>
       <div class="col-xs-6">
         <div class="grid-wrapper">
           <div class="y-row" ref="rows" v-for="(y, row) in 4" :key="y">
@@ -31,13 +32,13 @@
         </div>
       </div>
       <div class="col">
-           <h2 class="h5 text-left">{{xLabelHigh}}</h2>
+        <h2 class="h5 text-left">{{ xLabelHigh }}</h2>
       </div>
     </div>
     <div class="row">
       <div class="col"></div>
       <div class="col-xs-6">
-        <h2 class="h5">{{yLabelLow}}</h2>
+        <h2 class="h5">{{ yLabelLow }}</h2>
       </div>
       <div class="col"></div>
     </div>
@@ -50,7 +51,7 @@ import XYQuestionRange from "@c/XYQuestionRange.vue";
 export default {
   // Register used components
   components: {
-    XYQuestionRange
+    XYQuestionRange,
   },
   props: {
     name: String,
@@ -58,47 +59,48 @@ export default {
     initialData: Array, // Data array
     multiselect: {
       type: Boolean,
-      default: false
+      default: false,
     },
     disableCells: {
-      default: false
+      default: false,
     },
     cellSizeInRem: {
       type: Number,
-      default: 1.5
+      default: 1.5,
     },
     xRanges: {
-      default: 4
+      default: 4,
     },
     yRanges: {
-      default: 4
+      default: 4,
     },
     xRangeLength: {
-      default: 5
+      default: 5,
     },
     yRangeLength: {
-      default: 5
+      default: 5,
     },
     xLabelLow: {
       type: String,
-      default: "xLow"
+      default: "xLow",
     },
     xLabelHigh: {
       type: String,
-      default: "xHigh"
+      default: "xHigh",
     },
     yLabelLow: {
       type: String,
-      default: "yLow"
+      default: "yLow",
     },
     yLabelHigh: {
       type: String,
-      default: "yHigh"
-    }
+      default: "yHigh",
+    },
   },
   data() {
+    console.log(this.initialData);
     return {
-      selected: [...this.initialData] // Copy
+      selected: this.initialData, // Copy
     };
   },
   methods: {
@@ -119,7 +121,7 @@ export default {
       );
     },
     setSelected(xMin, xMax, yMin, yMax) {
-      var selected = this.selected.filter(coordinates => {
+      var selected = this.selected.filter((coordinates) => {
         return (
           coordinates.x >= xMin &&
           coordinates.x <= xMax &&
@@ -137,7 +139,7 @@ export default {
           this.selected = [e.coordinates];
         }
       } else {
-        var index = this.selected.findIndex(obj => {
+        var index = this.selected.findIndex((obj) => {
           return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
         });
         this.selected.splice(index, 1);
@@ -145,8 +147,8 @@ export default {
 
       // Run the callback with the updated selection.
       this.onChange([...this.selected]);
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -47,6 +47,11 @@ class LabSurveyResponse
      */
     private $xyQuestionResponses;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $submitted;
+
     public function __construct()
     {
         $this->xyQuestionResponses = new ArrayCollection();
@@ -157,5 +162,17 @@ class LabSurveyResponse
         if ($this->getCreatedAt() === null) {
             $this->setCreatedAt(new \DateTime('now'));
         }
+    }
+
+    public function getSubmitted(): ?bool
+    {
+        return $this->submitted;
+    }
+
+    public function setSubmitted(bool $submitted): self
+    {
+        $this->submitted = $submitted;
+
+        return $this;
     }
 }

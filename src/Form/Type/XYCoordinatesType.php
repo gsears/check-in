@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\LabSurveyResponse;
 use App\Entity\LabSurveyXYQuestion;
 use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\XYCoordinates;
 use App\Entity\XYQuestion;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -22,14 +23,16 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Implements DataMapperInterface to return an XYCoordinates object.
  * https://symfony.com/doc/current/form/data_mappers.html
  */
-class XYQuestionType extends AbstractType implements DataMapperInterface
+class XYCoordinatesType extends AbstractType implements DataMapperInterface
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // Hidden forms to store the XY values and bind them.
         $builder
             ->add('xValue', HiddenType::class)
-            ->add('yValue', HiddenType::class);
+            ->add('yValue', HiddenType::class)
+            // Configure to create coordinates on submit
+            ->setDataMapper($this);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -40,9 +43,11 @@ class XYQuestionType extends AbstractType implements DataMapperInterface
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        // Set that this form is bound to an LabSurveyResponse entity
+        // 'empty-data' null prevents automatic creation of the item, as we want to
+        // control this from our data mapper
+        $resolver->setDefault('empty_data', null);
+
         $resolver->setDefaults([
-            'data_class' => XYQuestion::class,
             'x_label_low' => null,
             'x_label_high' => null,
             'y_label_low' => null,
@@ -60,6 +65,8 @@ class XYQuestionType extends AbstractType implements DataMapperInterface
 
     public function mapDataToForms($viewData, iterable $forms)
     {
+        dump('data to form');
+
         // there is no data yet, so nothing to prepopulate
         if (null === $viewData) {
             return;
@@ -69,6 +76,8 @@ class XYQuestionType extends AbstractType implements DataMapperInterface
         if (!$viewData instanceof XYCoordinates) {
             throw new UnexpectedTypeException($viewData, XYCoordinates::class);
         }
+
+        dump($viewData);
 
         /** @var FormInterface[] $forms */
         $forms = iterator_to_array($forms);
@@ -80,8 +89,11 @@ class XYQuestionType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(iterable $forms, &$viewData)
     {
+        dump("here");
         /** @var FormInterface[] $forms */
         $forms = iterator_to_array($forms);
+
+        dump($viewData);
 
         $viewData = new XYCoordinates(
             $forms['xValue']->getData(),

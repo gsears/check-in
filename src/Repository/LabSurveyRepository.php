@@ -49,6 +49,25 @@ class LabSurveyRepository extends ServiceEntityRepository
             ->setParameter('courseInstance', $courseInstance)
             ->andWhere('r.student = :student')
             ->setParameter('student', $student)
+            ->andWhere('r.submitted = true')
+            ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findPendingSurveysByCourseInstanceAndStudent(CourseInstance $courseInstance, Student $student, DateTime $beforeDateTime = null)
+    {
+        $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();
+
+        return $this->createQueryBuilder('l')
+            ->join('l.responses', 'r')
+            ->andWhere('l.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->andWhere('r.student = :student')
+            ->setParameter('student', $student)
+            ->andWhere('r.submitted = false')
+            ->andWhere('l.startDateTime < :beforeDateTime')
+            ->setParameter('beforeDateTime', $beforeDateTime)
             ->orderBy('l.startDateTime', 'DESC')
             ->getQuery()
             ->getResult();

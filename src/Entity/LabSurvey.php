@@ -155,6 +155,11 @@ class LabSurvey
         return new ArrayCollection(iterator_to_array($iterator));
     }
 
+    public function getQuestionCount(): int
+    {
+        return count($this->getQuestions()->toArray());
+    }
+
     /**
      * @return Collection|LabSurveyResponse[]
      */

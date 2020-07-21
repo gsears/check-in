@@ -23,17 +23,16 @@ class LabSurveyResponseRepository extends ServiceEntityRepository
      * @return LabSurveyResponse[] Returns an array of LabSurveyResponse objects
      */
 
-    public function findByLabSurveyAndStudent($labSurvey, $student)
+    public function findOneByLabSurveyAndStudent($labSurvey, $student)
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.student = :student')
             ->setParameter('student', $student)
             ->andWhere('l.labSurvey = :labSurvey')
-            ->setParameter('student', $labSurvey)
+            ->setParameter('labSurvey', $labSurvey)
             ->orderBy('l.id', 'ASC')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getOneOrNullResult();
     }
 
 

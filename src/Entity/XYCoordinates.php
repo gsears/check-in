@@ -11,7 +11,7 @@ class XYCoordinates
 
     public function __construct(int $x, int $y)
     {
-        if (!$x || !$y) {
+        if (is_null($x) || is_null($y)) {
             throw new InvalidArgumentException("X and Y must exist!", 1);
         }
 

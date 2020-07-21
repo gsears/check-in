@@ -11,7 +11,7 @@ use App\Repository\LabSurveyXYQuestionResponseRepository;
 /**
  * @ORM\Entity(repositoryClass=LabSurveyXYQuestionResponseRepository::class)
  */
-class LabSurveyXYQuestionResponse
+class LabSurveyXYQuestionResponse implements SurveyQuestionResponseInterface
 {
     /**
      * @ORM\Id()
@@ -58,7 +58,7 @@ class LabSurveyXYQuestionResponse
 
     public function getCoordinates(): ?XYCoordinates
     {
-        if ($this->xValue && $this->yValiue) {
+        if ($this->xValue && $this->yValue) {
             return new XYCoordinates($this->xValue, $this->yValue);
         } else {
             return null;
