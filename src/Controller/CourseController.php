@@ -190,8 +190,8 @@ class CourseController extends AbstractController
             // If it doesn't exist, create a new empty one
             if (!$questionResponse) {
                 $questionResponse = new LabSurveyXYQuestionResponse();
-                $question->addResponse($questionResponse);
-                $response->addXyQuestionResponse($questionResponse);
+                $questionResponse->setLabSurveyXYQuestion($question);
+                $questionResponse->setLabSurveyResponse($response);
             }
 
             $form = $this->createForm(LabSurveyXYQuestionResponseType::class,  $questionResponse, [
