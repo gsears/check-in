@@ -14,6 +14,7 @@ use App\Entity\LabSurveyXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
+use App\Form\Type\XYCoordinates;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Exception;
@@ -524,10 +525,10 @@ class AppFixtures extends Fixture
                             foreach ($labSurveyXYQuestions as $xyQuestion) {
                                 if(rand(0, 10) < 9) {
                                     $xyResponse = new LabSurveyXYQuestionResponse();
+                                    $xyCoordinates = new XYCoordinates(rand(-10, 9), rand(-10, 9));
 
                                     $xyResponse
-                                        ->setXValue(rand(0, 10))
-                                        ->setYValue(rand(0, 10))
+                                        ->setCoordinates($xyCoordinates)
                                         ->setLabSurveyXYQuestion($xyQuestion);
 
                                     $labSurveyResponse->addXyQuestionResponse($xyResponse);

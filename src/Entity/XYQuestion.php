@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Form\Type\XYCoordinates;
 use App\Repository\XYQuestionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -41,11 +42,13 @@ class XYQuestion implements QuestionInterface
 
     public function __toString()
     {
-        return sprintf("XY Question: %s\n%s\nx: %sy: %s\n",
+        return sprintf(
+            "XY Question: %s\n%s\nx: %sy: %s\n",
             $this->getName(),
             $this->getQuestionText(),
             $this->getXField(),
-            $this->getYField());
+            $this->getYField()
+        );
     }
 
     public function getId(): ?int

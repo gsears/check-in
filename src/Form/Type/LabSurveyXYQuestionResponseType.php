@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\XYQuestion;
 use App\Form\Type\XYCoordinates;
 use App\Entity\LabSurveyResponse;
+use App\Form\Type\XYQuestionType;
 use App\Entity\LabSurveyXYQuestion;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
@@ -17,7 +18,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use App\Form\Type\XYQuestionType;
 
 
 class LabSurveyXYQuestionResponseType extends AbstractType
@@ -35,46 +35,23 @@ class LabSurveyXYQuestionResponseType extends AbstractType
         $xyQuestionResponse = $builder->getData();
 
         // https://stackoverflow.com/questions/21862168/calling-builder-getdata-from-within-a-nested-form-always-returns-null
+        // https://symfony.com/doc/current/form/events.html
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function ($event) {
             $builder = $event->getForm();
             $xyQuestionResponse = $event->getData();
 
-            // If the object does not exist in the database
-            $xValue = $xyQuestionResponse->getXValue();
-            $yValue = $xyQuestionResponse->getYValue();
-
-            if ($xValue && $yValue) {
-                $values = [(new XYCoordinates($xValue, $yValue))];
-            } else {
-                $values = [];
-            }
-
             $xyQuestion = $xyQuestionResponse->getLabSurveyXYQuestion()->getXYQuestion();
-            $id = strval($xyQuestion->getId());
             $xField = $xyQuestion->getXField();
             $yField = $xyQuestion->getYField();
 
-            $xHiddenFieldId = 'x_' . $id;
-            $yHiddenFieldId = 'y_' . $id;
             // Add hidden types for XY responses. These will be filled via the js component.
             $builder
                 // Do not map the xy form component to the entity.
-                ->add($xyQuestion->getName(), XYQuestionType::class, [
-                    'mapped' => false,
-                    'id' => $id,
-                    'values' => $this->parseCoordinates($values),
+                ->add('coordinates', XYQuestionType::class, [
                     'x_label_low' => $xField->getLowLabel(),
                     'x_label_high' => $xField->getHighLabel(),
                     'y_label_low' => $yField->getLowLabel(),
                     'y_label_high' => $yField->getHighLabel(),
-                    'x_field_id' => $xHiddenFieldId,
-                    'y_field_id' => $yHiddenFieldId
-                ])
-                ->add('xValue', HiddenType::class, [
-                    'attr' => ['data-id' => $xHiddenFieldId]
-                ])
-                ->add('yValue', HiddenType::class, [
-                    'attr' => ['data-id' => $yHiddenFieldId]
                 ]);
         });
     }
@@ -89,16 +66,5 @@ class LabSurveyXYQuestionResponseType extends AbstractType
         $resolver->setDefaults([
             'data_class' => LabSurveyXYQuestionResponse::class,
         ]);
-    }
-
-    /**
-     * Creates json from the coordinates
-     *
-     * @param [type] $coordinates
-     * @return void
-     */
-    private function parseCoordinates($coordinates)
-    {
-        return $this->serializer->serialize($coordinates, 'json');
     }
 }

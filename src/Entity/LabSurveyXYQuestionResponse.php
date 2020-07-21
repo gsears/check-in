@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\LabSurveyXYQuestionResponseRepository;
+use App\Entity\XYCoordinates;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\LabSurveyResponse;
+use App\Entity\LabSurveyXYQuestion;
+use App\Repository\LabSurveyXYQuestionResponseRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LabSurveyXYQuestionResponseRepository::class)
@@ -38,12 +41,13 @@ class LabSurveyXYQuestionResponse
      */
     private $labSurveyResponse;
 
-    public function __toString() : string
+    public function __toString(): string
     {
-        return sprintf("Response for '%s': {%d,%d}\n",
+        return sprintf(
+            "Response for '%s': {%d,%d}\n",
             $this->getLabSurveyXYQuestion()->getXYQuestion()->getName(),
-            $this->getXValue(),
-            $this->getYValue()
+            $this->xValue,
+            $this->yValue
         );
     }
 
@@ -52,26 +56,19 @@ class LabSurveyXYQuestionResponse
         return $this->id;
     }
 
-    public function getXValue(): ?int
+    public function getCoordinates(): ?XYCoordinates
     {
-        return $this->xValue;
+        if ($this->xValue && $this->yValiue) {
+            return new XYCoordinates($this->xValue, $this->yValue);
+        } else {
+            return null;
+        }
     }
 
-    public function setXValue(?int $xValue): self
+    public function setCoordinates(XYCoordinates $xyCoordinates): self
     {
-        $this->xValue = $xValue;
-
-        return $this;
-    }
-
-    public function getYValue(): ?int
-    {
-        return $this->yValue;
-    }
-
-    public function setYValue(?int $yValue): self
-    {
-        $this->yValue = $yValue;
+        $this->xValue = $xyCoordinates->getX();
+        $this->yValue = $xyCoordinates->getY();
 
         return $this;
     }

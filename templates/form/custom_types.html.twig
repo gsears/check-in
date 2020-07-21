@@ -1,43 +1,55 @@
 {% block lab_survey_response_row %}
-    <h1>{{lab.name}}</h1>
-    <small>{{lab.courseInstance.course.code}}</small>
+	<h1>{{lab.name}}</h1>
+	<small>{{lab.courseInstance.course.code}}</small>
 {% endblock %}
 
 {% block lab_survey_response_label %}
-    label
+	label
 {% endblock %}
 
 {% block lab_survey_response_widget %}
-    widgh
+	widgh
 {% endblock %}
 
 {# This widget creates an instance of the vue component from forms #}
 {% block xy_question_widget %}
-    <div id="xy-{{id}}">
-        Loading...
-    </div>
+	{# Variable with widget ID #}
+	{% set widgetId = id ~ '_xywidget' %}
 
-    <script>
-    // Waits until js and everything else is ready and loads
-    // an instance of the XY selector.
+    {# Render hidden fields #}
+    {% for child in form.children|filter(child => not child.rendered) %}
+        {{ form_widget(child) }}
+    {% endfor %}
+
+    {# Dom element for JS Component #}
+	<div id="{{widgetId}}">
+		Loading...
+	</div>
+
+	<script>
+    // Waits until js and everything else is ready and loads an instance of the XY selector.
     addLoadEvent(() => {
-        XYQuestionWidgetFactory('#xy-{{id}}', {{values}}, {
-            {% if x_field_id and y_field_id %}
-                onChange: (values) => {
-                    var x = document.querySelectorAll("[data-id='{{x_field_id}}']")[0];
-                    x.value = values[0].x;
+        const xField = document.getElementById('{{ id }}_xValue');
+        const yField = document.getElementById('{{ id }}_yValue');
 
-                    var y = document.querySelectorAll("[data-id='{{y_field_id}}']")[0];
-                    y.value = values[0].y;
-                },
-            {% endif %}
+        let initial = [];
+        let x = xField.value;
+        let y = yField.value
 
-            xLabelHigh: '{{x_label_high}}',
-             xLabelLow: '{{x_label_low}}',
-            yLabelHigh: '{{y_label_high}}',
-             yLabelLow: '{{y_label_low}}',
+        if(x && y) {
+            initial.push({x, y});
+        }
+
+        XYQuestionWidgetFactory('#{{ widgetId }}', initial, {
+            onChange: (values) => {
+                xField.value = values[0].x;
+                yField.value = values[0].y;
+            },
+            xLabelHigh: '{{ x_label_high }}',
+            xLabelLow: '{{ x_label_low }}',
+            yLabelHigh: '{{ y_label_high }}',
+            yLabelLow: '{{ y_label_low }}'
         });
-
     });
-    </script>
+	</script>
 {% endblock %}

@@ -1,11 +1,20 @@
 <?php
-namespace App\Form\Type;
+
+namespace App\Entity;
+
+use InvalidArgumentException;
+
 class XYCoordinates
 {
     private $x;
     private $y;
 
-    public function __construct(int $x, int $y) {
+    public function __construct(int $x, int $y)
+    {
+        if (!$x || !$y) {
+            throw new InvalidArgumentException("X and Y must exist!", 1);
+        }
+
         $this->x = $x;
         $this->y = $y;
     }
