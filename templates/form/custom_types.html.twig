@@ -1,14 +1,5 @@
-{% block lab_survey_response_row %}
-	<h1>{{lab.name}}</h1>
-	<small>{{lab.courseInstance.course.code}}</small>
-{% endblock %}
-
-{% block lab_survey_response_label %}
-	label
-{% endblock %}
-
-{% block lab_survey_response_widget %}
-	widgh
+{% block lab_survey_xy_question_response_label %}
+    
 {% endblock %}
 
 {# This widget creates an instance of the vue component from forms #}
@@ -48,7 +39,8 @@
             xLabelHigh: '{{ x_label_high }}',
             xLabelLow: '{{ x_label_low }}',
             yLabelHigh: '{{ y_label_high }}',
-            yLabelLow: '{{ y_label_low }}'
+            yLabelLow: '{{ y_label_low }}',
+            cellSizeInRem: 1
         });
     });
 	</script>

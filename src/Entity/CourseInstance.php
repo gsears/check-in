@@ -57,16 +57,18 @@ class CourseInstance
         $this->labSurveys = new ArrayCollection();
     }
 
-    public function __toString() : string
+    public function __toString(): string
     {
-        return sprintf("Course Instance: %sStartDate: %s - EndDate: %s\n \nInstructors Assigned:\n- %s\Students Assigned:\n- %s\n",
+        return sprintf(
+            "Course Instance: %sStartDate: %s - EndDate: %s\n \nInstructors Assigned:\n- %s\Students Assigned:\n- %s\n",
             $this->getCourse(),
             date_format($this->getStartDate(), "d/m/y"),
             date_format($this->getEndDate(), "d/m/y"),
             join("- ", $this->getInstructors()->toArray()),
-            join("- ", $this->getEnrolments()->map(function($enrolment){
+            join("- ", $this->getEnrolments()->map(function ($enrolment) {
                 return $enrolment->getStudent();
-            })->toArray()));
+            })->toArray())
+        );
     }
 
     public function getId(): ?int
@@ -196,5 +198,16 @@ class CourseInstance
         }
 
         return $this;
+    }
+
+    public function getName()
+    {
+        return sprintf(
+            "%s %s: %s - %s",
+            $this->course->getCode(),
+            $this->course->getName(),
+            date_format($this->getStartDate(), "d/m/y"),
+            date_format($this->getEndDate(), "d/m/y")
+        );
     }
 }

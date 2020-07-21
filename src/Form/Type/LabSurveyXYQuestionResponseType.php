@@ -48,6 +48,7 @@ class LabSurveyXYQuestionResponseType extends AbstractType
             $builder
                 // Do not map the xy form component to the entity.
                 ->add('coordinates', XYQuestionType::class, [
+                    'label' => $xyQuestion->getName(),
                     'x_label_low' => $xField->getLowLabel(),
                     'x_label_high' => $xField->getHighLabel(),
                     'y_label_low' => $yField->getLowLabel(),
