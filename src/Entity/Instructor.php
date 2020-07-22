@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\InstructorRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -23,6 +25,21 @@ class Instructor
      */
     private $appuser;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=CourseInstance::class, mappedBy="instructors")
+     */
+    private $courseInstances;
+
+    public function __construct()
+    {
+        $this->courseInstances = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return "INSTRUCTOR - " . $this->getUser();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -40,8 +57,31 @@ class Instructor
         return $this;
     }
 
-    public function __toString(): string
+    /**
+     * @return Collection|CourseInstance[]
+     */
+    public function getCourseInstances(): Collection
     {
-        return "INSTRUCTOR - " . $this->getUser();
+        return $this->courseInstances;
+    }
+
+    public function addCourseInstance(CourseInstance $courseInstance): self
+    {
+        if (!$this->courseInstances->contains($courseInstance)) {
+            $this->courseInstances[] = $courseInstance;
+            $courseInstance->addInstructor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourseInstance(CourseInstance $courseInstance): self
+    {
+        if ($this->courseInstances->contains($courseInstance)) {
+            $this->courseInstances->removeElement($courseInstance);
+            $courseInstance->removeInstructor($this);
+        }
+
+        return $this;
     }
 }

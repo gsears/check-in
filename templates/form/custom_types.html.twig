@@ -1,0 +1,51 @@
+{# This widget creates an instance of the vue component from forms #}
+{% block xy_coordinates_widget %}
+	{# Variable with widget ID #}
+	{% set widgetId = id ~ '_xywidget' %}
+
+	{# Render hidden fields #}
+	{% for child in form.children|filter(child => not child.rendered) %}
+		{{ form_widget(child) }}
+	{% endfor %}
+
+	{# Dom element for JS Component #}
+	<div id="{{widgetId}}">
+		Loading...
+	</div>
+
+	<script>
+		// Waits until js and everything else is ready and loads an instance of the XY selector.
+addLoadEvent(() => {
+const xField = document.getElementById('{{ id }}_xValue');
+const yField = document.getElementById('{{ id }}_yValue');
+
+let initial = [];
+let x = parseInt(xField.value);
+let y = parseInt(yField.value);
+
+console.log(x, y);
+
+if (x !== null && y !== null) {
+	initial.push({x, y});
+	console.log(initial);
+}
+
+	XYQuestionWidgetFactory('#{{ widgetId }}', initial, {
+		onChange: (values) => {
+			if(values[0]) {
+				xField.value = values[0].x;
+				yField.value = values[0].y;
+			} else {
+				xField.value = null;
+				yField.value = null;
+			}
+		},
+		xLabelHigh: '{{ x_label_high }}',
+		xLabelLow: '{{ x_label_low }}',
+		yLabelHigh: '{{ y_label_high }}',
+		yLabelLow: '{{ y_label_low }}',
+		cellSizeInRem: 1
+	});
+});
+	</script>
+{% endblock %}

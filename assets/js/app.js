@@ -14,9 +14,34 @@ import '../css/app.scss';
 // console.log('Hello Webpack Encore! Edit me in assets/js/app.js');
 
 import Vue from 'vue';
-import App from './App.vue';
+import XYQuestion from '@c/XYQuestion.vue';
 
-new Vue({
-  el: '#app',
-  render: h => h(App),
-});
+global.XYQuestionWidgetFactory = (el, initialData, opts) => {
+
+  const defaultOpts = {
+    multiselect: false,
+    disableCells: false,
+    cellSizeInRem: 1.2
+  };
+
+  if(initialData) {
+    if(!Array.isArray(initialData)) {
+      initialData = [initialData];
+    }
+  } else {
+    initialData = [];
+  }
+
+  return new Vue({
+    el,
+    render: h => h(XYQuestion, {
+      props: {
+        ...defaultOpts,
+        ...opts,
+        initialData
+      }
+    })
+  });
+}
+
+
