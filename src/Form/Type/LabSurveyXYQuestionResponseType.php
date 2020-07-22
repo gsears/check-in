@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
 {
@@ -42,7 +42,13 @@ class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
         $builder
             // Do not map the xy form component to the entity.
             ->add('coordinates', XYCoordinatesType::class, [
-                'label' => $xyQuestion->getName(),
+                'constraints' => new NotBlank(),
+                'label' => $xyQuestion->getQuestionText(),
+                'help' => sprintf(
+                    'Click on the grid to select a response. The x axis represents %s. The y axis represents %s.',
+                    $xyQuestion->getXField()->getName(),
+                    $xyQuestion->getYField()->getName()
+                ),
                 'x_label_low' => $xField->getLowLabel(),
                 'x_label_high' => $xField->getHighLabel(),
                 'y_label_low' => $yField->getLowLabel(),

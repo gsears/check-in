@@ -531,7 +531,7 @@ class AppFixtures extends Fixture
                         if (rand(0, 10) < 8) {
 
                             $labSurveyResponse = $this->manager->getRepository(LabSurveyResponse::class)
-                                ->findByLabSurveyAndStudent($labSurvey, $student)[0];
+                                ->findOneByLabSurveyAndStudent($labSurvey, $student);
 
                             $labSurveyResponse->setSubmitted(true);
 

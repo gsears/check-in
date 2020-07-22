@@ -8,7 +8,7 @@
       @change="handleChange($event)"
       :value="value"
     />
-    <label :for="value">{{countDisplay}}</label>
+    <label :for="value">{{ countDisplay }}</label>
   </div>
 </template>
 
@@ -17,44 +17,44 @@ export default {
   props: {
     name: String,
     disabled: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     xValue: Number,
     yValue: Number,
     count: {
       type: Number,
-      default: null
+      default: null,
     },
-    size: Number
+    size: Number,
   },
   computed: {
     value() {
       return `{x:${this.xValue},y:${this.yValue}}`;
     },
     countDisplay() {
-        return this.count > 1 ? this.count : '';
-    }
+      return this.count > 1 ? this.count : "";
+    },
   },
   methods: {
     sizeStyle() {
       return {
         height: this.size + "rem",
         width: this.size + "rem",
-        fontSize: this.size + "rem"
+        fontSize: this.size + "rem",
       };
     },
     handleChange(e) {
       this.$emit("change", {
         coordinates: {
           x: this.xValue,
-          y: this.yValue
+          y: this.yValue,
         },
 
-        checked: e.target.checked
+        checked: e.target.checked,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -80,10 +80,14 @@ export default {
   top: 0;
   cursor: pointer;
   opacity: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: solid 1px #f2f2f2;
 }
 
 .wrapper input:disabled {
-    cursor: initial;
+  cursor: initial;
 }
 
 .wrapper label {

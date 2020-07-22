@@ -18,8 +18,10 @@ use App\Security\Roles;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Security\Voter\StudentVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class CourseController extends AbstractController
@@ -166,6 +168,31 @@ class CourseController extends AbstractController
             throw $this->createNotFoundException('This lab survey question does not exist');
         }
 
+        // Check that referrer was previous question, otherwise redirect to first question
+        // to avoid skipping.
+
+        if ($page > 1) {
+            $referer = $request->headers->get('referer');
+
+            if (!$referer) {
+                throw new AccessDeniedHttpException('Cannot skip form entry.');
+            }
+            $current = $request->getUri();
+            $regex = "/(.+)\/(\d+)$/";
+
+            preg_match($regex, $referer, $refererMatch);
+            preg_match($regex, $current, $currentMatch);
+
+            $refererBase = $refererMatch[1];
+            $currentBase = $currentMatch[1];
+            $refererPage = intval($refererMatch[2]);
+
+            if ($refererBase !== $currentBase || !in_array($refererPage, [$page, $page - 1])) {
+                throw new AccessDeniedHttpException('Cannot skip form entry.');
+            }
+        }
+
+
         // Generate form:
 
         $labSurveyResponseRepo = $entityManager
@@ -173,9 +200,6 @@ class CourseController extends AbstractController
 
         // There is always a response object for each student
         $response = $labSurveyResponseRepo->findOneByLabSurveyAndStudent($lab, $student);
-
-        // Is there another question?
-        $hasNextQuestion = $page < $lab->getQuestionCount();
 
         // Perform action depending on question type
         if ($question instanceof LabSurveyXYQuestion) {
@@ -194,9 +218,7 @@ class CourseController extends AbstractController
                 $questionResponse->setLabSurveyResponse($response);
             }
 
-            $form = $this->createForm(LabSurveyXYQuestionResponseType::class,  $questionResponse, [
-                'has_next' => $hasNextQuestion
-            ]);
+            $form = $this->createForm(LabSurveyXYQuestionResponseType::class,  $questionResponse);
         }
 
         // Handle form:
@@ -205,43 +227,52 @@ class CourseController extends AbstractController
 
         if ($form->isSubmitted()) {
 
-            // Check if skipped
             $skipped = $form->get(SurveyQuestionResponseType::SKIP_BUTTON_NAME)->isClicked();
+            $isValid = $form->isValid();
 
-            if (!$skipped && $form->isValid()) {
-                // $form->getData() holds the submitted survey question response
-                $questionResponse = $form->getData();
+            // If the form is skipped or is valid, redirect to the next page
+            if ($skipped || $isValid) {
 
-                // Save the response to the database.
-                $entityManager->getManager()->persist($questionResponse);
-                $entityManager->getManager()->flush();
-            }
+                // Persist to the database if the form was not skipped
+                if (!$skipped  && $isValid) {
 
-            // Redirect accordingly...
-            if ($hasNextQuestion) {
-                // Get next page in the survey
-                return $this->redirectToRoute('lab_survey_response', [
-                    'courseId' => $courseId,
-                    'instanceId' => $instanceId,
-                    'labId' => $labId,
-                    'studentId' => $studentId,
-                    'page' => $page + 1
-                ]);
-            } else {
-                // We've completed the form. Update the lab response to completed
-                $response->setSubmitted(true);
-                // Update the database changes
-                $entityManager->getManager()->flush();
+                    // $form->getData() holds the submitted survey question response
+                    $questionResponse = $form->getData();
+                    // Save the response to the database.
+                    $entityManager->getManager()->persist($questionResponse);
+                    $entityManager->getManager()->flush();
+                }
 
-                // Back to summary
-                return $this->redirectToRoute('view_course_student_summary', [
-                    'courseId' => $courseId,
-                    'instanceId' => $instanceId,
-                    'studentId' => $studentId
-                ]);
+                // Redirect accordingly...
+                if ($page < $lab->getQuestionCount()) {
+                    // Get next page in the survey
+                    return $this->redirectToRoute('lab_survey_response', [
+                        'courseId' => $courseId,
+                        'instanceId' => $instanceId,
+                        'labId' => $labId,
+                        'studentId' => $studentId,
+                        'page' => $page + 1
+                    ]);
+                } else {
+
+                    if (!$skipped) {
+                        // We've completed the form. Update the lab response to completed...
+                        $response->setSubmitted(true);
+                        // ...and save to the database.
+                        $entityManager->getManager()->flush();
+                    }
+
+                    // Back to summary
+                    return $this->redirectToRoute('view_course_student_summary', [
+                        'courseId' => $courseId,
+                        'instanceId' => $instanceId,
+                        'studentId' => $studentId
+                    ]);
+                }
             }
         }
 
+        // Render the form. If there are submission errors, they will be displayed too.
         return $this->render('labsurvey/page.html.twig', [
             'form' => $form->createView()
         ]);

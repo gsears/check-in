@@ -35,7 +35,7 @@ abstract class SurveyQuestionResponseType extends AbstractType
         ]);
 
         $builder->add('submit', SubmitType::class, [
-            'label' => $options['has_next'] ? 'Next Question' : 'Submit'
+            'label' => 'Submit Response'
         ]);
     }
 
@@ -44,11 +44,7 @@ abstract class SurveyQuestionResponseType extends AbstractType
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
             'data_class' => SurveyQuestionResponseInterface::class,
-            'has_next' => null
         ]);
-
-        // Validate this form by requiring all of the below options
-        $resolver->setAllowedTypes('has_next', 'boolean');
     }
 
     abstract public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface;
