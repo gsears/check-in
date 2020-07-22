@@ -2,52 +2,60 @@
 
 namespace App\Form\Type;
 
-use App\Entity\SurveyQuestionResponseInterface;
+use App\Entity\XYQuestion;
+use App\Form\Type\XYCoordinates;
+use App\Entity\LabSurveyResponse;
+use App\Form\Type\XYCoordinatesType;
+use App\Entity\LabSurveyXYQuestion;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormInterface;
+use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\XYQuestionDangerZone;
+use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
-abstract class LabSurveyXYQuestionType extends AbstractType
+class LabSurveyXYQuestionType extends AbstractType
 {
-    private $serializer;
-
-    public function __construct(SerializerInterface $serializer)
-    {
-        $this->serializer = $serializer;
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-        $labSurveyXyQuestion = $builder->getData();
-        $xyQuestion = $labSurveyXyQuestion->getXYQuestion();
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            $labSurveyXYQuestion = $event->getData();
 
-        $xField = $xyQuestion->getXField();
-        $yField = $xyQuestion->getYField();
+            $xyQuestion = $labSurveyXYQuestion->getXYQuestion();
+            $xField = $xyQuestion->getXField();
+            $yField = $xyQuestion->getYField();
 
-        $responses = $labSurveyXyQuestion->getResponses();
+            $form = $event->getForm();
 
-        // Serialize responses as initial data
-
-        $builder->add('dangerZones', XYQuestionDangerZoneType::class, [
-            'x_label_low' => $xField->getLowLabel(),
-            'x_label_high' => $xField->getHighLabel(),
-            'y_label_low' => $yField->getLowLabel(),
-            'y_label_high' => $yField->getHighLabel(),
-        ]);
-
-        $builder->add('submit', SubmitType::class, [
-            'label' => 'Update Danger Zones'
-        ]);
+            dump("here");
+            $form
+                // Do not map the xy form component to the entity.
+                ->add('dangerZones', XYQuestionDangerZoneType::class, [
+                    'label' => $xyQuestion->getName(),
+                    'x_label_low' => $xField->getLowLabel(),
+                    'x_label_high' => $xField->getHighLabel(),
+                    'y_label_low' => $yField->getLowLabel(),
+                    'y_label_high' => $yField->getHighLabel(),
+                    // Can be blank (no danger zones)
+                    'not_blank' => false
+                ]);
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
-            'data_class' => LabSurveyXYQuestionType::class,
+            'data_class' => LabSurveyXYQuestion::class,
         ]);
     }
 }

@@ -35,7 +35,6 @@ class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
         $builder
             // Do not map the xy form component to the entity.
             ->add('coordinates', XYCoordinatesType::class, [
-                'constraints' => new NotBlank(),
                 'label' => $xyQuestion->getQuestionText(),
                 'help' => sprintf(
                     'Click on the grid to select a response. The x axis represents %s. The y axis represents %s.',
@@ -46,6 +45,7 @@ class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
                 'x_label_high' => $xField->getHighLabel(),
                 'y_label_low' => $yField->getLowLabel(),
                 'y_label_high' => $yField->getHighLabel(),
+                'not_blank' => true
             ]);
 
         return $builder;

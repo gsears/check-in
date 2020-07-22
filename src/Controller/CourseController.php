@@ -11,8 +11,10 @@ use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
 use App\Entity\XYQuestionDangerZone;
+use App\Form\Type\LabSurveyDangerZoneType;
 use App\Form\Type\LabSurveyResponseType;
 use App\Form\Type\LabSurveyXYQuestionResponseType;
+use App\Form\Type\LabSurveyXYQuestionType;
 use App\Form\Type\SurveyQuestionResponseType;
 use App\Form\Type\XYCoordinatesType;
 use App\Security\Roles;
@@ -256,12 +258,10 @@ class CourseController extends AbstractController
                     ]);
                 } else {
 
-                    if (!$skipped) {
-                        // We've completed the form. Update the lab response to completed...
-                        $response->setSubmitted(true);
-                        // ...and save to the database.
-                        $entityManager->getManager()->flush();
-                    }
+                    // We've completed the form. Update the lab response to completed...
+                    $response->setSubmitted(true);
+                    // ...and save to the database.
+                    $entityManager->getManager()->flush();
 
                     // Back to summary
                     return $this->redirectToRoute('view_course_student_summary', [
@@ -282,19 +282,29 @@ class CourseController extends AbstractController
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/test", name="test")
+     * @Route("courses/{courseId}/{instanceId}/lab/{labId}/", name="test")
      */
-    public function test()
+    public function test($courseId, $instanceId, $labId)
     {
-        $labSurveyXYQuestion = new LabSurveyXYQuestion();
-        $xyDangerZone = new XYQuestionDangerZone();
-        $xyDangerZone->setLabSurveyXYQuestion($labSurveyXYQuestion);
-        $xyDangerZone->setXHighBound(-6);
-        $xyDangerZone->setXLowBound(-10);
-        $xyDangerZone->setYHighBound(-6);
-        $xyDangerZone->setYLowBound(-10);
+        // Security and sanity checks:
 
-        $form = $this->createForm(LabSurveyXYQuestionType::class);
+        $entityManager = $this->getDoctrine();
+
+        $courseInstanceRepo = $entityManager
+            ->getRepository(CourseInstance::class);
+
+        $courseInstance = $courseInstanceRepo->find($instanceId);
+
+        $labRepo = $entityManager
+            ->getRepository(LabSurvey::class);
+
+        $lab = $labRepo->find($labId);
+
+        if (!($this->coursePathExists($courseInstance, $courseId) && $lab)) {
+            throw $this->createNotFoundException('This lab survey does not exist');
+        }
+
+        $form = $this->createForm(LabSurveyDangerZoneType::class, $lab);
         return $this->render('labsurvey/page.html.twig', [
             'form' => $form->createView()
         ]);

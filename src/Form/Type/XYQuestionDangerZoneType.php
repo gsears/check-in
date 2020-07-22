@@ -26,55 +26,37 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Implements DataMapperInterface to return an XYCoordinates object.
  * https://symfony.com/doc/current/form/data_mappers.html
  */
-class XYQuestionDangerZoneType extends AbstractXYType implements DataMapperInterface
+class XYQuestionDangerZoneType extends AbstractXYComponentType
 {
     private $serializer;
 
-    // Inject the serializer
     public function __construct(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function provideJsonContent($viewData): ?string
     {
-        // Hidden form to store the json string from the jscomponent
-        $builder
-            ->add('json', HiddenType::class)
-            // Configure to create dangerzones on submit
-            ->setDataMapper($this);
-    }
-
-    public function mapDataToForms($viewData, iterable $forms)
-    {
-
-        dump($viewData);
-        // there is no data yet, so nothing to prepopulate
-        if (null === $viewData) {
-            return;
+        if (!$viewData) {
+            return null;
         }
 
-        // serialize data, ignoring the labSurveyQuestion field.
-        $jsonContent = $this->serializer->serialize(
+        // Serialise the XYQuestionDangerZone collection, ignoring the labSurveyQuestion field,
+        // as this won't be set by the javascript component.
+        return $this->serializer->serialize(
             $viewData,
             'json',
             [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labSurveyQuestion']]
         );
-
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-
-        // initialize form field values
-        $forms['json']->setData($jsonContent);
     }
 
-    public function mapFormsToData(iterable $forms, &$viewData)
+    public function consumeJsonContent($jsonContent)
     {
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-        $jsonContent = $forms['json']->getData();
+        if (null === $jsonContent) {
+            return null;
+        }
 
-        dump($jsonContent);
-        $viewData = $this->serializer->deserialize($jsonContent, XYQuestionDangerZone::class, 'json');
+        // Converts a json string into XYQuestionDangerZone entities.
+        return $this->serializer->deserialize($jsonContent, XYQuestionDangerZone::class . '[]', 'json');
     }
 }

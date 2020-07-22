@@ -32,10 +32,10 @@ class XYCoordinatesType extends AbstractXYComponentType
         $this->serializer = $serializer;
     }
 
-    public function provideJsonContent($viewData): string
+    public function provideJsonContent($viewData): ?string
     {
         if (!$viewData) {
-            return "[]";
+            return null;
         }
 
         // invalid data type
@@ -43,21 +43,19 @@ class XYCoordinatesType extends AbstractXYComponentType
             throw new UnexpectedTypeException($viewData, XYCoordinates::class);
         }
 
-        dump($viewData);
-
-        $array = [$viewData];
-
-        dump($array);
         // Convert the XYCoordinate object into a json array for consumption
         // in the javascript component.
-        $string = $this->serializer->serialize($array, 'json');
-        dump($string);
-        return $string;
+        return $this->serializer->serialize([$viewData], 'json');
     }
 
     public function consumeJsonContent($jsonContent)
     {
+        if (null === $jsonContent) {
+            return null;
+        }
+
         $resultArray = $this->serializer->deserialize($jsonContent, XYCoordinates::class . '[]', 'json');
+
         if (count($resultArray) === 0) {
             return null;
         } else {

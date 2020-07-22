@@ -3,6 +3,15 @@
 	{# Variable with widget ID #}
 	{% set widgetId = id ~ '_xywidget' %}
 
+	{% set data %}
+		{% if initial_data %}
+			{{initial_data|raw}}
+		{% else %}
+			JSON.parse(document.getElementById('{{ id }}_jsonContent').value)
+		{% endif %}
+	{% endset %}
+	
+
 	{# Render hidden fields #}
 	{% for child in form.children|filter(child => not child.rendered) %}
 		{{ form_widget(child) }}
@@ -17,7 +26,9 @@
 		// Waits until js and everything else is ready and loads an instance of the XY selector.
 addLoadEvent(() => {
 
-	XYQuestionWidgetFactory('#{{ widgetId }}', {{initial_data|raw}}, {
+	const initialData = {{initial_data|raw}}
+
+	XYQuestionWidgetFactory('#{{ widgetId }}', {{data}} , {
 		onChange: (values) => {
 			document.getElementById('{{ id }}_jsonContent').value = JSON.stringify(values);
 		},
