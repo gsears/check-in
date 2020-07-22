@@ -1,5 +1,5 @@
 {# This widget creates an instance of the vue component from forms #}
-{% block xy_coordinates_widget %}
+{% block xy_component_widget %}
 	{# Variable with widget ID #}
 	{% set widgetId = id ~ '_xywidget' %}
 
@@ -16,29 +16,10 @@
 	<script>
 		// Waits until js and everything else is ready and loads an instance of the XY selector.
 addLoadEvent(() => {
-const xField = document.getElementById('{{ id }}_xValue');
-const yField = document.getElementById('{{ id }}_yValue');
 
-let initial = [];
-let x = parseInt(xField.value);
-let y = parseInt(yField.value);
-
-console.log(x, y);
-
-if (x !== null && y !== null) {
-	initial.push({x, y});
-	console.log(initial);
-}
-
-	XYQuestionWidgetFactory('#{{ widgetId }}', initial, {
+	XYQuestionWidgetFactory('#{{ widgetId }}', {{initial_data|raw}}, {
 		onChange: (values) => {
-			if(values[0]) {
-				xField.value = values[0].x;
-				yField.value = values[0].y;
-			} else {
-				xField.value = null;
-				yField.value = null;
-			}
+			document.getElementById('{{ id }}_jsonContent').value = JSON.stringify(values);
 		},
 		xLabelHigh: '{{ x_label_high }}',
 		xLabelLow: '{{ x_label_low }}',

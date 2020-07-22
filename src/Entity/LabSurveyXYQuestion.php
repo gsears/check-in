@@ -46,9 +46,15 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
      */
     private $index;
 
+    /**
+     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labSurveyXYQuestion", orphanRemoval=true)
+     */
+    private $dangerZones;
+
     public function __construct()
     {
         $this->responses = new ArrayCollection();
+        $this->dangerZones = new ArrayCollection();
     }
 
     public function __toString() : string
@@ -132,5 +138,36 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
 
     public function getQuestion(): QuestionInterface {
         return $this->xyQuestion;
+    }
+
+    /**
+     * @return Collection|XYQuestionDangerZone[]
+     */
+    public function getDangerZones(): Collection
+    {
+        return $this->dangerZones;
+    }
+
+    public function addDangerZone(XYQuestionDangerZone $dangerZone): self
+    {
+        if (!$this->dangerZones->contains($dangerZone)) {
+            $this->dangerZones[] = $dangerZone;
+            $dangerZone->setLabSurveyXYQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDangerZone(XYQuestionDangerZone $dangerZone): self
+    {
+        if ($this->dangerZones->contains($dangerZone)) {
+            $this->dangerZones->removeElement($dangerZone);
+            // set the owning side to null (unless already changed)
+            if ($dangerZone->getLabSurveyXYQuestion() === $this) {
+                $dangerZone->setLabSurveyXYQuestion(null);
+            }
+        }
+
+        return $this;
     }
 }

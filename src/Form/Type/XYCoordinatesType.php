@@ -23,53 +23,19 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Implements DataMapperInterface to return an XYCoordinates object.
  * https://symfony.com/doc/current/form/data_mappers.html
  */
-class XYCoordinatesType extends AbstractType implements DataMapperInterface
+class XYCoordinatesType extends AbstractXYComponentType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    private $serializer;
+
+    public function __construct(SerializerInterface $serializer)
     {
-        // Hidden forms to store the XY values and bind them.
-        $builder
-            ->add('xValue', HiddenType::class)
-            ->add('yValue', HiddenType::class)
-            // Configure to create coordinates on submit
-            ->setDataMapper($this);
+        $this->serializer = $serializer;
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function provideJsonContent($viewData): string
     {
-        // Lazy merge to grab all options as vars as there are no conditions
-        $view->vars = array_merge($view->vars, $options);
-    }
-
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        // 'empty-data' null prevents automatic creation of the item, as we want to
-        // control this from our data mapper
-        $resolver->setDefault('empty_data', null);
-
-        $resolver->setDefaults([
-            'x_label_low' => null,
-            'x_label_high' => null,
-            'y_label_low' => null,
-            'y_label_high' => null,
-        ]);
-
-        // Validate this form by requiring all of the below
-        $resolver
-            ->setAllowedTypes('x_label_low', 'string')
-            ->setAllowedTypes('x_label_high', 'string')
-            ->setAllowedTypes('y_label_low', 'string')
-            ->setAllowedTypes('y_label_high', 'string');
-    }
-
-
-    public function mapDataToForms($viewData, iterable $forms)
-    {
-        dump('data to form');
-
-        // there is no data yet, so nothing to prepopulate
-        if (null === $viewData) {
-            return;
+        if (!$viewData) {
+            return "[]";
         }
 
         // invalid data type
@@ -79,29 +45,23 @@ class XYCoordinatesType extends AbstractType implements DataMapperInterface
 
         dump($viewData);
 
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
+        $array = [$viewData];
 
-        // initialize form field values
-        $forms['xValue']->setData($viewData->getX());
-        $forms['yValue']->setData($viewData->getY());
+        dump($array);
+        // Convert the XYCoordinate object into a json array for consumption
+        // in the javascript component.
+        $string = $this->serializer->serialize($array, 'json');
+        dump($string);
+        return $string;
     }
 
-    public function mapFormsToData(iterable $forms, &$viewData)
+    public function consumeJsonContent($jsonContent)
     {
-        dump("here");
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-        $xValue = $forms['xValue']->getData();
-        $yValue = $forms['yValue']->getData();
-
-        if ($xValue && $yValue) {
-            $viewData = new XYCoordinates(
-                $xValue,
-                $yValue
-            );
+        $resultArray = $this->serializer->deserialize($jsonContent, XYCoordinates::class . '[]', 'json');
+        if (count($resultArray) === 0) {
+            return null;
         } else {
-            $viewData;
+            return $resultArray[0];
         }
     }
 }

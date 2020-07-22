@@ -22,13 +22,6 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
 {
-    private $serializer;
-
-    public function __construct(SerializerInterface $serializer)
-    {
-        $this->serializer = $serializer;
-    }
-
     public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface
     {
         // Get the data so we can query it for its XY Question

@@ -57,9 +57,9 @@ export default {
     name: String,
     onChange: Function,
     initialData: Array, // Data array
-    multiselect: {
-      type: Boolean,
-      default: false,
+    mode: {
+      type: String,
+      default: "select",
     },
     disableCells: {
       default: false,
@@ -133,7 +133,7 @@ export default {
     },
     handleChange(e) {
       if (e.checked) {
-        if (this.multiselect) {
+        if (this.mode === "multiselect") {
           this.selected.push(e.coordinates);
         } else {
           this.selected = [e.coordinates];

@@ -10,6 +10,7 @@ use App\Entity\LabSurveyXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
+use App\Entity\XYQuestionDangerZone;
 use App\Form\Type\LabSurveyResponseType;
 use App\Form\Type\LabSurveyXYQuestionResponseType;
 use App\Form\Type\SurveyQuestionResponseType;
@@ -273,6 +274,27 @@ class CourseController extends AbstractController
         }
 
         // Render the form. If there are submission errors, they will be displayed too.
+        return $this->render('labsurvey/page.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * Includes course ID in the URL for readability.
+     *
+     * @Route("/test", name="test")
+     */
+    public function test()
+    {
+        $labSurveyXYQuestion = new LabSurveyXYQuestion();
+        $xyDangerZone = new XYQuestionDangerZone();
+        $xyDangerZone->setLabSurveyXYQuestion($labSurveyXYQuestion);
+        $xyDangerZone->setXHighBound(-6);
+        $xyDangerZone->setXLowBound(-10);
+        $xyDangerZone->setYHighBound(-6);
+        $xyDangerZone->setYLowBound(-10);
+
+        $form = $this->createForm(LabSurveyXYQuestionType::class);
         return $this->render('labsurvey/page.html.twig', [
             'form' => $form->createView()
         ]);
