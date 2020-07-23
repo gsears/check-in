@@ -1,16 +1,6 @@
-{# This widget creates an instance of the vue component from forms #}
-{% block xy_component_widget %}
+{% block xy_coordinates_widget %}
 	{# Variable with widget ID #}
 	{% set widgetId = id ~ '_xywidget' %}
-
-	{% set data %}
-		{% if initial_data %}
-			{{initial_data|raw}}
-		{% else %}
-			JSON.parse(document.getElementById('{{ id }}_jsonContent').value)
-		{% endif %}
-	{% endset %}
-	
 
 	{# Render hidden fields #}
 	{% for child in form.children|filter(child => not child.rendered) %}
@@ -23,21 +13,31 @@
 	</div>
 
 	<script>
-		// Waits until js and everything else is ready and loads an instance of the XY selector.
-addLoadEvent(() => {
-
-	const initialData = {{initial_data|raw}}
-
-	XYQuestionWidgetFactory('#{{ widgetId }}', {{data}} , {
-		onChange: (values) => {
-			document.getElementById('{{ id }}_jsonContent').value = JSON.stringify(values);
-		},
-		xLabelHigh: '{{ x_label_high }}',
-		xLabelLow: '{{ x_label_low }}',
-		yLabelHigh: '{{ y_label_high }}',
-		yLabelLow: '{{ y_label_low }}',
-		cellSizeInRem: {{cell_size}}
+	// Waits until js and everything else is ready and loads an instance of the XY selector.
+	addLoadEvent(() => {
+		XYQuestionWidgetFactory('#{{ widgetId }}', {
+			mode: 'points',
+			points: {
+				data: {% if initial_data %}
+					{{initial_data|raw}}
+				{% else %}
+					JSON.parse(document.getElementById('{{ id }}_jsonContent').value)
+				{% endif %},
+				onChange: (points) => {
+					document.getElementById('{{ id }}_jsonContent').value = JSON.stringify(points);
+				},
+			}
+			xLabelHigh: '{{ x_label_high }}',
+			xLabelLow: '{{ x_label_low }}',
+			yLabelHigh: '{{ y_label_high }}',
+			yLabelLow: '{{ y_label_low }}',
+			cellSizeInRem: {{cell_size}}
+		});
 	});
-});
 	</script>
+{% endblock %}
+
+{# This widget creates an instance of the vue component from forms #}
+{% block xy_danger_zones_widget %}
+
 {% endblock %}

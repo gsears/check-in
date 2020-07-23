@@ -82,7 +82,7 @@ export default {
     },
     mode: {
       type: String,
-      default: "region",
+      default: "point",
       validator: (value) => {
         return (
           ["readonly-danger", "readonly", "point", "region"].indexOf(value) !==
