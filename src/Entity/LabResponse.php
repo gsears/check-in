@@ -2,16 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\LabSurveyResponseRepository;
+use App\Repository\LabResponseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=LabSurveyResponseRepository::class)
+ * @ORM\Entity(repositoryClass=LabResponseRepository::class)
  * @ORM\HasLifecycleCallbacks
  */
-class LabSurveyResponse
+class LabResponse
 {
     /**
      * @ORM\Id()
@@ -31,19 +31,19 @@ class LabSurveyResponse
     private $createdAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Student::class, inversedBy="labSurveyResponses")
+     * @ORM\ManyToOne(targetEntity=Student::class, inversedBy="labResponses")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="guid")
      */
     private $student;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabSurvey::class, inversedBy="responses")
+     * @ORM\ManyToOne(targetEntity=Lab::class, inversedBy="responses")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $labSurvey;
+    private $lab;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestionResponse::class, mappedBy="labSurveyResponse", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true)
      */
     private $xyQuestionResponses;
 
@@ -62,7 +62,7 @@ class LabSurveyResponse
         return sprintf(
             "%s's response for %s (%s):\n%s\n",
             $this->getStudent()->getGuid(),
-            $this->getLabSurvey()->getName(),
+            $this->getLab()->getName(),
             $this->getCreatedAt()->format("d/m/y h:i:s"),
             join("", $this->getXyQuestionResponses()->toArray())
         );
@@ -109,43 +109,43 @@ class LabSurveyResponse
         return $this;
     }
 
-    public function getLabSurvey(): ?LabSurvey
+    public function getLab(): ?Lab
     {
-        return $this->labSurvey;
+        return $this->lab;
     }
 
-    public function setLabSurvey(?LabSurvey $labSurvey): self
+    public function setLab(?Lab $lab): self
     {
-        $this->labSurvey = $labSurvey;
+        $this->lab = $lab;
 
         return $this;
     }
 
     /**
-     * @return Collection|LabSurveyXYQuestionResponse[]
+     * @return Collection|LabXYQuestionResponse[]
      */
     public function getXyQuestionResponses(): Collection
     {
         return $this->xyQuestionResponses;
     }
 
-    public function addXyQuestionResponse(LabSurveyXYQuestionResponse $xyQuestionResponse): self
+    public function addXyQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
         if (!$this->xyQuestionResponses->contains($xyQuestionResponse)) {
             $this->xyQuestionResponses[] = $xyQuestionResponse;
-            $xyQuestionResponse->setLabSurveyResponse($this);
+            $xyQuestionResponse->setLabResponse($this);
         }
 
         return $this;
     }
 
-    public function removeXyQuestionResponse(LabSurveyXYQuestionResponse $xyQuestionResponse): self
+    public function removeXyQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
         if ($this->xyQuestionResponses->contains($xyQuestionResponse)) {
             $this->xyQuestionResponses->removeElement($xyQuestionResponse);
             // set the owning side to null (unless already changed)
-            if ($xyQuestionResponse->getLabSurveyResponse() === $this) {
-                $xyQuestionResponse->setLabSurveyResponse(null);
+            if ($xyQuestionResponse->getLabResponse() === $this) {
+                $xyQuestionResponse->setLabResponse(null);
             }
         }
 

@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CourseInstance;
-use App\Entity\LabSurvey;
+use App\Entity\Lab;
 use App\Entity\Student;
 use App\Provider\DateTimeProvider;
 use DateTime;
@@ -11,20 +11,20 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method LabSurvey|null find($id, $lockMode = null, $lockVersion = null)
- * @method LabSurvey|null findOneBy(array $criteria, array $orderBy = null)
- * @method LabSurvey[]    findAll()
- * @method LabSurvey[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Lab|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Lab|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Lab[]    findAll()
+ * @method Lab[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LabSurveyRepository extends ServiceEntityRepository
+class LabRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, LabSurvey::class);
+        parent::__construct($registry, Lab::class);
     }
 
     /**
-     * @return LabSurvey[] Returns an array of LabSurvey objects
+     * @return Lab[] Returns an array of Lab objects
      */
 
     public function findByCourseInstance(CourseInstance $courseInstance, DateTime $beforeDateTime = null)
@@ -74,7 +74,7 @@ class LabSurveyRepository extends ServiceEntityRepository
     }
 
     /*
-    public function findOneBySomeField($value): ?LabSurvey
+    public function findOneBySomeField($value): ?Lab
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.exampleField = :val')

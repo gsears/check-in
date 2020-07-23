@@ -46,15 +46,15 @@ class CourseInstance
     private $enrolments;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurvey::class, mappedBy="courseInstance", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Lab::class, mappedBy="courseInstance", orphanRemoval=true)
      */
-    private $labSurveys;
+    private $labs;
 
     public function __construct()
     {
         $this->instructors = new ArrayCollection();
         $this->enrolments = new ArrayCollection();
-        $this->labSurveys = new ArrayCollection();
+        $this->labs = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -170,30 +170,30 @@ class CourseInstance
     }
 
     /**
-     * @return Collection|LabSurvey[]
+     * @return Collection|Lab[]
      */
-    public function getLabSurveys(): Collection
+    public function getLabs(): Collection
     {
-        return $this->labSurveys;
+        return $this->labs;
     }
 
-    public function addLabSurvey(LabSurvey $labSurvey): self
+    public function addLab(Lab $lab): self
     {
-        if (!$this->labSurveys->contains($labSurvey)) {
-            $this->labSurveys[] = $labSurvey;
-            $labSurvey->setCourseInstance($this);
+        if (!$this->labs->contains($lab)) {
+            $this->labs[] = $lab;
+            $lab->setCourseInstance($this);
         }
 
         return $this;
     }
 
-    public function removeLabSurvey(LabSurvey $labSurvey): self
+    public function removeLab(Lab $lab): self
     {
-        if ($this->labSurveys->contains($labSurvey)) {
-            $this->labSurveys->removeElement($labSurvey);
+        if ($this->labs->contains($lab)) {
+            $this->labs->removeElement($lab);
             // set the owning side to null (unless already changed)
-            if ($labSurvey->getCourseInstance() === $this) {
-                $labSurvey->setCourseInstance(null);
+            if ($lab->getCourseInstance() === $this) {
+                $lab->setCourseInstance(null);
             }
         }
 

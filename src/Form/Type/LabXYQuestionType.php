@@ -4,14 +4,14 @@ namespace App\Form\Type;
 
 use App\Entity\XYQuestion;
 use App\Form\Type\XYCoordinates;
-use App\Entity\LabSurveyResponse;
+use App\Entity\LabResponse;
 use App\Form\Type\XYCoordinatesType;
-use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabXYQuestion;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabXYQuestionResponse;
 use App\Entity\XYQuestionDangerZone;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -22,15 +22,15 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class LabSurveyXYQuestionType extends AbstractType
+class LabXYQuestionType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
-            $labSurveyXYQuestion = $event->getData();
+            $labXYQuestion = $event->getData();
 
-            $xyQuestion = $labSurveyXYQuestion->getXYQuestion();
+            $xyQuestion = $labXYQuestion->getXYQuestion();
             $xField = $xyQuestion->getXField();
             $yField = $xyQuestion->getYField();
 
@@ -46,7 +46,9 @@ class LabSurveyXYQuestionType extends AbstractType
                     'y_label_low' => $yField->getLowLabel(),
                     'y_label_high' => $yField->getHighLabel(),
                     // Can be blank (no danger zones)
-                    'not_blank' => false
+                    'not_blank' => false,
+                    'cell_size' => 0.9,
+                    // SET INITIAL DATA HERE
                 ]);
         });
     }
@@ -55,7 +57,7 @@ class LabSurveyXYQuestionType extends AbstractType
     {
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
-            'data_class' => LabSurveyXYQuestion::class,
+            'data_class' => LabXYQuestion::class,
         ]);
     }
 }

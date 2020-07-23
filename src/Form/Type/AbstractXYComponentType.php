@@ -4,13 +4,13 @@ namespace App\Form\Type;
 
 use App\Entity\XYQuestion;
 use App\Entity\XYCoordinates;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabXYQuestionResponse;
 
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -105,6 +105,7 @@ abstract class AbstractXYComponentType extends AbstractType implements DataMappe
             'y_label_high' => null,
             'not_blank' => true,
             'initial_data' => null,
+            'cell_size' => 1,
         ]);
 
         // Type check the options passed in.

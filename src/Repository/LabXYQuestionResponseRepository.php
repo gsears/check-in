@@ -2,25 +2,25 @@
 
 namespace App\Repository;
 
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabXYQuestionResponse;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method LabSurveyXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
- * @method LabSurveyXYQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
- * @method LabSurveyXYQuestionResponse[]    findAll()
- * @method LabSurveyXYQuestionResponse[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method LabXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
+ * @method LabXYQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
+ * @method LabXYQuestionResponse[]    findAll()
+ * @method LabXYQuestionResponse[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LabSurveyXYQuestionResponseRepository extends ServiceEntityRepository
+class LabXYQuestionResponseRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, LabSurveyXYQuestionResponse::class);
+        parent::__construct($registry, LabXYQuestionResponse::class);
     }
 
     // /**
-    //  * @return LabSurveyXYQuestionResponse[] Returns an array of LabSurveyXYQuestionResponse objects
+    //  * @return LabXYQuestionResponse[] Returns an array of LabXYQuestionResponse objects
     //  */
     /*
     public function findByExampleField($value)
@@ -37,7 +37,7 @@ class LabSurveyXYQuestionResponseRepository extends ServiceEntityRepository
     */
 
     /*
-    public function findOneBySomeField($value): ?LabSurveyXYQuestionResponse
+    public function findOneBySomeField($value): ?LabXYQuestionResponse
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.exampleField = :val')

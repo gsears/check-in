@@ -4,9 +4,9 @@ namespace App\Form\Type;
 
 use App\Entity\XYQuestion;
 use App\Form\Type\XYCoordinates;
-use App\Entity\LabSurveyResponse;
+use App\Entity\LabResponse;
 use App\Form\Type\XYCoordinatesType;
-use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabXYQuestion;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;

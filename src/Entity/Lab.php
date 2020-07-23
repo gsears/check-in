@@ -2,15 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\LabSurveyRepository;
+use App\Repository\LabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=LabSurveyRepository::class)
+ * @ORM\Entity(repositoryClass=LabRepository::class)
  */
-class LabSurvey
+class Lab
 {
     /**
      * @ORM\Id()
@@ -30,18 +30,18 @@ class LabSurvey
     private $startDateTime;
 
     /**
-     * @ORM\ManyToOne(targetEntity=CourseInstance::class, inversedBy="labSurveys")
+     * @ORM\ManyToOne(targetEntity=CourseInstance::class, inversedBy="labs")
      * @ORM\JoinColumn(nullable=false)
      */
     private $courseInstance;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestion::class, mappedBy="labSurvey", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabXYQuestion::class, mappedBy="lab", orphanRemoval=true)
      */
     private $xyQuestions;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="labSurvey", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="lab", orphanRemoval=true)
      */
     private $responses;
 
@@ -107,30 +107,30 @@ class LabSurvey
     }
 
     /**
-     * @return Collection|LabSurveyXYQuestion[]
+     * @return Collection|LabXYQuestion[]
      */
     public function getXyQuestions(): Collection
     {
         return $this->xyQuestions;
     }
 
-    public function addXyQuestion(LabSurveyXYQuestion $xyQuestion): self
+    public function addXyQuestion(LabXYQuestion $xyQuestion): self
     {
         if (!$this->xyQuestions->contains($xyQuestion)) {
             $this->xyQuestions[] = $xyQuestion;
-            $xyQuestion->setLabSurvey($this);
+            $xyQuestion->setLab($this);
         }
 
         return $this;
     }
 
-    public function removeXyQuestion(LabSurveyXYQuestion $xyQuestion): self
+    public function removeXyQuestion(LabXYQuestion $xyQuestion): self
     {
         if ($this->xyQuestions->contains($xyQuestion)) {
             $this->xyQuestions->removeElement($xyQuestion);
             // set the owning side to null (unless already changed)
-            if ($xyQuestion->getLabSurvey() === $this) {
-                $xyQuestion->setLabSurvey(null);
+            if ($xyQuestion->getLab() === $this) {
+                $xyQuestion->setLab(null);
             }
         }
 
@@ -161,30 +161,30 @@ class LabSurvey
     }
 
     /**
-     * @return Collection|LabSurveyResponse[]
+     * @return Collection|LabResponse[]
      */
     public function getResponses(): Collection
     {
         return $this->responses;
     }
 
-    public function addResponse(LabSurveyResponse $response): self
+    public function addResponse(LabResponse $response): self
     {
         if (!$this->responses->contains($response)) {
             $this->responses[] = $response;
-            $response->setLabSurvey($this);
+            $response->setLab($this);
         }
 
         return $this;
     }
 
-    public function removeResponse(LabSurveyResponse $response): self
+    public function removeResponse(LabResponse $response): self
     {
         if ($this->responses->contains($response)) {
             $this->responses->removeElement($response);
             // set the owning side to null (unless already changed)
-            if ($response->getLabSurvey() === $this) {
-                $response->setLabSurvey(null);
+            if ($response->getLab() === $this) {
+                $response->setLab(null);
             }
         }
 

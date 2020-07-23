@@ -18,10 +18,10 @@ class XYQuestionDangerZone
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabSurveyXYQuestion::class, inversedBy="dangerZones")
+     * @ORM\ManyToOne(targetEntity=LabXYQuestion::class, inversedBy="dangerZones")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $labSurveyXYQuestion;
+    private $labXYQuestion;
 
     /**
      * @ORM\Column(type="integer")
@@ -53,14 +53,14 @@ class XYQuestionDangerZone
         return $this->id;
     }
 
-    public function getLabSurveyXYQuestion(): ?LabSurveyXYQuestion
+    public function getLabXYQuestion(): ?LabXYQuestion
     {
-        return $this->labSurveyXYQuestion;
+        return $this->labXYQuestion;
     }
 
-    public function setLabSurveyXYQuestion(?LabSurveyXYQuestion $labSurveyXYQuestion): self
+    public function setLabXYQuestion(?LabXYQuestion $labXYQuestion): self
     {
-        $this->labSurveyXYQuestion = $labSurveyXYQuestion;
+        $this->labXYQuestion = $labXYQuestion;
 
         return $this;
     }

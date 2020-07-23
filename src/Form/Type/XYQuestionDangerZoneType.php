@@ -2,9 +2,9 @@
 
 namespace App\Form\Type;
 
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Entity\LabXYQuestionResponse;
 use App\Entity\XYCoordinates;
 use App\Entity\XYQuestion;
 use App\Entity\XYQuestionDangerZone;
@@ -41,12 +41,12 @@ class XYQuestionDangerZoneType extends AbstractXYComponentType
             return null;
         }
 
-        // Serialise the XYQuestionDangerZone collection, ignoring the labSurveyQuestion field,
+        // Serialise the XYQuestionDangerZone collection, ignoring the labQuestion field,
         // as this won't be set by the javascript component.
         return $this->serializer->serialize(
             $viewData,
             'json',
-            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labSurveyQuestion']]
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labQuestion']]
         );
     }
 

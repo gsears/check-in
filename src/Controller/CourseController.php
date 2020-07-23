@@ -3,18 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\CourseInstance;
-use App\Entity\LabSurvey;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\Lab;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Entity\LabXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYQuestion;
 use App\Entity\XYQuestionDangerZone;
-use App\Form\Type\LabSurveyDangerZoneType;
-use App\Form\Type\LabSurveyResponseType;
-use App\Form\Type\LabSurveyXYQuestionResponseType;
-use App\Form\Type\LabSurveyXYQuestionType;
+use App\Form\Type\LabDangerZoneType;
+use App\Form\Type\LabResponseType;
+use App\Form\Type\LabXYQuestionResponseType;
+use App\Form\Type\LabXYQuestionType;
 use App\Form\Type\SurveyQuestionResponseType;
 use App\Form\Type\XYCoordinatesType;
 use App\Security\Roles;
@@ -109,16 +109,16 @@ class CourseController extends AbstractController
         // Check if instructor on that course or the same student
         $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
 
-        $labSurveyRepo = $entityManager
-            ->getRepository(LabSurvey::class);
+        $labRepo = $entityManager
+            ->getRepository(Lab::class);
 
-        $labs = $labSurveyRepo
+        $labs = $labRepo
             ->findByCourseInstance($courseInstance);
 
-        $completedLabs = $labSurveyRepo
+        $completedLabs = $labRepo
             ->findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
 
-        $pendingLabs = $labSurveyRepo
+        $pendingLabs = $labRepo
             ->findPendingSurveysByCourseInstanceAndStudent($courseInstance, $student);
 
         return $this->render('course/student_summary.html.twig', [
@@ -135,7 +135,7 @@ class CourseController extends AbstractController
      * Optional
      * @Route("/courses/{courseId}/{instanceId}/lab/{labId}/{studentId}/{!page}", name="lab_survey_response", requirements={"page"="\d+"})
      */
-    public function completeLabSurvey(Request $request, $courseId, $instanceId, $labId, $studentId, int $page = 1)
+    public function completeLab(Request $request, $courseId, $instanceId, $labId, $studentId, int $page = 1)
     {
         // Security and sanity checks:
 
@@ -152,7 +152,7 @@ class CourseController extends AbstractController
         $student = $studentRepo->find($studentId);
 
         $labRepo = $entityManager
-            ->getRepository(LabSurvey::class);
+            ->getRepository(Lab::class);
 
         $lab = $labRepo->find($labId);
 
@@ -198,30 +198,30 @@ class CourseController extends AbstractController
 
         // Generate form:
 
-        $labSurveyResponseRepo = $entityManager
-            ->getRepository(LabSurveyResponse::class);
+        $labResponseRepo = $entityManager
+            ->getRepository(LabResponse::class);
 
         // There is always a response object for each student
-        $response = $labSurveyResponseRepo->findOneByLabSurveyAndStudent($lab, $student);
+        $response = $labResponseRepo->findOneByLabAndStudent($lab, $student);
 
         // Perform action depending on question type
-        if ($question instanceof LabSurveyXYQuestion) {
+        if ($question instanceof LabXYQuestion) {
 
             // Get the response that matches the question
             $questionResponse = $response->getXYQuestionResponses()->filter(
-                function (LabSurveyXYQuestionResponse $xyQuestionResponse) use ($question) {
-                    return $xyQuestionResponse->getLabSurveyXYQuestion() === $question;
+                function (LabXYQuestionResponse $xyQuestionResponse) use ($question) {
+                    return $xyQuestionResponse->getLabXYQuestion() === $question;
                 }
             )->first();
 
             // If it doesn't exist, create a new empty one
             if (!$questionResponse) {
-                $questionResponse = new LabSurveyXYQuestionResponse();
-                $questionResponse->setLabSurveyXYQuestion($question);
-                $questionResponse->setLabSurveyResponse($response);
+                $questionResponse = new LabXYQuestionResponse();
+                $questionResponse->setLabXYQuestion($question);
+                $questionResponse->setLabResponse($response);
             }
 
-            $form = $this->createForm(LabSurveyXYQuestionResponseType::class,  $questionResponse);
+            $form = $this->createForm(LabXYQuestionResponseType::class,  $questionResponse);
         }
 
         // Handle form:
@@ -274,7 +274,7 @@ class CourseController extends AbstractController
         }
 
         // Render the form. If there are submission errors, they will be displayed too.
-        return $this->render('labsurvey/page.html.twig', [
+        return $this->render('lab/page.html.twig', [
             'form' => $form->createView()
         ]);
     }
@@ -296,7 +296,7 @@ class CourseController extends AbstractController
         $courseInstance = $courseInstanceRepo->find($instanceId);
 
         $labRepo = $entityManager
-            ->getRepository(LabSurvey::class);
+            ->getRepository(Lab::class);
 
         $lab = $labRepo->find($labId);
 
@@ -304,8 +304,8 @@ class CourseController extends AbstractController
             throw $this->createNotFoundException('This lab survey does not exist');
         }
 
-        $form = $this->createForm(LabSurveyDangerZoneType::class, $lab);
-        return $this->render('labsurvey/page.html.twig', [
+        $form = $this->createForm(LabDangerZoneType::class, $lab);
+        return $this->render('lab/page.html.twig', [
             'form' => $form->createView()
         ]);
     }

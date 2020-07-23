@@ -10,9 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass=App\Repository\LabSurveyXYQuestionRepository::class)
+ * @ORM\Entity(repositoryClass=App\Repository\LabXYQuestionRepository::class)
  */
-class LabSurveyXYQuestion implements SurveyQuestionInterface
+class LabXYQuestion implements SurveyQuestionInterface
 {
     /**
      * @ORM\Id()
@@ -22,10 +22,10 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabSurvey::class, inversedBy="xyQuestions")
+     * @ORM\ManyToOne(targetEntity=Lab::class, inversedBy="xyQuestions")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $labSurvey;
+    private $lab;
 
     /**
      * @ORM\ManyToOne(targetEntity=XYQuestion::class)
@@ -34,7 +34,7 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
     private $xyQuestion;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestionResponse::class, mappedBy="labSurveyXYQuestion")
+     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labXYQuestion")
      */
     private $responses;
 
@@ -47,7 +47,7 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
     private $index;
 
     /**
-     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labSurveyXYQuestion", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labXYQuestion", orphanRemoval=true)
      */
     private $dangerZones;
 
@@ -57,11 +57,13 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
         $this->dangerZones = new ArrayCollection();
     }
 
-    public function __toString() : string
+    public function __toString(): string
     {
-        return sprintf('Q%d : %s',
+        return sprintf(
+            'Q%d : %s',
             $this->getIndex(),
-            $this->getXyQuestion()->getName());
+            $this->getXyQuestion()->getName()
+        );
     }
 
     public function getId(): ?int
@@ -69,14 +71,14 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
         return $this->id;
     }
 
-    public function getLabSurvey(): ?LabSurvey
+    public function getLab(): ?Lab
     {
-        return $this->labSurvey;
+        return $this->lab;
     }
 
-    public function setLabSurvey(?LabSurvey $labSurvey): self
+    public function setLab(?Lab $lab): self
     {
-        $this->labSurvey = $labSurvey;
+        $this->lab = $lab;
 
         return $this;
     }
@@ -94,30 +96,30 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
     }
 
     /**
-     * @return Collection|LabSurveyXYQuestionResponse[]
+     * @return Collection|LabXYQuestionResponse[]
      */
     public function getResponses(): Collection
     {
         return $this->responses;
     }
 
-    public function addResponse(LabSurveyXYQuestionResponse $response): self
+    public function addResponse(LabXYQuestionResponse $response): self
     {
         if (!$this->responses->contains($response)) {
             $this->responses[] = $response;
-            $response->setLabSurveyXYQuestion($this);
+            $response->setLabXYQuestion($this);
         }
 
         return $this;
     }
 
-    public function removeResponse(LabSurveyXYQuestionResponse $response): self
+    public function removeResponse(LabXYQuestionResponse $response): self
     {
         if ($this->responses->contains($response)) {
             $this->responses->removeElement($response);
             // set the owning side to null (unless already changed)
-            if ($response->getLabSurveyXYQuestion() === $this) {
-                $response->setLabSurveyXYQuestion(null);
+            if ($response->getLabXYQuestion() === $this) {
+                $response->setLabXYQuestion(null);
             }
         }
 
@@ -136,7 +138,8 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
         return $this;
     }
 
-    public function getQuestion(): QuestionInterface {
+    public function getQuestion(): QuestionInterface
+    {
         return $this->xyQuestion;
     }
 
@@ -152,7 +155,7 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
     {
         if (!$this->dangerZones->contains($dangerZone)) {
             $this->dangerZones[] = $dangerZone;
-            $dangerZone->setLabSurveyXYQuestion($this);
+            $dangerZone->setLabXYQuestion($this);
         }
 
         return $this;
@@ -163,8 +166,8 @@ class LabSurveyXYQuestion implements SurveyQuestionInterface
         if ($this->dangerZones->contains($dangerZone)) {
             $this->dangerZones->removeElement($dangerZone);
             // set the owning side to null (unless already changed)
-            if ($dangerZone->getLabSurveyXYQuestion() === $this) {
-                $dangerZone->setLabSurveyXYQuestion(null);
+            if ($dangerZone->getLabXYQuestion() === $this) {
+                $dangerZone->setLabXYQuestion(null);
             }
         }
 

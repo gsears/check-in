@@ -32,15 +32,15 @@ class Student
     private $enrolments;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="student", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="student", orphanRemoval=true)
      */
-    private $labSurveyResponses;
+    private $labResponses;
 
     public function __construct()
     {
         $this->enrolments = new ArrayCollection();
-        $this->labSurveyXYQuestionResponses = new ArrayCollection();
-        $this->labSurveyResponses = new ArrayCollection();
+        $this->labXYQuestionResponses = new ArrayCollection();
+        $this->labResponses = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -104,30 +104,30 @@ class Student
     }
 
     /**
-     * @return Collection|LabSurveyResponse[]
+     * @return Collection|LabResponse[]
      */
-    public function getLabSurveyResponses(): Collection
+    public function getLabResponses(): Collection
     {
-        return $this->labSurveyResponses;
+        return $this->labResponses;
     }
 
-    public function addLabSurveyResponse(LabSurveyResponse $labSurveyResponse): self
+    public function addLabResponse(LabResponse $labResponse): self
     {
-        if (!$this->labSurveyResponses->contains($labSurveyResponse)) {
-            $this->labSurveyResponses[] = $labSurveyResponse;
-            $labSurveyResponse->setStudent($this);
+        if (!$this->labResponses->contains($labResponse)) {
+            $this->labResponses[] = $labResponse;
+            $labResponse->setStudent($this);
         }
 
         return $this;
     }
 
-    public function removeLabSurveyResponse(LabSurveyResponse $labSurveyResponse): self
+    public function removeLabResponse(LabResponse $labResponse): self
     {
-        if ($this->labSurveyResponses->contains($labSurveyResponse)) {
-            $this->labSurveyResponses->removeElement($labSurveyResponse);
+        if ($this->labResponses->contains($labResponse)) {
+            $this->labResponses->removeElement($labResponse);
             // set the owning side to null (unless already changed)
-            if ($labSurveyResponse->getStudent() === $this) {
-                $labSurveyResponse->setStudent(null);
+            if ($labResponse->getStudent() === $this) {
+                $labResponse->setStudent(null);
             }
         }
 

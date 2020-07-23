@@ -2,9 +2,9 @@
 
 namespace App\Form\Type;
 
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Entity\LabXYQuestionResponse;
 use App\Entity\XYCoordinates;
 use App\Entity\XYQuestion;
 use Symfony\Component\Form\AbstractType;

@@ -7,10 +7,10 @@ use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
-use App\Entity\LabSurvey;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\Lab;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Entity\LabXYQuestionResponse;
 use App\Entity\Student;
 use App\Entity\User;
 use App\Entity\XYCoordinates;
@@ -171,12 +171,12 @@ class AppFixtures extends Fixture
         $this->printArray('XY Questions', $xyQuestions);
 
         // Create lab surveys
-        $labSurveys = $this->loadLabSurveys($courseInstances, $xyQuestions);
-        $this->printArray('Lab Surveys', $labSurveys);
+        $labs = $this->loadLabs($courseInstances, $xyQuestions);
+        $this->printArray('Lab Surveys', $labs);
 
         // Create lab xy responses
-        $completedLabSurveyResponses = $this->loadLabSurveyResponses($courseInstances);
-        $this->printArray('Completed Lab Survey Responses', $completedLabSurveyResponses);
+        $completedLabResponses = $this->loadLabResponses($courseInstances);
+        $this->printArray('Completed Lab Survey Responses', $completedLabResponses);
 
         // Commit to db
         $manager->flush();
@@ -437,9 +437,9 @@ class AppFixtures extends Fixture
         return $xyQuestions;
     }
 
-    public function loadLabSurveys(array $courseInstances, array $xyQuestions): array
+    public function loadLabs(array $courseInstances, array $xyQuestions): array
     {
-        $labSurveys = [];
+        $labs = [];
 
         foreach ($courseInstances as $courseInstance) {
             // Copy as we don't want to mutate the original
@@ -452,31 +452,31 @@ class AppFixtures extends Fixture
 
             // Create 10 labs every week for each course
             for ($i = 0; $i < 10; $i++) {
-                $labSurvey = new LabSurvey();
+                $lab = new Lab();
 
                 $labStartDate = clone $courseStart;
                 $labStartDate->modify('+' . $i . 'week');
 
-                $labSurvey
+                $lab
                     ->setName('Lab ' . strval($i + 1))
                     ->setStartDateTime($labStartDate);
 
-                $courseInstance->addLabSurvey($labSurvey);
+                $courseInstance->addLab($lab);
 
                 // Add stock XY Questions for each lab instance
                 foreach ($xyQuestions as $name => $xyQuestion) {
-                    $labSurveyXYQuestion = new LabSurveyXYQuestion();
+                    $labXYQuestion = new LabXYQuestion();
 
                     // Set the question order by index
-                    $labSurveyXYQuestion->setIndex(self::XY_QUESTIONS[$name]['index']);
+                    $labXYQuestion->setIndex(self::XY_QUESTIONS[$name]['index']);
 
 
-                    $labSurveyXYQuestion
+                    $labXYQuestion
                         ->setXyQuestion($xyQuestion);
 
-                    $labSurvey->addXyQuestion($labSurveyXYQuestion);
+                    $lab->addXyQuestion($labXYQuestion);
 
-                    $this->manager->persist($labSurveyXYQuestion);
+                    $this->manager->persist($labXYQuestion);
                 }
 
                 // For each student in the lab, generate an empty response object
@@ -485,23 +485,23 @@ class AppFixtures extends Fixture
                 });
 
                 foreach ($students as $student) {
-                    $labSurveyResponse = new LabSurveyResponse();
-                    $labSurveyResponse
+                    $labResponse = new LabResponse();
+                    $labResponse
                         ->setSubmitted(false)
                         ->setStudent($student)
-                        ->setLabSurvey($labSurvey);
-                    $this->manager->persist($labSurveyResponse);
+                        ->setLab($lab);
+                    $this->manager->persist($labResponse);
                 }
 
-                $this->manager->persist($labSurvey);
-                $labSurveys[] = $labSurvey;
+                $this->manager->persist($lab);
+                $labs[] = $lab;
             }
         }
         $this->manager->flush();
-        return $labSurveys;
+        return $labs;
     }
 
-    public function loadLabSurveyResponses($courseInstances)
+    public function loadLabResponses($courseInstances)
     {
         $completedResponses = [];
 
@@ -517,45 +517,45 @@ class AppFixtures extends Fixture
             if ($courseInstance->getStartDate() <= $cutoffDate) {
 
                 // For each lab before the cutoff date / time...
-                $labSurveys = $courseInstance->getLabSurveys()->filter(
+                $labs = $courseInstance->getLabs()->filter(
                     function ($lab) use ($cutoffDate) {
                         return $lab->getStartDateTime() <= $cutoffDate;
                     }
                 )->toArray();
 
-                foreach ($labSurveys as $labSurvey) {
+                foreach ($labs as $lab) {
                     // each student...
                     foreach ($students as $student) {
 
                         // 80% chance of completing survey
                         if (rand(0, 10) < 8) {
 
-                            $labSurveyResponse = $this->manager->getRepository(LabSurveyResponse::class)
-                                ->findOneByLabSurveyAndStudent($labSurvey, $student);
+                            $labResponse = $this->manager->getRepository(LabResponse::class)
+                                ->findOneByLabAndStudent($lab, $student);
 
-                            $labSurveyResponse->setSubmitted(true);
+                            $labResponse->setSubmitted(true);
 
                             // SET THE SURVEY QUESTIONS
                             // ------------------------
                             // XY
-                            $labSurveyXYQuestions = $labSurvey->getXyQuestions()->toArray();
+                            $labXYQuestions = $lab->getXyQuestions()->toArray();
                             // 90% chance of completing an XY question
-                            foreach ($labSurveyXYQuestions as $xyQuestion) {
+                            foreach ($labXYQuestions as $xyQuestion) {
                                 if (rand(0, 10) < 9) {
-                                    $xyResponse = new LabSurveyXYQuestionResponse();
+                                    $xyResponse = new LabXYQuestionResponse();
                                     $xyCoordinates = new XYCoordinates(rand(-10, 9), rand(-10, 9));
 
                                     $xyResponse
                                         ->setCoordinates($xyCoordinates)
-                                        ->setLabSurveyXYQuestion($xyQuestion);
+                                        ->setLabXYQuestion($xyQuestion);
 
-                                    $labSurveyResponse->addXyQuestionResponse($xyResponse);
+                                    $labResponse->addXyQuestionResponse($xyResponse);
 
                                     $this->manager->persist($xyResponse);
                                 }
                             }
 
-                            $completedResponses[] = $labSurveyResponse;
+                            $completedResponses[] = $labResponse;
                         }
                     }
                 }

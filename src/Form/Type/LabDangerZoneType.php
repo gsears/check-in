@@ -2,7 +2,7 @@
 
 namespace App\Form\Type;
 
-use App\Entity\LabSurvey;
+use App\Entity\Lab;
 use App\Entity\SurveyQuestionResponseInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class LabSurveyDangerZoneType extends AbstractType
+class LabDangerZoneType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -20,7 +20,7 @@ class LabSurveyDangerZoneType extends AbstractType
         $builder->add('xyQuestions', CollectionType::class, [
             'label' => 'XY Questions',
             'help' => 'Click on the regions to set the warning level, then click update.',
-            'entry_type' => LabSurveyXYQuestionType::class,
+            'entry_type' => LabXYQuestionType::class,
             'entry_options' => [
                 'label' => false
             ]
@@ -35,7 +35,7 @@ class LabSurveyDangerZoneType extends AbstractType
     {
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
-            'data_class' => LabSurvey::class,
+            'data_class' => Lab::class,
         ]);
     }
 }
