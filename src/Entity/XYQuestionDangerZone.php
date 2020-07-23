@@ -18,6 +18,9 @@ class XYQuestionDangerZone
     private $id;
 
     /**
+     * Cascade persist means we don't need to explicitly call persist on XYDangerZones when we update
+     * a lab question with new ones.
+     *
      * @ORM\ManyToOne(targetEntity=LabXYQuestion::class, inversedBy="dangerZones")
      * @ORM\JoinColumn(nullable=false)
      */

@@ -69,12 +69,14 @@ class XYQuestionDangerZoneType extends AbstractXYComponentType
             return null;
         }
 
-        // Serialise the XYQuestionDangerZone collection, ignoring the labQuestion field,
-        // as this won't be set by the javascript component.
+        dump($viewData);
+        // Serialise the XYQuestionDangerZone collection, ignoring the labXYQuestion field,
+        // as this won't be set by the javascript component and would result in circular
+        // serialization.
         $out = $this->serializer->serialize(
             $viewData,
             'json',
-            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labQuestion']]
+            [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labXYQuestion']]
         );
 
         return $out;

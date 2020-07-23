@@ -47,7 +47,7 @@ class LabXYQuestion implements SurveyQuestionInterface
     private $index;
 
     /**
-     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labXYQuestion", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labXYQuestion", orphanRemoval=true, cascade={"persist"})
      */
     private $dangerZones;
 
