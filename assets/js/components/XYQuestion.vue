@@ -1,50 +1,36 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col"></div>
-      <div class="col-xs-6">
-        <h2 class="h5">{{ yLabelHigh }}</h2>
-      </div>
-      <div class="col"></div>
+  <div class="d-flex align-items-center">
+    <div class>
+      <h2 class="label text-right mr-2 xlabel-left">{{ xLabelLow }}</h2>
     </div>
-    <div class="row align-items-center">
-      <div class="col">
-        <h2 class="h5 text-right">{{ xLabelLow }}</h2>
-      </div>
-      <div class="col-xs-6">
-        <div class="grid-wrapper">
-          <!-- Note that i, j are indexed from 0, row and col from 1 -->
-          <!-- id is used to index XYQuestionRanges in this.regions -->
-          <div class="y-row" ref="rows" v-for="(row, j) in yRanges" :key="row">
-            <XYQuestionRange
-              class="x-range"
-              v-for="(col, i) in xRanges"
-              :key="col"
-              :name="name"
-              :mode="mode"
-              :cellSizeInRem="cellSizeInRem"
-              :dataPoints="dataPoints"
-              :dataRegions="dataRegions"
-              :xMin="xMinVal(i)"
-              :xMax="xMaxVal(i)"
-              :yMin="yMinVal(j)"
-              :yMax="yMaxVal(j)"
-              @pointChange="handlePointChange($event)"
-              @regionClick="handleRegionChange($event)"
-            ></XYQuestionRange>
-          </div>
+    <div class="text-center">
+      <h2 class="label">{{ yLabelHigh }}</h2>
+      <div class="grid-wrapper">
+        <!-- Note that i, j are indexed from 0, row and col from 1 -->
+        <!-- id is used to index XYQuestionRanges in this.regions -->
+        <div class="y-row" ref="rows" v-for="(row, j) in yRanges" :key="row">
+          <XYQuestionRange
+            class="x-range"
+            v-for="(col, i) in xRanges"
+            :key="col"
+            :name="name"
+            :mode="mode"
+            :cellSizeInRem="cellSizeInRem"
+            :dataPoints="dataPoints"
+            :dataRegions="dataRegions"
+            :xMin="xMinVal(i)"
+            :xMax="xMaxVal(i)"
+            :yMin="yMinVal(j)"
+            :yMax="yMaxVal(j)"
+            @pointChange="handlePointChange($event)"
+            @regionClick="handleRegionChange($event)"
+          ></XYQuestionRange>
         </div>
-      </div>
-      <div class="col">
-        <h2 class="h5 text-left">{{ xLabelHigh }}</h2>
+        <h2 class="label">{{ yLabelLow }}</h2>
       </div>
     </div>
-    <div class="row">
-      <div class="col"></div>
-      <div class="col-xs-6">
-        <h2 class="h5">{{ yLabelLow }}</h2>
-      </div>
-      <div class="col"></div>
+    <div class>
+      <h2 class="label text-left ml-2 xlabel-right">{{ xLabelHigh }}</h2>
     </div>
   </div>
 </template>
@@ -61,7 +47,7 @@ export default {
     name: String,
     points: {
       type: Object,
-      default: function() {
+      default: function () {
         return {
           data: [],
           onChange: () => {},
@@ -71,7 +57,7 @@ export default {
     },
     regions: {
       type: Object,
-      default: function() {
+      default: function () {
         return {
           data: [],
           onChange: () => {},
@@ -213,6 +199,10 @@ export default {
 </script>
 
 <style scoped>
+.label {
+  font-weight: bold;
+  font-size: 1rem;
+}
 .grid-wrapper {
   line-height: 0%;
 }
@@ -229,5 +219,13 @@ export default {
   height: 100%;
   min-width: 2px;
   background-color: black;
+}
+
+.xlabel-left {
+  transform: rotate(-90deg);
+}
+
+.xlabel-right {
+  transform: rotate(90deg);
 }
 </style>

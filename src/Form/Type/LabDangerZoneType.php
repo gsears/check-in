@@ -23,6 +23,9 @@ class LabDangerZoneType extends AbstractType
             'entry_type' => LabXYQuestionType::class,
             'entry_options' => [
                 'label' => false
+            ],
+            'attr' => [
+                'class' => 'flex-form-collection',
             ]
         ]);
 
