@@ -284,7 +284,7 @@ class CourseController extends AbstractController
      *
      * @Route("courses/{courseId}/{instanceId}/lab/{labId}/", name="test")
      */
-    public function test($courseId, $instanceId, $labId)
+    public function test(Request $request, $courseId, $instanceId, $labId)
     {
         // Security and sanity checks:
 
@@ -305,6 +305,13 @@ class CourseController extends AbstractController
         }
 
         $form = $this->createForm(LabDangerZoneType::class, $lab);
+        $form->handleRequest($request);
+        dump($form->isSubmitted());
+        if ($form->isSubmitted()) {
+            dump("here");
+            dump($form->getData());
+        }
+
         return $this->render('lab/page.html.twig', [
             'form' => $form->createView()
         ]);

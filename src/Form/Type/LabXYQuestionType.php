@@ -34,7 +34,9 @@ class LabXYQuestionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+        $builder->add('dangerZones');
+
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
             $labXYQuestion = $event->getData();
 
             $xyQuestion = $labXYQuestion->getXYQuestion();
@@ -55,7 +57,6 @@ class LabXYQuestionType extends AbstractType
 
             $jsonCoordinates = $this->serializer->serialize($coordinatesArray, 'json');
 
-            dump("here");
             $form
                 // Do not map the xy form component to the entity.
                 ->add('dangerZones', XYQuestionDangerZoneType::class, [

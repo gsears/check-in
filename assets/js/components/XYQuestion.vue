@@ -19,7 +19,6 @@
             <XYQuestionRange
               class="x-range"
               v-for="(col, i) in xRanges"
-              :regionId="j * xRanges + i"
               :key="col"
               :name="name"
               :mode="mode"
@@ -168,7 +167,7 @@ export default {
           }
           // Remove (first found) from data array
         } else {
-          var index = this.dataPoints.findIndex((obj) => {
+          const index = this.dataPoints.findIndex((obj) => {
             return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
           });
           this.dataPoints.splice(index, 1);
@@ -181,15 +180,31 @@ export default {
     handleRegionChange(e) {
       if (this.mode === "region") {
         const region = e.data;
-        // Use set to trigger redraw on array change
-        // https://stackoverflow.com/questions/44800470/vue-js-updated-array-item-value-doesnt-update-in-page
-        this.$set(this.dataRegions, region.regionId, region);
-        // Provide just populated regions to the callback.
+        // Find in array, otherwise push
+        const index = this.dataRegions.findIndex((obj) => {
+          return (
+            obj.xMin === region.xMin &&
+            obj.xMax === region.xMax &&
+            obj.yMin === region.yMin &&
+            obj.yMax === region.yMax
+          );
+        });
+
+        if (index < 0) {
+          // Add if missing
+          this.dataRegions.push(region);
+        } else {
+          // Update if found
+          this.$set(this.dataRegions, index, region);
+        }
+
+        // Provide just the regions with risk levels in the callback.
         const selectedRegions = [
-          ...this.dataRegions.filter((region) => region),
+          ...this.dataRegions.filter((region) => {
+            return region.riskLevel > 0;
+          }),
         ];
 
-        console.log(selectedRegions);
         this.regions.onChange(selectedRegions);
       }
     },

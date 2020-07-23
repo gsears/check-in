@@ -512,7 +512,6 @@ class AppFixtures extends Fixture
             $students = $courseInstance->getEnrolments()->map(function ($e) {
                 return $e->getStudent();
             });
-            var_dump('student count  ' . count($students));
             // For each courseInstance starting before the simulated date...
             if ($courseInstance->getStartDate() <= $cutoffDate) {
 

@@ -63,7 +63,12 @@ export default {
   methods: {
     riskLevel() {
       const region = this.dataRegions.filter((region) => {
-        return this.regionId == region.regionId;
+        return (
+          region.xMin === this.xMin &&
+          region.xMax === this.xMax &&
+          region.yMin === this.yMin &&
+          region.yMax === this.yMax
+        );
       });
       const riskLevel = region[0] ? region[0].riskLevel : 0;
       return riskLevel;
@@ -87,7 +92,6 @@ export default {
       this.$emit("regionClick", {
         event: e,
         data: {
-          regionId: this.regionId,
           riskLevel: (this.riskLevel() + 1) % 3,
           xMin: this.xMin,
           xMax: this.xMax,

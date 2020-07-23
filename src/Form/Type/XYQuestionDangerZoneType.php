@@ -71,11 +71,13 @@ class XYQuestionDangerZoneType extends AbstractXYComponentType
 
         // Serialise the XYQuestionDangerZone collection, ignoring the labQuestion field,
         // as this won't be set by the javascript component.
-        return $this->serializer->serialize(
+        $out = $this->serializer->serialize(
             $viewData,
             'json',
             [AbstractNormalizer::IGNORED_ATTRIBUTES => ['labQuestion']]
         );
+
+        return $out;
     }
 
     public function consumeJsonContent($jsonContent)

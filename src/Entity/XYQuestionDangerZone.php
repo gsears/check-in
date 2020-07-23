@@ -67,12 +67,12 @@ class XYQuestionDangerZone
 
     public function getRiskLevel(): ?int
     {
-        return $this->risklevel;
+        return $this->riskLevel;
     }
 
-    public function setRiskLevel(int $risklevel): self
+    public function setRiskLevel(int $riskLevel): self
     {
-        $this->risklevel = $risklevel;
+        $this->riskLevel = $riskLevel;
 
         return $this;
     }
