@@ -63,7 +63,7 @@ export default {
   methods: {
     riskLevel() {
       const region = this.dataRegions.filter((region) => {
-        return this.id == region.id;
+        return this.regionid == region.regionid;
       });
       const riskLevel = region[0] ? region[0].riskLevel : 0;
       return riskLevel;
