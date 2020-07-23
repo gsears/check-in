@@ -45,4 +45,4 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/courses, roles: ROLE_USER }
-        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY}
+        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
