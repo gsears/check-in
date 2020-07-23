@@ -35,6 +35,34 @@ class XYQuestionDangerZoneType extends AbstractXYComponentType
         $this->serializer = $serializer;
     }
 
+    /**
+     * This defines the twig template fragment used to generate the html for this form
+     * component in /templates/form/custom_types.html.twig . We define a our own
+     * fragment to hook it up to the javascript component.
+     *
+     * @return void
+     */
+    public function getBlockPrefix()
+    {
+        return 'xy_danger_zones';
+    }
+
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+        $view->vars['coordinates'] = $options['coordinates'];
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        // Allow coordinates to be passed in to populate the xy component.
+        $resolver->setDefault('coordinates', null);
+        // Should be a json array.
+        $resolver->setAllowedTypes('coordinates', 'string');
+    }
+
     public function provideJsonContent($viewData): ?string
     {
         if (!$viewData) {

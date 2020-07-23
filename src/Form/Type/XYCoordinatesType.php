@@ -32,6 +32,18 @@ class XYCoordinatesType extends AbstractXYComponentType
         $this->serializer = $serializer;
     }
 
+    /**
+     * This defines the twig template fragment used to generate the html for this form
+     * component in /templates/form/custom_types.html.twig . We define a our own
+     * fragment to hook it up to the javascript component.
+     *
+     * @return void
+     */
+    public function getBlockPrefix()
+    {
+        return 'xy_coordinates';
+    }
+
     public function provideJsonContent($viewData): ?string
     {
         if (!$viewData) {

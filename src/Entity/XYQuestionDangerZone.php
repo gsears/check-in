@@ -26,27 +26,27 @@ class XYQuestionDangerZone
     /**
      * @ORM\Column(type="integer")
      */
-    private $riskWeight;
+    private $riskLevel;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $yHighBound;
+    private $yMax;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $yLowBound;
+    private $yMin;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $xHighBound;
+    private $xMax;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $xLowBound;
+    private $xMin;
 
     public function getId(): ?int
     {
@@ -65,62 +65,62 @@ class XYQuestionDangerZone
         return $this;
     }
 
-    public function getRiskWeight(): ?int
+    public function getRiskLevel(): ?int
     {
-        return $this->riskWeight;
+        return $this->risklevel;
     }
 
-    public function setRiskWeight(int $riskWeight): self
+    public function setRiskLevel(int $risklevel): self
     {
-        $this->riskWeight = $riskWeight;
+        $this->risklevel = $risklevel;
 
         return $this;
     }
 
-    public function getYHighBound(): ?int
+    public function getYMax(): ?int
     {
-        return $this->yHighBound;
+        return $this->yMax;
     }
 
-    public function setYHighBound(int $yHighBound): self
+    public function setYMax(int $yMax): self
     {
-        $this->yHighBound = $yHighBound;
+        $this->yMax = $yMax;
 
         return $this;
     }
 
-    public function getYLowBound(): ?int
+    public function getYMin(): ?int
     {
-        return $this->yLowBound;
+        return $this->yMin;
     }
 
-    public function setYLowBound(int $yLowBound): self
+    public function setYMin(int $yMin): self
     {
-        $this->yLowBound = $yLowBound;
+        $this->yMin = $yMin;
 
         return $this;
     }
 
-    public function getXHighBound(): ?int
+    public function getXMax(): ?int
     {
-        return $this->xHighBound;
+        return $this->xMax;
     }
 
-    public function setXHighBound(int $xHighBound): self
+    public function setXMax(int $xMax): self
     {
-        $this->xHighBound = $xHighBound;
+        $this->xMax = $xMax;
 
         return $this;
     }
 
-    public function getXLowBound(): ?int
+    public function getXMin(): ?int
     {
-        return $this->xLowBound;
+        return $this->xMin;
     }
 
-    public function setXLowBound(int $xLowBound): self
+    public function setXMin(int $xMin): self
     {
-        $this->xLowBound = $xLowBound;
+        $this->xMin = $xMin;
 
         return $this;
     }

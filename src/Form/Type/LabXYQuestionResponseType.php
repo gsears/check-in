@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabXYQuestionResponse;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -20,14 +20,14 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
+class LabXYQuestionResponseType extends SurveyQuestionResponseType
 {
     public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface
     {
         // Get the data so we can query it for its XY Question
         $xyQuestionResponse = $builder->getData();
 
-        $xyQuestion = $xyQuestionResponse->getLabSurveyXYQuestion()->getXYQuestion();
+        $xyQuestion = $xyQuestionResponse->getLabXYQuestion()->getXYQuestion();
         $xField = $xyQuestion->getXField();
         $yField = $xyQuestion->getYField();
 

@@ -24,6 +24,13 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabXYQuestionType extends AbstractType
 {
+    private $serializer;
+
+    public function __construct(SerializerInterface $serializer)
+    {
+        $this->serializer = $serializer;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
@@ -35,6 +42,18 @@ class LabXYQuestionType extends AbstractType
             $yField = $xyQuestion->getYField();
 
             $form = $event->getForm();
+
+            // Serialize the coordinates of the responses
+            $coordinatesArray = [];
+
+            foreach ($labXYQuestion->getResponses()->toArray() as $response) {
+                $coordinates = $response->getCoordinates();
+                if ($coordinates) {
+                    $coordinatesArray[] = $coordinates;
+                }
+            }
+
+            $jsonCoordinates = $this->serializer->serialize($coordinatesArray, 'json');
 
             dump("here");
             $form
@@ -49,6 +68,7 @@ class LabXYQuestionType extends AbstractType
                     'not_blank' => false,
                     'cell_size' => 0.9,
                     // SET INITIAL DATA HERE
+                    'coordinates' => $jsonCoordinates
                 ]);
         });
     }

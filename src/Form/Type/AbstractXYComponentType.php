@@ -64,18 +64,6 @@ abstract class AbstractXYComponentType extends AbstractType implements DataMappe
     }
 
     /**
-     * This defines the twig template fragment used to generate the html for this form
-     * component in /templates/form/custom_types.html.twig . We define a our own
-     * fragment to hook it up to the javascript component.
-     *
-     * @return void
-     */
-    final public function getBlockPrefix()
-    {
-        return 'xy_component';
-    }
-
-    /**
      * Here we pass variables into our twig template.
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
