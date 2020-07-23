@@ -19,7 +19,7 @@
             <XYQuestionRange
               class="x-range"
               v-for="(col, i) in xRanges"
-              :regionid="j * xRanges + i"
+              :regionId="j * xRanges + i"
               :key="col"
               :name="name"
               :mode="mode"
@@ -125,8 +125,8 @@ export default {
   },
   data() {
     return {
-      dataPoints: this.points.data,
-      dataRegions: this.regions.data,
+      dataPoints: [...this.points.data],
+      dataRegions: [...this.regions.data],
     };
   },
   methods: {
@@ -183,9 +183,14 @@ export default {
         const region = e.data;
         // Use set to trigger redraw on array change
         // https://stackoverflow.com/questions/44800470/vue-js-updated-array-item-value-doesnt-update-in-page
-        this.$set(this.dataRegions, region.regionid, region);
+        this.$set(this.dataRegions, region.regionId, region);
         // Provide just populated regions to the callback.
-        this.regions.onChange(this.dataRegions.filter((region) => region));
+        const selectedRegions = [
+          ...this.dataRegions.filter((region) => region),
+        ];
+
+        console.log(selectedRegions);
+        this.regions.onChange(selectedRegions);
       }
     },
   },

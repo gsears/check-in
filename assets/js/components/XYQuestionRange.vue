@@ -38,7 +38,7 @@ export default {
     XYQuestionCell,
   },
   props: {
-    id: Number,
+    regionId: Number,
     name: String,
     mode: String,
     cellSizeInRem: Number,
@@ -63,7 +63,7 @@ export default {
   methods: {
     riskLevel() {
       const region = this.dataRegions.filter((region) => {
-        return this.regionid == region.regionid;
+        return this.regionId == region.regionId;
       });
       const riskLevel = region[0] ? region[0].riskLevel : 0;
       return riskLevel;
@@ -87,7 +87,7 @@ export default {
       this.$emit("regionClick", {
         event: e,
         data: {
-          id: this.id,
+          regionId: this.regionId,
           riskLevel: (this.riskLevel() + 1) % 3,
           xMin: this.xMin,
           xMax: this.xMax,
