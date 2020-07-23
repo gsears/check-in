@@ -20,7 +20,7 @@ class LabResponseRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return LabResponse[] Returns an array of LabResponse objects
+     * @return LabResponse Returns a single lab response object.
      */
 
     public function findOneByLabAndStudent($lab, $student)

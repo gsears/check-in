@@ -51,6 +51,18 @@ class CourseInstanceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findIfMatchesCourse($id, $courseId)
+    {
+        return $this->createQueryBuilder('ci')
+            ->join('ci.course', 'c')
+            ->andWhere('ci = :id')
+            ->setParameter('id', $id)
+            ->andWhere('c = :courseId')
+            ->setParameter('courseId', $courseId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 
     /*
     public function findOneBySomeField($value): ?CourseInstance
