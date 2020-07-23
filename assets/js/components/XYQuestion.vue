@@ -13,20 +13,25 @@
       </div>
       <div class="col-xs-6">
         <div class="grid-wrapper">
-          <div class="y-row" ref="rows" v-for="(y, row) in 4" :key="y">
+          <!-- Note that i, j are indexed from 0, row and col from 1 -->
+          <!-- id is used to index XYQuestionRanges in this.regions -->
+          <div class="y-row" ref="rows" v-for="(row, j) in yRanges" :key="row">
             <XYQuestionRange
               class="x-range"
-              v-for="(x, col) in 4"
-              :key="x"
+              v-for="(col, i) in xRanges"
+              :id="j * xRanges + i"
+              :key="col"
               :name="name"
-              :disableCells="disableCells"
+              :mode="mode"
               :cellSizeInRem="cellSizeInRem"
-              :selectedArray="selected"
-              :xMin="xMinVal(col)"
-              :xMax="xMaxVal(col)"
-              :yMin="yMinVal(row)"
-              :yMax="yMaxVal(row)"
-              @change="handleChange($event)"
+              :dataPoints="dataPoints"
+              :dataRegions="dataRegions"
+              :xMin="xMinVal(i)"
+              :xMax="xMaxVal(i)"
+              :yMin="yMinVal(j)"
+              :yMax="yMaxVal(j)"
+              @pointChange="handlePointChange($event)"
+              @regionClick="handleRegionChange($event)"
             ></XYQuestionRange>
           </div>
         </div>
@@ -55,14 +60,35 @@ export default {
   },
   props: {
     name: String,
-    onChange: Function,
-    initialData: Array, // Data array
+    points: {
+      type: Object,
+      default: function() {
+        return {
+          data: [],
+          onChange: () => {},
+          multiselect: false,
+        };
+      },
+    },
+    regions: {
+      type: Object,
+      default: function() {
+        return {
+          data: [],
+          onChange: () => {},
+          multiselect: false,
+        };
+      },
+    },
     mode: {
       type: String,
-      default: "select",
-    },
-    disableCells: {
-      default: false,
+      default: "region",
+      validator: (value) => {
+        return (
+          ["readonly-danger", "readonly", "point", "region"].indexOf(value) !==
+          -1
+        );
+      },
     },
     cellSizeInRem: {
       type: Number,
@@ -98,9 +124,9 @@ export default {
     },
   },
   data() {
-    console.log(this.initialData);
     return {
-      selected: this.initialData, // Copy
+      dataPoints: this.points.data,
+      dataRegions: this.regions.data,
     };
   },
   methods: {
@@ -120,8 +146,8 @@ export default {
         (this.yRanges / 2) * this.yRangeLength - row * this.yRangeLength - 1
       );
     },
-    setSelected(xMin, xMax, yMin, yMax) {
-      var selected = this.selected.filter((coordinates) => {
+    setPoints(xMin, xMax, yMin, yMax) {
+      var points = this.points.filter((coordinates) => {
         return (
           coordinates.x >= xMin &&
           coordinates.x <= xMax &&
@@ -129,24 +155,38 @@ export default {
           coordinates.y <= yMax
         );
       });
-      return selected;
+      return points;
     },
-    handleChange(e) {
-      if (e.checked) {
-        if (this.mode === "multiselect") {
-          this.selected.push(e.coordinates);
+    handlePointChange(e) {
+      if (this.mode === "point") {
+        // If point is checked
+        if (e.checked) {
+          if (this.points.multiselect) {
+            this.dataPoints.push(e.coordinates);
+          } else {
+            this.dataPoints = [e.coordinates];
+          }
+          // Remove (first found) from data array
         } else {
-          this.selected = [e.coordinates];
+          var index = this.dataPoints.findIndex((obj) => {
+            return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
+          });
+          this.dataPoints.splice(index, 1);
         }
-      } else {
-        var index = this.selected.findIndex((obj) => {
-          return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
-        });
-        this.selected.splice(index, 1);
-      }
 
-      // Run the callback with the updated selection.
-      this.onChange([...this.selected]);
+        // Run the callback for a point change
+        this.points.onChange([...this.dataPoints]);
+      }
+    },
+    handleRegionChange(e) {
+      if (this.mode === "region") {
+        const region = e.data;
+        // Use set to trigger redraw on array change
+        // https://stackoverflow.com/questions/44800470/vue-js-updated-array-item-value-doesnt-update-in-page
+        this.$set(this.dataRegions, region.id, region);
+        // Provide just populated regions to the callback.
+        this.regions.onChange(this.dataRegions.filter((region) => region));
+      }
     },
   },
 };
