@@ -13,8 +13,8 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class CourseInstanceVoter extends Voter
 {
-    // At the moment, courses are not editable.
     const VIEW = 'COURSEINSTANCE_VIEW';
+    const EDIT = 'COURSEINSTANCE_EDIT';
 
     protected function supports($attribute, $subject)
     {
@@ -40,6 +40,9 @@ class CourseInstanceVoter extends Voter
             case self::VIEW:
                 return $this->canView($courseInstance, $user);
                 break;
+            case self::EDIT:
+                return $this->canEdit($courseInstance, $user);
+                break;
         }
 
         return false;
@@ -47,18 +50,26 @@ class CourseInstanceVoter extends Voter
 
     private function canView(CourseInstance $courseInstance, User $user)
     {
-        if($user->hasRole(Roles::INSTRUCTOR)) {
-            // If course has instructor
-            return $courseInstance->getInstructors()->contains($user->getInstructor());
+        // If they can edit, they can view
+        if ($this->canEdit($courseInstance, $user)) {
+            return true;
         }
 
-        if($user->hasRole(Roles::STUDENT)) {
-            // If course has student
-            return $courseInstance->getEnrolments()->exists(function($key, Enrolment $enrolment) use ($user) {
+        // If the user is a student, are they enrolled?
+        if ($user->hasRole(Roles::STUDENT)) {
+            return $courseInstance->getEnrolments()->exists(function ($key, Enrolment $enrolment) use ($user) {
                 return $enrolment->getStudent() === $user->getStudent();
             });
         }
 
         return false;
+    }
+
+    private function canEdit(CourseInstance $courseInstance, User $user)
+    {
+        // Instructors who teach the course can edit
+        if ($user->hasRole(Roles::INSTRUCTOR)) {
+            return $courseInstance->getInstructors()->contains($user->getInstructor());
+        }
     }
 }

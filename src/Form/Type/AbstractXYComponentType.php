@@ -2,25 +2,15 @@
 
 namespace App\Form\Type;
 
-use App\Entity\XYQuestion;
-use App\Entity\XYCoordinates;
-use App\Entity\LabResponse;
-use App\Entity\LabXYQuestion;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
-use App\Entity\LabXYQuestionResponse;
-
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotEqualTo;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;;
-
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 /**
  * Implements DataMapperInterface to return an XYCoordinates object.
