@@ -17,13 +17,11 @@
           :key="col"
           :name="name"
           :disabled="disabledPoints"
-          :size="cellSizeInRem"
           :count="getCellCount(xVal(col), yVal(row))"
           :x-value="xVal(col)"
           :y-value="yVal(row)"
           @change="handlePointChange($event)"
-        >
-        </XYQuestionCell>
+        ></XYQuestionCell>
       </div>
     </div>
   </div>
@@ -41,7 +39,6 @@ export default {
     regionId: Number,
     name: String,
     mode: String,
-    cellSizeInRem: Number,
     dataPoints: Array,
     dataRegions: Array,
     xMin: Number,

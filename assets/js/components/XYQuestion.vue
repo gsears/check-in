@@ -15,7 +15,6 @@
             :key="col"
             :name="name"
             :mode="mode"
-            :cellSizeInRem="cellSizeInRem"
             :dataPoints="dataPoints"
             :dataRegions="dataRegions"
             :xMin="xMinVal(i)"
@@ -74,10 +73,6 @@ export default {
           -1
         );
       },
-    },
-    cellSizeInRem: {
-      type: Number,
-      default: 1.5,
     },
     xRanges: {
       default: 4,

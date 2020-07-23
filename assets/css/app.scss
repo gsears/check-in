@@ -1,12 +1,27 @@
 @import "~bootstrap/scss/bootstrap";
 
+// @import "~/bootstrap/scss/functions";
+// @import "~/bootstrap/scss/variables";
+// @import "~/bootstrap/scss/mixins/_breakpoints";
+
 .flex-form-collection {
 
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
 
-    .form-group {
+    &>.form-group {
         width: 33%;
+
+        @include media-breakpoint-down(lg) {
+            width: 50%;
+        }
+
+        @include media-breakpoint-down(sm) {
+            width: 100%;
+        }
+
+        font-size: 0.8rem;
     }
 }
