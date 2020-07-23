@@ -222,10 +222,13 @@ export default {
 }
 
 .xlabel-left {
-  transform: rotate(-90deg);
+  writing-mode: vertical-rl;
+  height: max-content;
+  transform: rotate(180deg);
 }
 
 .xlabel-right {
-  transform: rotate(90deg);
+  writing-mode: vertical-rl;
+  height: max-content;
 }
 </style>
