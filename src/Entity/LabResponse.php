@@ -160,7 +160,7 @@ class LabResponse
     {
         $this->setUpdatedAt(new \DateTime('now'));
         if ($this->getCreatedAt() === null) {
-            $this->setCreatedAt(new \DateTime('now'));
+            $this->setCreatedAt($this->getUpdatedAt());
         }
     }
 
