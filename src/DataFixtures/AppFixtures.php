@@ -2,26 +2,11 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\AffectiveField;
-use App\Entity\Course;
-use App\Entity\CourseInstance;
-use App\Entity\Enrolment;
-use App\Entity\Instructor;
-use App\Entity\Lab;
+use Faker;
 use App\Entity\LabResponse;
-use App\Entity\LabXYQuestion;
-use App\Entity\LabXYQuestionResponse;
-use App\Entity\Student;
-use App\Entity\User;
 use App\Entity\XYCoordinates;
-use App\Entity\XYQuestion;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Faker;
 
 /**
  * Populates the database with dummy data for testing and evaluation.

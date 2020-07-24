@@ -14,6 +14,7 @@ use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Entity\XYCoordinates;
 use App\Entity\AffectiveField;
+use App\Entity\CourseDates;
 use App\Entity\CourseInstance;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\LabXYQuestionDangerZone;
@@ -118,8 +119,7 @@ final class EntityCreator
     public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate): CourseInstance
     {
         $courseInstance = (new CourseInstance())
-            ->setStartDate($startDate)
-            ->setEndDate($endDate);
+            ->setDates(new CourseDates($startDate, $endDate));
 
         $course->addCourseInstance($courseInstance);
 

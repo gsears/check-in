@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\CourseDates;
 use App\Repository\CourseInstanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -88,28 +89,22 @@ class CourseInstance
         return $this;
     }
 
+    public function setDates(CourseDates $courseDates): self
+    {
+        $this->startDate = $courseDates->getStartDate();
+        $this->endDate = $courseDates->getEndDate();
+
+        return $this;
+    }
+
     public function getStartDate(): ?\DateTimeInterface
     {
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): self
-    {
-        $this->startDate = $startDate;
-
-        return $this;
-    }
-
     public function getEndDate(): ?\DateTimeInterface
     {
         return $this->endDate;
-    }
-
-    public function setEndDate(\DateTimeInterface $endDate): self
-    {
-        $this->endDate = $endDate;
-
-        return $this;
     }
 
     /**
