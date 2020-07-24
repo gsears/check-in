@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Entity;
 
 use App\Entity\Bound;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class BoundTest extends TestCase

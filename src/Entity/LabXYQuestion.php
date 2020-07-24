@@ -21,7 +21,7 @@ class LabXYQuestion implements SurveyQuestionInterface
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Lab::class, inversedBy="xyQuestions")
+     * @ORM\ManyToOne(targetEntity=Lab::class, inversedBy="labXYQuestions")
      * @ORM\JoinColumn(nullable=false)
      */
     private $lab;
