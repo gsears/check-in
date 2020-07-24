@@ -19,7 +19,11 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -30,9 +34,18 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
 {
     private $serializer;
 
-    public function __construct(SerializerInterface $serializer)
+    public function __construct()
     {
-        $this->serializer = $serializer;
+        // This uses a custom normalizer which allows us to access the private properties
+        // of the object. This way, we can bypass the 'setBound' method, which can cause
+        // some problems when denormalizing. Array denormalizer helps us map the result to
+        // a collection.
+
+        // TODO: Write a custom denormalizer which handles setBound.
+        $this->serializer = new Serializer(
+            [new PropertyNormalizer(), new ArrayDenormalizer()],
+            [new JsonEncoder()]
+        );
     }
 
     /**
