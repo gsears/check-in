@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Tests\Functional;
 
 use App\DataFixtures\EntityCreator;
@@ -79,3 +80,4 @@ abstract class FunctionalTestCase extends WebTestCase
 
         $this->assertInstanceOf($class, $entity);
     }
+}
