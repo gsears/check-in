@@ -2,12 +2,10 @@
 
 namespace App\Security\Voter;
 
-use App\Entity\User;
-use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Enrolment;
+use App\Entity\User;
 use App\Security\Roles;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
@@ -20,7 +18,7 @@ class CourseInstanceVoter extends Voter
     {
         // Check that the attribute that has been passed in is supported by this voter.
         // Essentially, if a non-course object is passed in, this voter will be skipped.
-        return in_array($attribute, [self::VIEW])
+        return in_array($attribute, [self::VIEW, self::EDIT])
             && $subject instanceof CourseInstance;
     }
 
@@ -29,7 +27,7 @@ class CourseInstanceVoter extends Voter
         $user = $token->getUser();
 
         // if the user is anonymous, do not grant access
-        if (!$user instanceof User) {
+        if (!($user instanceof User)) {
             return false;
         }
 
