@@ -30,7 +30,7 @@ class CourseController extends AbstractController
     /**
      * Symfony injects in the CourseInstanceRepository.
      *
-     * @Route("/", name="courses")
+     * @Route("", name="courses")
      */
     public function index(CourseInstanceRepository $courseRepo)
     {
