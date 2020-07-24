@@ -47,7 +47,7 @@ class LabXYQuestion implements SurveyQuestionInterface
     private $index;
 
     /**
-     * @ORM\OneToMany(targetEntity=XYQuestionDangerZone::class, mappedBy="labXYQuestion", orphanRemoval=true, cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=LabXYQuestionDangerZone::class, mappedBy="labXYQuestion", orphanRemoval=true, cascade={"persist"})
      */
     private $dangerZones;
 
@@ -62,7 +62,7 @@ class LabXYQuestion implements SurveyQuestionInterface
         return sprintf(
             'Q%d : %s',
             $this->getIndex(),
-            $this->getXyQuestion()->getName()
+            $this->getXYQuestion()->getName()
         );
     }
 
@@ -83,12 +83,12 @@ class LabXYQuestion implements SurveyQuestionInterface
         return $this;
     }
 
-    public function getXyQuestion(): ?XYQuestion
+    public function getXYQuestion(): ?XYQuestion
     {
         return $this->xyQuestion;
     }
 
-    public function setXyQuestion(?XYQuestion $xyQuestion): self
+    public function setXYQuestion(?XYQuestion $xyQuestion): self
     {
         $this->xyQuestion = $xyQuestion;
 
@@ -144,14 +144,14 @@ class LabXYQuestion implements SurveyQuestionInterface
     }
 
     /**
-     * @return Collection|XYQuestionDangerZone[]
+     * @return Collection|LabXYQuestionDangerZone[]
      */
     public function getDangerZones(): Collection
     {
         return $this->dangerZones;
     }
 
-    public function addDangerZone(XYQuestionDangerZone $dangerZone): self
+    public function addDangerZone(LabXYQuestionDangerZone $dangerZone): self
     {
         if (!$this->dangerZones->contains($dangerZone)) {
             $this->dangerZones[] = $dangerZone;
@@ -161,7 +161,7 @@ class LabXYQuestion implements SurveyQuestionInterface
         return $this;
     }
 
-    public function removeDangerZone(XYQuestionDangerZone $dangerZone): self
+    public function removeDangerZone(LabXYQuestionDangerZone $dangerZone): self
     {
         if ($this->dangerZones->contains($dangerZone)) {
             $this->dangerZones->removeElement($dangerZone);

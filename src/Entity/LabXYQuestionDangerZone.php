@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\XYQuestionDangerZoneRepository;
+use App\Repository\LabXYQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=XYQuestionDangerZoneRepository::class)
  */
-class XYQuestionDangerZone
+class LabXYQuestionDangerZone
 {
     /**
      * @ORM\Id()

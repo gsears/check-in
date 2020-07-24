@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200723231800 extends AbstractMigration
+final class Version20200724131252 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -25,10 +25,10 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE instructor_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE lab_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE course_instance_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE SEQUENCE xyquestion_danger_zone_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE xyquestion_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE users_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE lab_xyquestion_response_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE lab_xyquestion_danger_zone_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE lab_xyquestion_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE lab_response_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE affective_field_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
@@ -42,8 +42,6 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('CREATE TABLE course_instance_instructor (course_instance_id INT NOT NULL, instructor_id INT NOT NULL, PRIMARY KEY(course_instance_id, instructor_id))');
         $this->addSql('CREATE INDEX IDX_3FBB60CC4E3F42C9 ON course_instance_instructor (course_instance_id)');
         $this->addSql('CREATE INDEX IDX_3FBB60CC8C4FC193 ON course_instance_instructor (instructor_id)');
-        $this->addSql('CREATE TABLE xyquestion_danger_zone (id INT NOT NULL, lab_xyquestion_id INT NOT NULL, risk_level INT NOT NULL, y_max INT NOT NULL, y_min INT NOT NULL, x_max INT NOT NULL, x_min INT NOT NULL, PRIMARY KEY(id))');
-        $this->addSql('CREATE INDEX IDX_DBD0988DFA80A32 ON xyquestion_danger_zone (lab_xyquestion_id)');
         $this->addSql('CREATE TABLE xyquestion (id INT NOT NULL, x_field_id INT NOT NULL, y_field_id INT NOT NULL, name VARCHAR(255) NOT NULL, question_text VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_89C14EB38AEAFB64 ON xyquestion (x_field_id)');
         $this->addSql('CREATE INDEX IDX_89C14EB36528905A ON xyquestion (y_field_id)');
@@ -54,6 +52,8 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_DA476E8771FEB27B ON lab_xyquestion_response (lab_response_id)');
         $this->addSql('CREATE TABLE student (guid INT NOT NULL, appuser_id INT NOT NULL, PRIMARY KEY(guid))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_B723AF33BB5E5996 ON student (appuser_id)');
+        $this->addSql('CREATE TABLE lab_xyquestion_danger_zone (id INT NOT NULL, lab_xyquestion_id INT NOT NULL, risk_level INT NOT NULL, y_max INT NOT NULL, y_min INT NOT NULL, x_max INT NOT NULL, x_min INT NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_35A632B0FA80A32 ON lab_xyquestion_danger_zone (lab_xyquestion_id)');
         $this->addSql('CREATE TABLE course (code VARCHAR(12) NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(65535) DEFAULT NULL, PRIMARY KEY(code))');
         $this->addSql('CREATE TABLE lab_xyquestion (id INT NOT NULL, lab_id INT NOT NULL, xy_question_id INT NOT NULL, index INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_E19299A8628913D5 ON lab_xyquestion (lab_id)');
@@ -70,12 +70,12 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('ALTER TABLE course_instance ADD CONSTRAINT FK_EB84DC88591CC992 FOREIGN KEY (course_id) REFERENCES course (code) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE course_instance_instructor ADD CONSTRAINT FK_3FBB60CC4E3F42C9 FOREIGN KEY (course_instance_id) REFERENCES course_instance (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE course_instance_instructor ADD CONSTRAINT FK_3FBB60CC8C4FC193 FOREIGN KEY (instructor_id) REFERENCES instructor (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE xyquestion_danger_zone ADD CONSTRAINT FK_DBD0988DFA80A32 FOREIGN KEY (lab_xyquestion_id) REFERENCES lab_xyquestion (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE xyquestion ADD CONSTRAINT FK_89C14EB38AEAFB64 FOREIGN KEY (x_field_id) REFERENCES affective_field (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE xyquestion ADD CONSTRAINT FK_89C14EB36528905A FOREIGN KEY (y_field_id) REFERENCES affective_field (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lab_xyquestion_response ADD CONSTRAINT FK_DA476E87FA80A32 FOREIGN KEY (lab_xyquestion_id) REFERENCES lab_xyquestion (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lab_xyquestion_response ADD CONSTRAINT FK_DA476E8771FEB27B FOREIGN KEY (lab_response_id) REFERENCES lab_response (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE student ADD CONSTRAINT FK_B723AF33BB5E5996 FOREIGN KEY (appuser_id) REFERENCES users (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE lab_xyquestion_danger_zone ADD CONSTRAINT FK_35A632B0FA80A32 FOREIGN KEY (lab_xyquestion_id) REFERENCES lab_xyquestion (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lab_xyquestion ADD CONSTRAINT FK_E19299A8628913D5 FOREIGN KEY (lab_id) REFERENCES lab (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lab_xyquestion ADD CONSTRAINT FK_E19299A8EA320F6 FOREIGN KEY (xy_question_id) REFERENCES xyquestion (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE lab_response ADD CONSTRAINT FK_E4772066CB944F1A FOREIGN KEY (student_id) REFERENCES student (guid) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -102,18 +102,18 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('ALTER TABLE lab_response DROP CONSTRAINT FK_E4772066CB944F1A');
         $this->addSql('ALTER TABLE enrolment DROP CONSTRAINT FK_C04D5114CB944F1A');
         $this->addSql('ALTER TABLE course_instance DROP CONSTRAINT FK_EB84DC88591CC992');
-        $this->addSql('ALTER TABLE xyquestion_danger_zone DROP CONSTRAINT FK_DBD0988DFA80A32');
         $this->addSql('ALTER TABLE lab_xyquestion_response DROP CONSTRAINT FK_DA476E87FA80A32');
+        $this->addSql('ALTER TABLE lab_xyquestion_danger_zone DROP CONSTRAINT FK_35A632B0FA80A32');
         $this->addSql('ALTER TABLE lab_xyquestion_response DROP CONSTRAINT FK_DA476E8771FEB27B');
         $this->addSql('ALTER TABLE xyquestion DROP CONSTRAINT FK_89C14EB38AEAFB64');
         $this->addSql('ALTER TABLE xyquestion DROP CONSTRAINT FK_89C14EB36528905A');
         $this->addSql('DROP SEQUENCE instructor_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE lab_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE course_instance_id_seq CASCADE');
-        $this->addSql('DROP SEQUENCE xyquestion_danger_zone_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE xyquestion_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE users_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE lab_xyquestion_response_id_seq CASCADE');
+        $this->addSql('DROP SEQUENCE lab_xyquestion_danger_zone_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE lab_xyquestion_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE lab_response_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE affective_field_id_seq CASCADE');
@@ -122,11 +122,11 @@ final class Version20200723231800 extends AbstractMigration
         $this->addSql('DROP TABLE lab');
         $this->addSql('DROP TABLE course_instance');
         $this->addSql('DROP TABLE course_instance_instructor');
-        $this->addSql('DROP TABLE xyquestion_danger_zone');
         $this->addSql('DROP TABLE xyquestion');
         $this->addSql('DROP TABLE users');
         $this->addSql('DROP TABLE lab_xyquestion_response');
         $this->addSql('DROP TABLE student');
+        $this->addSql('DROP TABLE lab_xyquestion_danger_zone');
         $this->addSql('DROP TABLE course');
         $this->addSql('DROP TABLE lab_xyquestion');
         $this->addSql('DROP TABLE lab_response');

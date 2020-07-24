@@ -7,7 +7,7 @@ use App\Entity\LabXYQuestion;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\XYCoordinates;
 use App\Entity\XYQuestion;
-use App\Entity\XYQuestionDangerZone;
+use App\Entity\LabXYQuestionDangerZone;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  * Implements DataMapperInterface to return an XYCoordinates object.
  * https://symfony.com/doc/current/form/data_mappers.html
  */
-class XYQuestionDangerZoneType extends AbstractXYComponentType
+class LabXYQuestionDangerZoneType extends AbstractXYComponentType
 {
     private $serializer;
 
@@ -89,6 +89,6 @@ class XYQuestionDangerZoneType extends AbstractXYComponentType
         }
 
         // Converts a json string into XYQuestionDangerZone entities.
-        return $this->serializer->deserialize($jsonContent, XYQuestionDangerZone::class . '[]', 'json');
+        return $this->serializer->deserialize($jsonContent, LabXYQuestionDangerZone::class . '[]', 'json');
     }
 }

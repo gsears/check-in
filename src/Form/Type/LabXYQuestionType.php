@@ -12,7 +12,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use App\Entity\LabXYQuestionResponse;
-use App\Entity\XYQuestionDangerZone;
+use App\Entity\LabXYQuestionDangerZone;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -59,7 +59,7 @@ class LabXYQuestionType extends AbstractType
 
             $form
                 // Do not map the xy form component to the entity.
-                ->add('dangerZones', XYQuestionDangerZoneType::class, [
+                ->add('dangerZones', LabXYQuestionDangerZoneType::class, [
                     'label' => $xyQuestion->getName(),
                     'x_label_low' => $xField->getLowLabel(),
                     'x_label_high' => $xField->getHighLabel(),

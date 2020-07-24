@@ -64,7 +64,7 @@ class LabResponse
             $this->getStudent()->getGuid(),
             $this->getLab()->getName(),
             $this->getCreatedAt()->format("d/m/y h:i:s"),
-            join("", $this->getXyQuestionResponses()->toArray())
+            join("", $this->getXYQuestionResponses()->toArray())
         );
     }
 
@@ -124,12 +124,12 @@ class LabResponse
     /**
      * @return Collection|LabXYQuestionResponse[]
      */
-    public function getXyQuestionResponses(): Collection
+    public function getXYQuestionResponses(): Collection
     {
         return $this->xyQuestionResponses;
     }
 
-    public function addXyQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
+    public function addXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
         if (!$this->xyQuestionResponses->contains($xyQuestionResponse)) {
             $this->xyQuestionResponses[] = $xyQuestionResponse;
@@ -139,7 +139,7 @@ class LabResponse
         return $this;
     }
 
-    public function removeXyQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
+    public function removeXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
         if ($this->xyQuestionResponses->contains($xyQuestionResponse)) {
             $this->xyQuestionResponses->removeElement($xyQuestionResponse);

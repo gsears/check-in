@@ -23,13 +23,6 @@ class SecurityControllerTest extends WebTestCase
         $this->assertResponseRedirects("http://localhost/courses", 301);
     }
 
-    public function testUnauthenticatedRedirectsToLogin()
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/courses');
-        $this->assertResponseRedirects('/login', 302);
-    }
-
     /**
      * @dataProvider usernameProvider
      *

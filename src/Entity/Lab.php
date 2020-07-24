@@ -38,7 +38,7 @@ class Lab
     /**
      * @ORM\OneToMany(targetEntity=LabXYQuestion::class, mappedBy="lab", orphanRemoval=true)
      */
-    private $xyQuestions;
+    private $labXYQuestions;
 
     /**
      * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="lab", orphanRemoval=true)
@@ -47,7 +47,7 @@ class Lab
 
     public function __construct()
     {
-        $this->xyQuestions = new ArrayCollection();
+        $this->labXYQuestions = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
 
@@ -109,25 +109,25 @@ class Lab
     /**
      * @return Collection|LabXYQuestion[]
      */
-    public function getXyQuestions(): Collection
+    public function getLabXYQuestions(): Collection
     {
-        return $this->xyQuestions;
+        return $this->labXYQuestions;
     }
 
-    public function addXyQuestion(LabXYQuestion $xyQuestion): self
+    public function addLabXYQuestion(LabXYQuestion $xyQuestion): self
     {
-        if (!$this->xyQuestions->contains($xyQuestion)) {
-            $this->xyQuestions[] = $xyQuestion;
+        if (!$this->labXYQuestions->contains($xyQuestion)) {
+            $this->labXYQuestions[] = $xyQuestion;
             $xyQuestion->setLab($this);
         }
 
         return $this;
     }
 
-    public function removeXyQuestion(LabXYQuestion $xyQuestion): self
+    public function removeLabXYQuestion(LabXYQuestion $xyQuestion): self
     {
-        if ($this->xyQuestions->contains($xyQuestion)) {
-            $this->xyQuestions->removeElement($xyQuestion);
+        if ($this->labXYQuestions->contains($xyQuestion)) {
+            $this->labXYQuestions->removeElement($xyQuestion);
             // set the owning side to null (unless already changed)
             if ($xyQuestion->getLab() === $this) {
                 $xyQuestion->setLab(null);
@@ -144,7 +144,7 @@ class Lab
     public function getQuestions(): Collection
     {
         // Join here.
-        $collection = $this->getXyQuestions();
+        $collection = $this->getLabXYQuestions();
 
         // Order here.
         $iterator = $collection->getIterator();
