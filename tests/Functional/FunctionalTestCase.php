@@ -78,3 +78,4 @@ abstract class FunctionalTestCase extends WebTestCase
             ->findOneBy($fields);
 
         $this->assertInstanceOf($class, $entity);
+    }
