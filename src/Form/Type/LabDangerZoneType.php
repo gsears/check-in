@@ -17,7 +17,7 @@ class LabDangerZoneType extends AbstractType
     {
         // Uses the collection type field to render a form element for each xyQuestion
         // from the
-        $builder->add('xyQuestions', CollectionType::class, [
+        $builder->add('labXYQuestions', CollectionType::class, [
             'label' => 'XY Questions',
             'help' => 'Click on the regions to set the warning level, then click update.',
             'entry_type' => LabXYQuestionType::class,

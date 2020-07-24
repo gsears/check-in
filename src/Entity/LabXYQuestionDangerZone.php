@@ -6,7 +6,7 @@ use App\Repository\LabXYQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=XYQuestionDangerZoneRepository::class)
+ * @ORM\Entity(repositoryClass=LabXYQuestionDangerZoneRepository::class)
  */
 class LabXYQuestionDangerZone
 {
