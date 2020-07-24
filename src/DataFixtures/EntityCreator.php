@@ -14,6 +14,7 @@ use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Entity\XYCoordinates;
 use App\Entity\AffectiveField;
+use App\Entity\Bound;
 use App\Entity\CourseDates;
 use App\Entity\CourseInstance;
 use App\Entity\LabXYQuestionResponse;
@@ -204,10 +205,8 @@ final class EntityCreator
     {
         $labXYQuestionDangerZone = (new LabXYQuestionDangerZone)
             ->setRiskLevel($riskLevel)
-            ->setXMin($xMin)
-            ->setXMax($xMax)
-            ->setYMin($yMin)
-            ->setYMax($yMax);
+            ->setXBound(new Bound($xMin, $xMax))
+            ->setYBound(new Bound($yMin, $yMax));
 
         $question->addDangerZone($labXYQuestionDangerZone);
 

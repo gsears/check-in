@@ -80,16 +80,17 @@ class LabXYQuestionDangerZone
         return $this;
     }
 
+    public function setYBound(Bound $bound): self
+    {
+        $this->yMin = $bound->getLowBound();
+        $this->yMax = $bound->getHighBound();
+
+        return $this;
+    }
+
     public function getYMax(): ?int
     {
         return $this->yMax;
-    }
-
-    public function setYMax(int $yMax): self
-    {
-        $this->yMax = $yMax;
-
-        return $this;
     }
 
     public function getYMin(): ?int
@@ -97,9 +98,10 @@ class LabXYQuestionDangerZone
         return $this->yMin;
     }
 
-    public function setYMin(int $yMin): self
+    public function setXBound(Bound $bound): self
     {
-        $this->yMin = $yMin;
+        $this->xMin = $bound->getLowBound();
+        $this->xMax = $bound->getHighBound();
 
         return $this;
     }
@@ -109,22 +111,8 @@ class LabXYQuestionDangerZone
         return $this->xMax;
     }
 
-    public function setXMax(int $xMax): self
-    {
-        $this->xMax = $xMax;
-
-        return $this;
-    }
-
     public function getXMin(): ?int
     {
         return $this->xMin;
-    }
-
-    public function setXMin(int $xMin): self
-    {
-        $this->xMin = $xMin;
-
-        return $this;
     }
 }
