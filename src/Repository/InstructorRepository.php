@@ -32,20 +32,6 @@ class InstructorRepository extends ServiceEntityRepository
             ->setParameter('student', $student)
             ->orderBy('i.id', 'ASC')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-
-
-    /*
-    public function findOneBySomeField($value): ?Instructor
-    {
-        return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

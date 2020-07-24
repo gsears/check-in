@@ -18,33 +18,4 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, LabXYQuestionResponse::class);
     }
-
-    // /**
-    //  * @return LabXYQuestionResponse[] Returns an array of LabXYQuestionResponse objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('l.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?LabXYQuestionResponse
-    {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

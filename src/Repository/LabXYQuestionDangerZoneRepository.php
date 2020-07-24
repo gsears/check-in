@@ -18,33 +18,4 @@ class LabXYQuestionDangerZoneRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, LabXYQuestionDangerZone::class);
     }
-
-    // /**
-    //  * @return XYQuestionDangerZone[] Returns an array of XYQuestionDangerZone objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('x')
-            ->andWhere('x.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('x.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?XYQuestionDangerZone
-    {
-        return $this->createQueryBuilder('x')
-            ->andWhere('x.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
