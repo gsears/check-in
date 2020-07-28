@@ -6,9 +6,15 @@ use App\Repository\LabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=LabRepository::class)
+ * @UniqueEntity(
+ *     fields={"courseInstance", "name"},
+ *     errorPath="name",
+ *     message="Lab names must be unique for each course instance."
+ * )
  */
 class Lab
 {

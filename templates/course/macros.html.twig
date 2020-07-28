@@ -17,7 +17,7 @@
 						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						<td>
-							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labId: lab.id, studentId: student.guid, page: 1 })}}">
+							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labName: lab.name, studentId: student.guid, page: 1 })}}">
 								{{editLabel}}
 							</a>
 						</td>

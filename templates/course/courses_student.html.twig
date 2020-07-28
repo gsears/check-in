@@ -29,8 +29,8 @@
 {% endblock %}
 
 {% block recent_labs_list %}
-	{% if recent_labs %}
-		<table id="recent-lab-list" class="table table-sm">
+	{% if recentLabs %}
+		<table id="recent-pending-lab-list" class="table table-sm">
 			<thead>
 				<tr>
 					<th>Date</th>
@@ -43,7 +43,7 @@
 					{% set href = path('lab_survey_response', {
         courseId: lab.courseInstance.course.code,
         instanceIndex: lab.courseInstance.indexInCourse,
-        labId: lab.id,
+        labName: lab.name,
         studentId: studentId,
         page: 1
     }) %}
