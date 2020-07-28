@@ -139,7 +139,7 @@ class CourseControllerTest extends FunctionalTestCase
             return $node[1];
         }, $recentLabsTableLinkNodes);
 
-        $this->assertContains('/courses/CS101/1/labOne/1234567/1', $recentLabsTableLinkHrefs, "Pending list contains correct link to lab survey first page");
+        $this->assertContains('/courses/CS101/1/lab/labOne/1234567/survey/1', $recentLabsTableLinkHrefs, "Pending list contains correct link to lab survey first page");
     }
 
     // TODO: Instructor
