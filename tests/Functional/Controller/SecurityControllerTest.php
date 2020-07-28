@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Functional\Controller;
 
 use App\Tests\Functional\FunctionalTestCase;
 
@@ -60,23 +60,22 @@ class SecurityControllerTest extends FunctionalTestCase
         $this->assertResponseRedirects('/courses', 302);
     }
 
+    public function userProvider()
+    {
+        yield [$this->getEntityCreator()->createInstructor('test', 'test')];
+        yield [$this->getEntityCreator()->createStudent('test', 'test', '1234')];
+    }
+
     /**
-     * Assert that clicking the logout button logs out.
+     * @dataProvider userProvider
+     *
+     * Assert that clicking the logout button logs out for all users
      */
-    public function testLogout()
+    public function testLogout($userType)
     {
         $client = static::createClient();
-
-        $testInstructor = $this->getEntityCreator()->createInstructor(
-            'test',
-            'test',
-        );
-
-        // simulate $testUser being logged in
-        $client->loginUser($testInstructor->getUser());
-
-        $crawler = $client->request('GET', '/courses');
-
+        $client->loginUser($userType->getUser());
+        $client->request('GET', '/courses');
         $this->assertResponseIsSuccessful();
 
         $client->clickLink("Logout");
