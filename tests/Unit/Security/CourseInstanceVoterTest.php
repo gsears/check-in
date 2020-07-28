@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Security\Voter;
+namespace App\Tests\Unit\Security;
 
 use Exception;
 

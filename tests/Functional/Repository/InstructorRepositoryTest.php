@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Functional\Repository;
 
 use App\Entity\Instructor;
 use App\Tests\Functional\FunctionalTestCase;
