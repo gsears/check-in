@@ -22,40 +22,24 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 class CourseInstanceVoterTest extends TestCase
 {
 
-    private function createInstructor(int $id)
+    private function createInstructorUser()
     {
         $instructor = $this->createMock(Instructor::class);
-        $instructor->method('getId')->willReturn($id);
-        return $instructor;
+
+        $user = $this->createMock(User::class);
+        $user->method('getInstructor')->willReturn($instructor);
+        $user->method('hasRole')->willReturn(Roles::INSTRUCTOR);
+
+        return $user;
     }
 
-    private function createStudent(int $id)
+    private function createStudentUser()
     {
         $student = $this->createMock(Student::class);
-        $student->method('getGuid')->willReturn($id);
-        return $student;
-    }
 
-    private function createUser(int $id, $type)
-    {
         $user = $this->createMock(User::class);
-        $user->method('getId')->willReturn($id);
-
-        switch ($type) {
-            case Student::class:
-                $user->method('getStudent')->willReturn($this->createStudent($id));
-                $user->method('hasRole')->willReturn(Roles::STUDENT);
-                break;
-
-            case Instructor::class:
-                $user->method('getInstructor')->willReturn($this->createInstructor($id));
-                $user->method('hasRole')->willReturn(Roles::INSTRUCTOR);
-                break;
-
-            default:
-                throw new Exception("Invalid type", 1);
-                break;
-        }
+        $user->method('getStudent')->willReturn($student);
+        $user->method('hasRole')->willReturn(Roles::STUDENT);
 
         return $user;
     }
@@ -74,73 +58,120 @@ class CourseInstanceVoterTest extends TestCase
 
     public function provideCases()
     {
+        // Test 1
+        $courseInstance = new CourseInstance();
+
         yield 'anonymous cannot view' => [
             CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
+            $courseInstance,
             null,
             Voter::ACCESS_DENIED
         ];
+
+        // Test 2
+        $user = $this->createInstructorUser();
+        $courseInstance = new CourseInstance();
+        $courseInstance->addInstructor($user->getInstructor());
 
         yield 'member instructor can view' => [
             CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(1, Instructor::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_GRANTED
         ];
+
+        // Test 3
+        $user = $this->createInstructorUser();
+        $courseInstance = new CourseInstance();
 
         yield 'non member instructor cannot view' => [
             CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(2, Instructor::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_DENIED
         ];
+
+        // Test 4
+        $user = $this->createStudentUser();
+        $enrolment = $this->createMock(Enrolment::class);
+        $enrolment->method('getStudent')->willReturn($user->getStudent());
+        $courseInstance = new CourseInstance();
+        $courseInstance->addEnrolment($enrolment);
 
         yield 'member student can view' => [
             CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(1, Student::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_GRANTED
         ];
 
+        // Test 5
+        $user = $this->createStudentUser();
+        $courseInstance = new CourseInstance();
+
         yield 'non member student cannot view' => [
             CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(2, Student::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_DENIED
         ];
 
+        // Test 6
+        $courseInstance = new CourseInstance();
+
         yield 'anonymous cannot edit' => [
             CourseInstanceVoter::EDIT,
-            $this->createCourseInstance(1, 1),
+            $courseInstance,
             null,
             Voter::ACCESS_DENIED
         ];
 
+        // Test 7
+        $user = $this->createStudentUser();
+        $enrolment = $this->createMock(Enrolment::class);
+        $enrolment->method('getStudent')->willReturn($user->getStudent());
+        $courseInstance = new CourseInstance();
+        $courseInstance->addEnrolment($enrolment);
+
         yield 'member student cannot edit' => [
             CourseInstanceVoter::EDIT,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(1, Student::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_DENIED
         ];
+
+        // Test 8
+        $user = $this->createStudentUser();
+        $courseInstance = new CourseInstance();
 
         yield 'non member student cannot edit' => [
             CourseInstanceVoter::EDIT,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(2, Student::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_DENIED
         ];
 
-        yield 'instructor can edit' => [
+        // Test 9
+
+        $user = $this->createInstructorUser();
+        $courseInstance = new CourseInstance();
+        $courseInstance->addInstructor($user->getInstructor());
+
+        yield 'member instructor can edit' => [
             CourseInstanceVoter::EDIT,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(1, Instructor::class),
+            $courseInstance,
+            $user,
             Voter::ACCESS_GRANTED
         ];
 
+        // Test 10
+        $user = $this->createInstructorUser();
+        $courseInstance = new CourseInstance();
+
         yield 'non member instructor cannot view' => [
-            CourseInstanceVoter::VIEW,
-            $this->createCourseInstance(1, 1),
-            $this->createUser(2, Instructor::class),
+            CourseInstanceVoter::EDIT,
+            $courseInstance,
+            $user,
             Voter::ACCESS_DENIED
         ];
     }
