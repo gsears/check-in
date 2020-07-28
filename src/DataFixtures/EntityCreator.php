@@ -186,8 +186,9 @@ final class EntityCreator
 
         $student->addLabResponse($labResponse);
         $lab->addResponse($labResponse);
-
-        return $this->save($labResponse);
+        $this->save($labResponse);
+        $this->em->flush();
+        return $labResponse;
     }
 
     public function createLabXYQuestionResponse(XYCoordinates $coordinates, LabXYQuestion $question, LabResponse $response): LabXYQuestionResponse
