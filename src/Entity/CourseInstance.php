@@ -51,6 +51,11 @@ class CourseInstance
      */
     private $labs;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $indexInCourse;
+
     public function __construct()
     {
         $this->instructors = new ArrayCollection();
@@ -85,6 +90,8 @@ class CourseInstance
     public function setCourse(?Course $course): self
     {
         $this->course = $course;
+
+
 
         return $this;
     }
@@ -204,5 +211,17 @@ class CourseInstance
             date_format($this->getStartDate(), "d/m/y"),
             date_format($this->getEndDate(), "d/m/y")
         );
+    }
+
+    public function getIndexInCourse(): ?int
+    {
+        return $this->indexInCourse;
+    }
+
+    public function setIndexInCourse(int $indexInCourse): self
+    {
+        $this->indexInCourse = $indexInCourse;
+
+        return $this;
     }
 }

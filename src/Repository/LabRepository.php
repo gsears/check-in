@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Lab;
 use App\Entity\Student;
@@ -37,6 +38,40 @@ class LabRepository extends ServiceEntityRepository
             ->andWhere('l.startDateTime < :beforeDateTime')
             ->setParameter('beforeDateTime', $beforeDateTime)
             ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByCourseAndInstanceIndex(Course $course, int $instanceIndex, DateTime $beforeDateTime = null)
+    {
+        $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();
+
+        return $this->createQueryBuilder('l')
+            ->join('l.courseInstance', 'ci')
+            ->andWhere('ci.course = :course')
+            ->setParameter('course', $course)
+            ->andWhere('ci.indexInCourse = :instanceIndex')
+            ->setParameter('instanceIndex', $instanceIndex)
+            ->andWhere('l.startDateTime < :beforeDateTime')
+            ->setParameter('beforeDateTime', $beforeDateTime)
+            ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findLatestPendingByStudent(Student $student, int $maxResults)
+    {
+        $beforeDateTime = (new DateTimeProvider())->getCurrentDateTime();
+
+        return $this->createQueryBuilder('l')
+            ->join('l.responses', 'r')
+            ->andWhere('r.student = :student')
+            ->setParameter('student', $student)
+            ->andWhere('r.submitted = false')
+            ->andWhere('l.startDateTime < :beforeDateTime')
+            ->setParameter('beforeDateTime', $beforeDateTime)
+            ->orderBy('l.startDateTime', 'DESC')
+            ->setMaxResults($maxResults)
             ->getQuery()
             ->getResult();
     }

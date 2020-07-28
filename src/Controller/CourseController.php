@@ -32,18 +32,20 @@ class CourseController extends AbstractController
      *
      * @Route("", name="courses")
      */
-    public function index(CourseInstanceRepository $courseRepo)
+    public function index(CourseInstanceRepository $courseRepo, LabRepository $labRepo)
     {
         $user = $this->getUser();
 
         $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
 
         if ($user->isStudent()) {
+            $student = $user->getStudent();
             $courseInstances = $courseRepo->findByStudent($user->getStudent());
-
+            $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
                 'courseInstances' => $courseInstances,
-                'studentId' => $user->getStudent()->getGuid()
+                'studentId' => $student->getGuid(),
+                'recentLabs' => $pendingLabs,
             ]);
         }
 
@@ -63,18 +65,17 @@ class CourseController extends AbstractController
      *
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceId}", name="view_course")
+     * @Route("/{courseId}/{instanceIndex}", name="view_course")
      */
     public function viewCourse(
         $courseId,
-        $instanceId,
+        $instanceIndex,
         CourseInstanceRepository $courseInstanceRepo,
         LabRepository $labRepo
     ) {
 
         // DATA
-
-        $courseInstance = $courseInstanceRepo->findIfMatchesCourse($instanceId, $courseId);
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         // SECURITY
@@ -95,11 +96,11 @@ class CourseController extends AbstractController
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceId}/{studentId}", name="view_course_student_summary")
+     * @Route("/{courseId}/{instanceIndex}/{studentId}", name="view_course_student_summary")
      */
     public function viewCourseStudentSummary(
         $courseId,
-        $instanceId,
+        $instanceIndex,
         $studentId,
         CourseInstanceRepository $courseInstanceRepo,
         StudentRepository $studentRepo,
@@ -108,7 +109,7 @@ class CourseController extends AbstractController
 
         // DATA
 
-        $courseInstance = $courseInstanceRepo->findIfMatchesCourse($instanceId, $courseId);
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $student = $studentRepo->find($studentId);
@@ -138,19 +139,19 @@ class CourseController extends AbstractController
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceId}/lab/{labId}/", name="lab_summmary")
+     * @Route("/{courseId}/{instanceIndex}/lab/{labId}/", name="lab_summmary")
      */
     public function viewLabSummary(
         Request $request,
         $courseId,
-        $instanceId,
+        $instanceIndex,
         $labId,
         CourseInstanceRepository $courseInstanceRepo,
         LabRepository $labRepo
     ) {
 
         // DATA
-        $courseInstance = $courseInstanceRepo->findIfMatchesCourse($instanceId, $courseId);
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $lab = $labRepo->find($labId);
@@ -188,7 +189,7 @@ class CourseController extends AbstractController
     /**
      * !page always generates the page number in the URL. Checks if page is a number.
      *
-     * @Route("/{courseId}/{instanceId}/lab/{labId}/{studentId}/{!page}",
+     * @Route("/{courseId}/{instanceIndex}/lab/{labId}/{studentId}/{!page}",
      *      name="lab_survey_response",
      *      requirements={"page"="\d+"})
      *
@@ -196,7 +197,7 @@ class CourseController extends AbstractController
     public function labSurvey(
         Request $request,
         $courseId,
-        $instanceId,
+        $instanceIndex,
         $labId,
         $studentId,
         int $page = 1,
@@ -208,7 +209,7 @@ class CourseController extends AbstractController
 
         // DATA
 
-        $courseInstance = $courseInstanceRepo->findIfMatchesCourse($instanceId, $courseId);
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $lab = $labRepo->find($labId);
@@ -265,7 +266,7 @@ class CourseController extends AbstractController
                     // Get next page in the survey
                     return $this->redirectToRoute('lab_survey_response', [
                         'courseId' => $courseId,
-                        'instanceId' => $instanceId,
+                        'instanceIndex' => $instanceIndex,
                         'labId' => $labId,
                         'studentId' => $studentId,
                         'page' => $page + 1
@@ -279,7 +280,7 @@ class CourseController extends AbstractController
                     // Back to summary
                     return $this->redirectToRoute('view_course_student_summary', [
                         'courseId' => $courseId,
-                        'instanceId' => $instanceId,
+                        'instanceIndex' => $instanceIndex,
                         'studentId' => $studentId
                     ]);
                 }

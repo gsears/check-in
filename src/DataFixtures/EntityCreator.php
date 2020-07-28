@@ -117,8 +117,10 @@ final class EntityCreator
 
     public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate): CourseInstance
     {
+        $courseInstanceRepo = $this->em->getRepository(CourseInstance::class);
         $courseInstance = (new CourseInstance())
-            ->setDates(new CourseDates($startDate, $endDate));
+            ->setDates(new CourseDates($startDate, $endDate))
+            ->setIndexInCourse($courseInstanceRepo->getNextIndexInCourse($course));
 
         $course->addCourseInstance($courseInstance);
 
