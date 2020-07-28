@@ -11,6 +11,7 @@ use App\Security\Voter\StudentVoter;
 use App\Entity\LabXYQuestionResponse;
 use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
+use App\Form\Type\LabResponseType;
 use App\Repository\LabResponseRepository;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
@@ -139,7 +140,7 @@ class CourseController extends AbstractController
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceIndex}/{labName}/", name="lab_summmary")
+     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/", name="lab_summmary")
      */
     public function viewLabSummary(
         Request $request,
@@ -183,8 +184,56 @@ class CourseController extends AbstractController
         }
 
         return $this->render('lab/summary.html.twig', [
-            'course_name' => $courseInstance->getName(),
-            'lab_name' => $lab->getName(),
+            'courseName' => $courseInstance->getName(),
+            'labName' => $lab->getName(),
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/{studentId}", name="lab_survey_view")
+     */
+    public function viewSurveyResponse(
+        Request $request,
+        $courseId,
+        $instanceIndex,
+        $labName,
+        $studentId,
+        CourseInstanceRepository $courseInstanceRepo,
+        LabRepository $labRepo,
+        StudentRepository $studentRepo,
+        LabResponseRepository $labResponseRepo
+    ) {
+        // DATA
+
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
+
+        $lab = $labRepo->findOneBy([
+            "name" => $labName
+        ]);
+        if (!$lab) throw $this->createNotFoundException('This lab does not exist');
+
+        $student = $studentRepo->find($studentId);
+        if (!$student) throw $this->createNotFoundException("This student does not exist");
+
+        // Response always exists, so no error checking
+        $labResponse = $labResponseRepo->findOneByLabAndStudent($lab, $student);
+
+        // SECURITY
+        // Check permission to view course instance
+        $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
+        // Check if the user is the owning student or instructor, otherwise deny
+        $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
+
+        // HANDLER
+        $form = $this->createForm(LabResponseType::class, $labResponse, [
+            'read_only' => true
+        ]);
+
+        return $this->render('lab/response.html.twig', [
+            'courseName' => $courseInstance->getName(),
+            'labName' => $lab->getName(),
             'form' => $form->createView()
         ]);
     }
@@ -192,7 +241,7 @@ class CourseController extends AbstractController
     /**
      * !page always generates the page number in the URL. Checks if page is a number.
      *
-     * @Route("/{courseId}/{instanceIndex}/{labName}/{studentId}/{!page}",
+     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/{studentId}/survey/{!page}",
      *      name="lab_survey_response",
      *      requirements={"page"="\d+"})
      *
@@ -218,6 +267,7 @@ class CourseController extends AbstractController
         $lab = $labRepo->findOneBy([
             "name" => $labName
         ]);
+
         if (!$lab) throw $this->createNotFoundException('This lab does not exist');
 
         $student = $studentRepo->find($studentId);
@@ -279,9 +329,9 @@ class CourseController extends AbstractController
                 } else {
                     // The form is completed. Even if everything was skipped!
                     $labResponse->setSubmitted(true);
+
                     // Update it in the database
                     $this->getDoctrine()->getManager()->flush();
-
                     // Back to summary
                     return $this->redirectToRoute('view_course_student_summary', [
                         'courseId' => $courseId,
