@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional\Repository;
 
+use Faker;
 use App\Entity\CourseInstance;
 use App\Tests\Functional\FunctionalTestCase;
 
@@ -20,13 +21,13 @@ class CourseInstanceRepositoryTest extends FunctionalTestCase
         $student = $creator->createStudent(
             'firstname',
             'surname',
-            '1234'
+            '12345',
         );
 
         $student2 = $creator->createStudent(
             'firstname',
             'surname',
-            '4321'
+            '54321'
         );
 
         $expectedCourseInstances = [];

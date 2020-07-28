@@ -20,13 +20,13 @@ class InstructorRepositoryTest extends FunctionalTestCase
         $student1 = $creator->createStudent(
             'firstname',
             'surname',
-            '1234'
+            '12345'
         );
 
         $student2 = $creator->createStudent(
             'firstname2',
             'surname2',
-            '4321'
+            '54321'
         );
 
         $instructor1 = $creator->createInstructor(
