@@ -36,6 +36,8 @@ class CourseController extends AbstractController
     {
         $user = $this->getUser();
 
+        $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
+
         if ($user->isStudent()) {
             $courseInstances = $courseRepo->findByStudent($user->getStudent());
 
@@ -52,6 +54,8 @@ class CourseController extends AbstractController
                 'courseInstances' => $courseInstances
             ]);
         }
+
+        $this->createAccessDeniedException("Invalid user role");
     }
 
     /**

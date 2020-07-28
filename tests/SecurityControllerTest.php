@@ -2,18 +2,10 @@
 
 namespace App\Tests;
 
-use App\DataFixtures\AppFixtures;
-use App\Repository\UserRepository;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\UrlHelper;
+use App\Tests\Functional\FunctionalTestCase;
 
-class SecurityControllerTest extends WebTestCase
+class SecurityControllerTest extends FunctionalTestCase
 {
-    public function usernameProvider()
-    {
-        yield [AppFixtures::TEST_STUDENT_USERNAME];
-        yield [AppFixtures::TEST_INSTUCTOR_USERNAME];
-    }
 
     public function testRootRedirectsToCourses()
     {
@@ -24,18 +16,23 @@ class SecurityControllerTest extends WebTestCase
     }
 
     /**
-     * @dataProvider usernameProvider
-     *
      * Assert that users are redirected to their courses page on login
      */
-    public function testLoginRedirect(string $username)
+    public function testLoginRedirect()
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
         $form = $crawler->selectButton('Sign in')->form();
 
+        $testUser = $this->getEntityCreator()->createUser(
+            'test',
+            'test',
+            'test@test.com'
+        );
+
+
         $client->submit($form, [
-            'email' => $username,
+            'email' => $testUser->getEmail(),
             'password' => 'password',
         ]);
 
@@ -43,23 +40,46 @@ class SecurityControllerTest extends WebTestCase
     }
 
     /**
-     * @dataProvider usernameProvider
-     *
-     * Assert that clicking the logout button logs out.
+     * Assert that users are redirected to their courses page if they access login page
      */
-    public function testLogout(string $username)
+    public function testLoginPageRedirectIfLoggedIn()
     {
         $client = static::createClient();
-        $userRepository = static::$container->get(UserRepository::class);
 
-        // retrieve the test user
-        $testUser = $userRepository->findOneByEmail($username);
+        $testUser = $this->getEntityCreator()->createUser(
+            'test',
+            'test',
+            'test@test.com'
+        );
 
         // simulate $testUser being logged in
         $client->loginUser($testUser);
 
+        $crawler = $client->request('GET', '/login');
+
+        $this->assertResponseRedirects('/courses', 302);
+    }
+
+    /**
+     * Assert that clicking the logout button logs out.
+     */
+    public function testLogout()
+    {
+        $client = static::createClient();
+
+        $testInstructor = $this->getEntityCreator()->createInstructor(
+            'test',
+            'test',
+        );
+
+        // simulate $testUser being logged in
+        $client->loginUser($testInstructor->getUser());
+
         $crawler = $client->request('GET', '/courses');
-        $client->clickLink('Logout');
+
+        $this->assertResponseIsSuccessful();
+
+        $client->clickLink("Logout");
 
         // Use full path as we are redirecting from firewall in security.yaml
         $this->assertResponseRedirects('http://localhost/login', 302);

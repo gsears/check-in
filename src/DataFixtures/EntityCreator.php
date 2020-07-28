@@ -52,58 +52,56 @@ final class EntityCreator
         return $entity;
     }
 
-    public function createUser(string $forename, string $surname, callable $roleSpecificConfigFunction): User
+    public function createUser(string $forename, string $surname, string $email): User
     {
         $user = (new User())
             ->setForename($forename)
             ->setSurname($surname)
-            ->setPassword(self::PASSWORD);
-
-        if ($roleSpecificConfigFunction) {
-            $roleSpecificConfigFunction($user);
-        }
+            ->setPassword(self::PASSWORD)
+            ->setEmail($email);
 
         return $this->save($user);
     }
 
     public function createStudent(string $forename, string $surname, string $guid, string $email = null): Student
     {
+        if (!$email) {
+            $firstSurnameLetter = strtolower($surname[0]);
+            $email = $guid . $firstSurnameLetter . '@student.gla.ac.uk';
+        }
+
+        $user = $this->createUser(
+            $forename,
+            $surname,
+            $email
+        );
+
         $student = (new Student())
             ->setGuid($guid);
 
-        $this->createUser(
-            $forename,
-            $surname,
-            function ($user) use ($guid, $email, $student) {
-                if (!$email) {
-                    $firstSurnameLetter = strtolower($user->getSurname()[0]);
-                    $email = $guid . $firstSurnameLetter . '@student.gla.ac.uk';
-                }
-                $user->setEmail($email);
-                $user->setStudent($student);
-            }
-        );
+        $user->setStudent($student);
 
+        $this->em->flush();
         return $this->save($student);
     }
 
     public function createInstructor(string $forename, string $surname, string $email = null): Instructor
     {
-        $instructor = new Instructor();
+        if (!$email) {
+            $email = strtolower($forename . '.' . $surname . '@glasgow.ac.uk');
+        }
 
-        $this->createUser(
+        $user = $this->createUser(
             $forename,
             $surname,
-            function ($user) use ($email, $instructor) {
-                if (!$email) {
-                    $email = $user->getForename() . '.' . $user->getSurname() . '@glasgow.ac.uk';
-                    $email = strtolower($email);
-                }
-                $user->setEmail($email);
-                $user->setInstructor($instructor);
-            }
+            $email
         );
 
+        $instructor = new Instructor();
+
+        $user->setInstructor($instructor);
+
+        $this->em->flush();
         return $this->save($instructor);
     }
 
