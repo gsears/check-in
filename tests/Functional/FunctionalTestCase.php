@@ -14,7 +14,18 @@ abstract class FunctionalTestCase extends WebTestCase
 
     private $entityCreator;
 
-    protected function get($service)
+    protected static function createClient(array $options = [], array $server = [])
+    {
+        // Creating a client after interacting with services is not allowed,
+        // so shutdown the kernel first
+        // https://github.com/symfony/symfony/issues/34507
+        // https://github.com/symfony/symfony-docs/pull/13351
+        static::ensureKernelShutdown();
+
+        return parent::createClient($options, $server);
+    }
+
+    protected function getService($service)
     {
         if (!static::$container) {
             static::bootKernel();
@@ -31,7 +42,7 @@ abstract class FunctionalTestCase extends WebTestCase
     {
         $this->ensureDatabaseExists();
 
-        return $this->get(EntityManagerInterface::class);
+        return $this->getService(EntityManagerInterface::class);
     }
 
     /**
@@ -42,7 +53,8 @@ abstract class FunctionalTestCase extends WebTestCase
         if (self::$databaseCreated) {
             return;
         }
-        $em = $this->get(EntityManagerInterface::class);
+
+        $em = $this->getService(EntityManagerInterface::class);
         $schema = new SchemaTool($em);
         $schema->dropDatabase();
         $schema->createSchema($em->getMetadataFactory()->getAllMetadata());
