@@ -61,7 +61,7 @@
 	// Waits until js and everything else is ready and loads an instance of the XY selector.
 	addLoadEvent(() => {
 		XYQuestionWidgetFactory('#{{ widgetId }}', {
-			mode: 'region',
+			mode: {% if read_only %}'readonly-danger'{% else %}'region'{% endif %},
 			points: {
 				data: {{coordinates | raw}}
 			},

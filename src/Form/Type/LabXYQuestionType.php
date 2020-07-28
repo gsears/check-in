@@ -13,6 +13,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\LabXYQuestionDangerZone;
+use Exception;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -36,7 +37,7 @@ class LabXYQuestionType extends AbstractType
 
         $builder->add('dangerZones');
 
-        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) use ($options) {
             $labXYQuestion = $event->getData();
 
             $xyQuestion = $labXYQuestion->getXYQuestion();
@@ -47,11 +48,24 @@ class LabXYQuestionType extends AbstractType
 
             // Serialize the coordinates of the responses
             $coordinatesArray = [];
+            $student = $options['filter_by_student'];
 
-            foreach ($labXYQuestion->getResponses()->toArray() as $response) {
-                $coordinates = $response->getCoordinates();
-                if ($coordinates) {
-                    $coordinatesArray[] = $coordinates;
+            if ($student) {
+                $studentResponse = $labXYQuestion
+                    ->getResponses()
+                    ->filter(function (LabXYQuestionResponse $response) use ($student) {
+                        dump($student);
+                        return $response->getLabResponse()->getStudent() === $student;
+                    })->first();
+                if ($studentResponse) {
+                    $coordinatesArray[] = $studentResponse->getCoordinates();
+                }
+            } else {
+                foreach ($labXYQuestion->getResponses()->toArray() as $response) {
+                    $coordinates = $response->getCoordinates();
+                    if ($coordinates) {
+                        $coordinatesArray[] = $coordinates;
+                    }
                 }
             }
 
@@ -69,7 +83,8 @@ class LabXYQuestionType extends AbstractType
                     'not_blank' => false,
                     'cell_size' => 0.9,
                     // SET INITIAL DATA HERE
-                    'coordinates' => $jsonCoordinates
+                    'coordinates' => $jsonCoordinates,
+                    'read_only' => $options['read_only']
                 ]);
         });
     }
@@ -79,6 +94,8 @@ class LabXYQuestionType extends AbstractType
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
             'data_class' => LabXYQuestion::class,
+            'filter_by_student' => null,
+            'read_only' => false,
         ]);
     }
 }

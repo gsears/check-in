@@ -64,6 +64,7 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
     {
         parent::buildView($view, $form, $options);
         $view->vars['coordinates'] = $options['coordinates'];
+        $view->vars['read_only'] = $options['read_only'];
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -72,8 +73,10 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
 
         // Allow coordinates to be passed in to populate the xy component.
         $resolver->setDefault('coordinates', null);
+        $resolver->setDefault('read_only', false);
         // Should be a json array.
         $resolver->setAllowedTypes('coordinates', 'string');
+        $resolver->setAllowedTypes('read_only', 'boolean');
     }
 
     public function provideJsonContent($viewData): ?string
