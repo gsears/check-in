@@ -60,10 +60,9 @@ class LabResponse
     public function __toString(): string
     {
         return sprintf(
-            "%s's response for %s (%s):\n%s\n",
+            "%s's response for %s ():\n%s\n",
             $this->getStudent()->getGuid(),
             $this->getLab()->getName(),
-            $this->getCreatedAt()->format("d/m/y h:i:s"),
             join("", $this->getXYQuestionResponses()->toArray())
         );
     }
