@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Course;
 use App\Entity\CourseInstance;
+use App\Entity\Instructor;
 use App\Entity\Lab;
 use App\Entity\Student;
 use App\Provider\DateTimeProvider;
@@ -55,6 +56,23 @@ class LabRepository extends ServiceEntityRepository
             ->andWhere('l.startDateTime < :beforeDateTime')
             ->setParameter('beforeDateTime', $beforeDateTime)
             ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findLatestByInstructor(Instructor $instructor, int $maxResults)
+    {
+        $beforeDateTime = (new DateTimeProvider())->getCurrentDateTime();
+
+        return $this->createQueryBuilder('l')
+            ->join('l.courseInstance', 'ci')
+            ->join('ci.instructors', 'i')
+            ->andWhere('i = :instructor')
+            ->setParameter('instructor', $instructor)
+            ->andWhere('l.startDateTime < :beforeDateTime')
+            ->setParameter('beforeDateTime', $beforeDateTime)
+            ->orderBy('l.startDateTime', 'DESC')
+            ->setMaxResults($maxResults)
             ->getQuery()
             ->getResult();
     }

@@ -1,4 +1,7 @@
 {
+    "cocur/slugify": {
+        "version": "v4.0.0"
+    },
     "dama/doctrine-test-bundle": {
         "version": "4.0",
         "recipe": {

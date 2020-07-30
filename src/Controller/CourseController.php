@@ -51,10 +51,12 @@ class CourseController extends AbstractController
         }
 
         if ($user->isInstructor()) {
-            $courseInstances = $courseRepo->findByInstructor($user->getInstructor());
-
+            $instructor = $user->getInstructor();
+            $courseInstances = $courseRepo->findByInstructor($instructor);
+            $recentLabs = $labRepo->findLatestByInstructor($instructor, 5);
             return $this->render('course/courses_instructor.html.twig', [
-                'courseInstances' => $courseInstances
+                'courseInstances' => $courseInstances,
+                'recentLabs' => $recentLabs
             ]);
         }
 
@@ -66,7 +68,7 @@ class CourseController extends AbstractController
      *
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceIndex}", name="view_course")
+     * @Route("/{courseId}/{instanceIndex}", name="view_course_summary")
      */
     public function viewCourse(
         $courseId,
@@ -140,13 +142,13 @@ class CourseController extends AbstractController
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/", name="lab_summmary")
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}", name="view_lab_summary")
      */
     public function viewLabSummary(
         Request $request,
         $courseId,
         $instanceIndex,
-        $labName,
+        $labSlug,
         CourseInstanceRepository $courseInstanceRepo,
         LabRepository $labRepo
     ) {
@@ -156,7 +158,7 @@ class CourseController extends AbstractController
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $lab = $labRepo->findOneBy([
-            "name" => $labName
+            "slug" => $labSlug
         ]);
 
         if (!$lab) throw $this->createNotFoundException('This lab does not exist');
@@ -191,13 +193,13 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/{studentId}", name="lab_survey_view")
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}", name="lab_survey_view")
      */
     public function viewSurveyResponse(
         Request $request,
         $courseId,
         $instanceIndex,
-        $labName,
+        $labSlug,
         $studentId,
         CourseInstanceRepository $courseInstanceRepo,
         LabRepository $labRepo,
@@ -210,7 +212,7 @@ class CourseController extends AbstractController
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $lab = $labRepo->findOneBy([
-            "name" => $labName
+            "slug" => $labSlug
         ]);
         if (!$lab) throw $this->createNotFoundException('This lab does not exist');
 
@@ -241,7 +243,7 @@ class CourseController extends AbstractController
     /**
      * !page always generates the page number in the URL. Checks if page is a number.
      *
-     * @Route("/{courseId}/{instanceIndex}/lab/{labName}/{studentId}/survey/{!page}",
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}/survey/{!page}",
      *      name="lab_survey_response",
      *      requirements={"page"="\d+"})
      *
@@ -250,7 +252,7 @@ class CourseController extends AbstractController
         Request $request,
         $courseId,
         $instanceIndex,
-        $labName,
+        $labSlug,
         $studentId,
         int $page = 1,
         CourseInstanceRepository $courseInstanceRepo,
@@ -265,7 +267,7 @@ class CourseController extends AbstractController
         if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $lab = $labRepo->findOneBy([
-            "name" => $labName
+            "slug" => $labSlug
         ]);
 
         if (!$lab) throw $this->createNotFoundException('This lab does not exist');
@@ -322,7 +324,7 @@ class CourseController extends AbstractController
                     return $this->redirectToRoute('lab_survey_response', [
                         'courseId' => $courseId,
                         'instanceIndex' => $instanceIndex,
-                        'labName' => $labName,
+                        'labSlug' => $labSlug,
                         'studentId' => $studentId,
                         'page' => $page + 1
                     ]);

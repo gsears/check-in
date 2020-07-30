@@ -1,16 +1,60 @@
 {% extends "course/courses_base.html.twig" %}
 
 {% block course_list %}
-	<ul>
-		{% for courseInstance in courseInstances %}
-			{% set href = path('view_course', {
+	<table id="course-list" class="table table-sm">
+		<thead>
+			<tr>
+				<th>Start</th>
+				<th>End</th>
+				<th>Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for courseInstance in courseInstances %}
+				{% set href = path('view_course_summary', {
         courseId: courseInstance.course.code,
         instanceIndex: courseInstance.indexInCourse
     }) %}
+				<tr>
+					<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
+					<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
+					<td>
+						<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
 
-			<li>
-				<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.id}}</a>
-			</li>
-		{% endfor %}
-	</ul>
+{% block recent_labs_list %}
+	{% if recentLabs %}
+		<table id="recent-lab-list" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Course</th>
+					<th>Lab</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for lab in recentLabs %}
+					{% set href = path('view_lab_summary', {
+        courseId: lab.courseInstance.course.code,
+        instanceIndex: lab.courseInstance.indexInCourse,
+        labSlug: lab.slug
+    }) %}
+					<tr>
+						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+						<td>{{lab.courseInstance.course.name}}</td>
+						<td>
+							<a href="{{href}}">{{lab.name}}</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		No recent labs...
+	{% endif %}
 {% endblock %}

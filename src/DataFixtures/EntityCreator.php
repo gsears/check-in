@@ -19,7 +19,10 @@ use App\Entity\CourseDates;
 use App\Entity\CourseInstance;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\LabXYQuestionDangerZone;
+use App\Repository\UserRepository;
+use Doctrine\DBAL\Driver\PDOException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 /**
  * Helpers to create entities easily.

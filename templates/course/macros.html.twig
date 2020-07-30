@@ -1,36 +1,3 @@
-{% macro labTable(title, labs, courseInstance, student, editLabel) %}
-	<h2>{{title | capitalize}}</h2>
-	{% if labs %}
-		<table class="table">
-			<thead>
-				<tr>
-					<th scope="col">Lab Name</th>
-					<th scope="col">Date</th>
-					<th scope="col">Start Time</th>
-					<th scope="col"></th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for lab in labs %}
-					<tr>
-						<td>{{lab.name}}</td>
-						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
-						<td>{{lab.startDateTime | date("H:i")}}</td>
-						<td>
-							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labName: lab.name, studentId: student.guid, page: 1 })}}">
-								{{editLabel}}
-							</a>
-						</td>
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	{% else %}
-		No
-		{{title}}.
-	{% endif %}
-{% endmacro %}
-
 {% macro instructorList(instructors) %}
 	<h2>Instructors</h2>
 	<ul>

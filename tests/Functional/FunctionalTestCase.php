@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use Faker;
 use App\DataFixtures\EntityCreator;
 use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,7 +12,6 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 abstract class FunctionalTestCase extends WebTestCase
 {
     private static $databaseCreated;
-
     private $entityCreator;
 
     protected static function createClient(array $options = [], array $server = [])
@@ -71,7 +71,7 @@ abstract class FunctionalTestCase extends WebTestCase
     protected function getEntityCreator(): EntityCreator
     {
         if (!$this->entityCreator) {
-            $this->entityCreator = new EntityCreator($this->getEntityManager());
+            return new EntityCreator($this->getEntityManager());
         }
 
         return $this->entityCreator;

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
  * @ORM\Entity(repositoryClass=LabRepository::class)
@@ -29,6 +30,11 @@ class Lab
      * @ORM\Column(type="string", length=255)
      */
     private $name;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $slug;
 
     /**
      * @ORM\Column(type="datetime")
@@ -84,8 +90,14 @@ class Lab
     public function setName(string $labName): self
     {
         $this->name = $labName;
+        $this->slug = strtolower((new AsciiSlugger())->slug($labName));
 
         return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
     }
 
     public function getStartDateTime(): ?\DateTimeInterface

@@ -43,7 +43,7 @@
 					{% set href = path('lab_survey_response', {
         courseId: lab.courseInstance.course.code,
         instanceIndex: lab.courseInstance.indexInCourse,
-        labName: lab.name,
+        labSlug: lab.slug,
         studentId: studentId,
         page: 1
     }) %}
