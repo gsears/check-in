@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional;
 
-use Faker;
 use App\DataFixtures\EntityCreator;
 use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;

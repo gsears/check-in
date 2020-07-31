@@ -7,8 +7,10 @@ use App\Tests\Functional\FunctionalTestCase;
 
 class CoursesPageTest extends FunctionalTestCase
 {
+    private $instructorUser;
+    private $studentUser;
 
-    public function testInstructorCourseLists()
+    protected function setUp()
     {
         $dateTimeProvider = new DateTimeProvider();
         $courseStart =  ($dateTimeProvider->getCurrentDateTime()->modify("- 1 week"));
@@ -20,6 +22,16 @@ class CoursesPageTest extends FunctionalTestCase
             'instructorName',
             'instructorSurname',
         );
+
+        $this->instructorUser = $testInstructor->getUser();
+
+        $testStudent = $creator->createStudent(
+            'studentName',
+            'studentSurname',
+            '1234567'
+        );
+
+        $this->studentUser = $testStudent->getUser();
 
         $testCourseOne = $creator->createCourse(
             'CS101',
@@ -53,26 +65,57 @@ class CoursesPageTest extends FunctionalTestCase
             ->setIndexInCourse(1)
             ->addInstructor($testInstructor);
 
-        $creator->createLab(
+        $creator->createEnrolment(
+            $testStudent,
+            $testCourseInstanceOne
+        );
+
+        $creator->createEnrolment(
+            $testStudent,
+            $testCourseInstanceTwo
+        );
+
+        $testLabBeforeTodayOne = $creator->createLab(
             'Lab One',
             $courseStart,
             $testCourseInstanceOne
         );
 
-        $creator->createLab(
+        $testLabBeforeTodayTwo = $creator->createLab(
             'Lab Two',
             $courseStart,
             $testCourseInstanceTwo
         );
 
-        $creator->createLab(
+        $testLabAfterToday = $creator->createLab(
             'Lab Three',
             $courseEnd,
             $testCourseInstanceTwo
         );
 
+        $creator->createLabResponse(
+            false,
+            $testStudent,
+            $testLabBeforeTodayOne
+        );
+
+        $creator->createLabResponse(
+            true,
+            $testStudent,
+            $testLabBeforeTodayTwo
+        );
+
+        $creator->createLabResponse(
+            false,
+            $testStudent,
+            $testLabAfterToday
+        );
+    }
+
+    public function testInstructorCourseLists()
+    {
         $client = static::createClient();
-        $client->loginUser($testInstructor->getUser());
+        $client->loginUser($this->instructorUser);
         $crawler = $client->request('GET', '/courses');
         $this->assertResponseIsSuccessful("Page renders for instructor.");
 
@@ -121,94 +164,8 @@ class CoursesPageTest extends FunctionalTestCase
 
     public function testStudentCourseLists()
     {
-        $dateTimeProvider = new DateTimeProvider();
-        $courseStart =  ($dateTimeProvider->getCurrentDateTime()->modify("- 1 week"));
-        $courseEnd = ($dateTimeProvider->getCurrentDateTime()->modify("+ 1 week"));
-
-        $creator = $this->getEntityCreator();
-
-        $testStudent = $creator->createStudent(
-            'studentName',
-            'studentSurname',
-            '7654321'
-        );
-
-        $testCourseOne = $creator->createCourse(
-            'CS303',
-            'Programming',
-            null
-        );
-
-        $testCourseTwo = $creator->createCourse(
-            'CS404',
-            'Algorithms',
-            null
-        );
-
-        $testCourseInstanceOne = $creator->createCourseInstance(
-            $testCourseOne,
-            $courseStart,
-            $courseEnd
-        );
-
-        $testCourseInstanceOne->setIndexInCourse(1);
-
-        $testCourseInstanceTwo = $creator->createCourseInstance(
-            $testCourseTwo,
-            $courseStart,
-            $courseEnd
-        );
-
-        $testCourseInstanceTwo->setIndexInCourse(1);
-
-        $creator->createEnrolment(
-            $testStudent,
-            $testCourseInstanceOne
-        );
-
-        $creator->createEnrolment(
-            $testStudent,
-            $testCourseInstanceTwo
-        );
-
-        $testLabBeforeTodayOne = $creator->createLab(
-            'Lab One',
-            $courseStart,
-            $testCourseInstanceOne
-        );
-
-        $testLabBeforeTodayTwo = $creator->createLab(
-            'Lab Two',
-            $courseStart,
-            $testCourseInstanceTwo
-        );
-
-        $testLabAfterToday = $creator->createLab(
-            'Lab Three',
-            $courseEnd,
-            $testCourseInstanceTwo
-        );
-
-        $creator->createLabResponse(
-            false,
-            $testStudent,
-            $testLabBeforeTodayOne
-        );
-
-        $creator->createLabResponse(
-            true,
-            $testStudent,
-            $testLabBeforeTodayTwo
-        );
-
-        $creator->createLabResponse(
-            false,
-            $testStudent,
-            $testLabAfterToday
-        );
-
         $client = static::createClient();
-        $client->loginUser($testStudent->getUser());
+        $client->loginUser($this->studentUser);
         $crawler = $client->request('GET', '/courses');
         $this->assertResponseIsSuccessful("Page renders for student.");
 
