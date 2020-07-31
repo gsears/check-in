@@ -1,9 +1,13 @@
-Create docker database using docker-compose
+- `docker-compose up` - Create a db container
+- `composer install` - Install backend dependencies
+- `yarn install` - Install frontend dependencies
+- `symfony serve` - Serve the backend
+- `make dev` - Serve the frontend
 
-Make fixtures
+* `make fixtures` - Create mock data
+* `make test` - Run unit and functional tests
 
-Default users:
-test@glasgow.ac.uk
-test@student.gla.ac.uk
+Mock users:
 
-password: password
+- Student: `test@student.gla.ac.uk` Pass: `password`
+- Instructor: `test@glasgow.ac.uk` Pass: `password`
