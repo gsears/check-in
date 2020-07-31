@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\CourseDates;
 use App\Repository\CourseInstanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -46,15 +47,20 @@ class CourseInstance
     private $enrolments;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurvey::class, mappedBy="courseInstance", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Lab::class, mappedBy="courseInstance", orphanRemoval=true)
      */
-    private $labSurveys;
+    private $labs;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $indexInCourse;
 
     public function __construct()
     {
         $this->instructors = new ArrayCollection();
         $this->enrolments = new ArrayCollection();
-        $this->labSurveys = new ArrayCollection();
+        $this->labs = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -85,6 +91,16 @@ class CourseInstance
     {
         $this->course = $course;
 
+
+
+        return $this;
+    }
+
+    public function setDates(CourseDates $courseDates): self
+    {
+        $this->startDate = $courseDates->getStartDate();
+        $this->endDate = $courseDates->getEndDate();
+
         return $this;
     }
 
@@ -93,23 +109,9 @@ class CourseInstance
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): self
-    {
-        $this->startDate = $startDate;
-
-        return $this;
-    }
-
     public function getEndDate(): ?\DateTimeInterface
     {
         return $this->endDate;
-    }
-
-    public function setEndDate(\DateTimeInterface $endDate): self
-    {
-        $this->endDate = $endDate;
-
-        return $this;
     }
 
     /**
@@ -170,30 +172,30 @@ class CourseInstance
     }
 
     /**
-     * @return Collection|LabSurvey[]
+     * @return Collection|Lab[]
      */
-    public function getLabSurveys(): Collection
+    public function getLabs(): Collection
     {
-        return $this->labSurveys;
+        return $this->labs;
     }
 
-    public function addLabSurvey(LabSurvey $labSurvey): self
+    public function addLab(Lab $lab): self
     {
-        if (!$this->labSurveys->contains($labSurvey)) {
-            $this->labSurveys[] = $labSurvey;
-            $labSurvey->setCourseInstance($this);
+        if (!$this->labs->contains($lab)) {
+            $this->labs[] = $lab;
+            $lab->setCourseInstance($this);
         }
 
         return $this;
     }
 
-    public function removeLabSurvey(LabSurvey $labSurvey): self
+    public function removeLab(Lab $lab): self
     {
-        if ($this->labSurveys->contains($labSurvey)) {
-            $this->labSurveys->removeElement($labSurvey);
+        if ($this->labs->contains($lab)) {
+            $this->labs->removeElement($lab);
             // set the owning side to null (unless already changed)
-            if ($labSurvey->getCourseInstance() === $this) {
-                $labSurvey->setCourseInstance(null);
+            if ($lab->getCourseInstance() === $this) {
+                $lab->setCourseInstance(null);
             }
         }
 
@@ -209,5 +211,17 @@ class CourseInstance
             date_format($this->getStartDate(), "d/m/y"),
             date_format($this->getEndDate(), "d/m/y")
         );
+    }
+
+    public function getIndexInCourse(): ?int
+    {
+        return $this->indexInCourse;
+    }
+
+    public function setIndexInCourse(int $indexInCourse): self
+    {
+        $this->indexInCourse = $indexInCourse;
+
+        return $this;
     }
 }

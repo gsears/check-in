@@ -18,19 +18,4 @@ class XYQuestionRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, XYQuestion::class);
     }
-
-
-
-
-    /*
-    public function findOneBySomeField($value): ?XYQuestion
-    {
-        return $this->createQueryBuilder('x')
-            ->andWhere('x.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

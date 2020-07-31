@@ -1,5 +1,9 @@
 {% extends "base.html.twig" %}
 
 {% block body %}
-	<h1>Lab survey</h2>
+	<header>
+		<h1>{{labName}}</h1>
+		<p>{{courseName}}</p>
+	</header>
+
 	{{form(form)}}{% endblock %}

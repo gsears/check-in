@@ -4,14 +4,14 @@ namespace App\Form\Type;
 
 use App\Entity\XYQuestion;
 use App\Form\Type\XYCoordinates;
-use App\Entity\LabSurveyResponse;
+use App\Entity\LabResponse;
 use App\Form\Type\XYCoordinatesType;
-use App\Entity\LabSurveyXYQuestion;
+use App\Entity\LabXYQuestion;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
-use App\Entity\LabSurveyXYQuestionResponse;
+use App\Entity\LabXYQuestionResponse;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -20,21 +20,14 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
+class LabXYQuestionResponseType extends SurveyQuestionResponseType
 {
-    private $serializer;
-
-    public function __construct(SerializerInterface $serializer)
-    {
-        $this->serializer = $serializer;
-    }
-
     public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface
     {
         // Get the data so we can query it for its XY Question
         $xyQuestionResponse = $builder->getData();
 
-        $xyQuestion = $xyQuestionResponse->getLabSurveyXYQuestion()->getXYQuestion();
+        $xyQuestion = $xyQuestionResponse->getLabXYQuestion()->getXYQuestion();
         $xField = $xyQuestion->getXField();
         $yField = $xyQuestion->getYField();
 
@@ -42,7 +35,6 @@ class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
         $builder
             // Do not map the xy form component to the entity.
             ->add('coordinates', XYCoordinatesType::class, [
-                'constraints' => new NotBlank(),
                 'label' => $xyQuestion->getQuestionText(),
                 'help' => sprintf(
                     'Click on the grid to select a response. The x axis represents %s. The y axis represents %s.',
@@ -53,6 +45,7 @@ class LabSurveyXYQuestionResponseType extends SurveyQuestionResponseType
                 'x_label_high' => $xField->getHighLabel(),
                 'y_label_low' => $yField->getLowLabel(),
                 'y_label_high' => $yField->getHighLabel(),
+                'not_blank' => true
             ]);
 
         return $builder;

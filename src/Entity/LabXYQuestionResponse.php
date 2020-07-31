@@ -4,14 +4,14 @@ namespace App\Entity;
 
 use App\Entity\XYCoordinates;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Repository\LabSurveyXYQuestionResponseRepository;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Repository\LabXYQuestionResponseRepository;
 
 /**
- * @ORM\Entity(repositoryClass=LabSurveyXYQuestionResponseRepository::class)
+ * @ORM\Entity(repositoryClass=LabXYQuestionResponseRepository::class)
  */
-class LabSurveyXYQuestionResponse implements SurveyQuestionResponseInterface
+class LabXYQuestionResponse implements SurveyQuestionResponseInterface
 {
     /**
      * @ORM\Id()
@@ -31,21 +31,21 @@ class LabSurveyXYQuestionResponse implements SurveyQuestionResponseInterface
     private $yValue;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabSurveyXYQuestion::class, inversedBy="responses")
+     * @ORM\ManyToOne(targetEntity=LabXYQuestion::class, inversedBy="responses")
      */
-    private $labSurveyXYQuestion;
+    private $labXYQuestion;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabSurveyResponse::class, inversedBy="xyQuestionResponses")
+     * @ORM\ManyToOne(targetEntity=LabResponse::class, inversedBy="xyQuestionResponses")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $labSurveyResponse;
+    private $labResponse;
 
     public function __toString(): string
     {
         return sprintf(
             "Response for '%s': {%d,%d}\n",
-            $this->getLabSurveyXYQuestion()->getXYQuestion()->getName(),
+            $this->getLabXYQuestion()->getXYQuestion()->getName(),
             $this->xValue,
             $this->yValue
         );
@@ -73,26 +73,26 @@ class LabSurveyXYQuestionResponse implements SurveyQuestionResponseInterface
         return $this;
     }
 
-    public function getLabSurveyXYQuestion(): ?LabSurveyXYQuestion
+    public function getLabXYQuestion(): ?LabXYQuestion
     {
-        return $this->labSurveyXYQuestion;
+        return $this->labXYQuestion;
     }
 
-    public function setLabSurveyXYQuestion(?LabSurveyXYQuestion $labSurveyXYQuestion): self
+    public function setLabXYQuestion(?LabXYQuestion $labXYQuestion): self
     {
-        $this->labSurveyXYQuestion = $labSurveyXYQuestion;
+        $this->labXYQuestion = $labXYQuestion;
 
         return $this;
     }
 
-    public function getLabSurveyResponse(): ?LabSurveyResponse
+    public function getLabResponse(): ?LabResponse
     {
-        return $this->labSurveyResponse;
+        return $this->labResponse;
     }
 
-    public function setLabSurveyResponse(?LabSurveyResponse $labSurveyResponse): self
+    public function setLabResponse(?LabResponse $labResponse): self
     {
-        $this->labSurveyResponse = $labSurveyResponse;
+        $this->labResponse = $labResponse;
 
         return $this;
     }

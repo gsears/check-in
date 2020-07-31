@@ -2,26 +2,11 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\AffectiveField;
-use App\Entity\Course;
-use App\Entity\CourseInstance;
-use App\Entity\Enrolment;
-use App\Entity\Instructor;
-use App\Entity\LabSurvey;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
-use App\Entity\Student;
-use App\Entity\User;
+use Faker;
+use App\Entity\LabResponse;
 use App\Entity\XYCoordinates;
-use App\Entity\XYQuestion;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Faker;
 
 /**
  * Populates the database with dummy data for testing and evaluation.
@@ -126,6 +111,12 @@ class AppFixtures extends Fixture
 
     private $manager;
     private $faker;
+    private $creator;
+
+    public function __construct(EntityCreator $creator)
+    {
+        $this->creator = $creator;
+    }
 
     public function load(ObjectManager $manager)
     {
@@ -171,44 +162,33 @@ class AppFixtures extends Fixture
         $this->printArray('XY Questions', $xyQuestions);
 
         // Create lab surveys
-        $labSurveys = $this->loadLabSurveys($courseInstances, $xyQuestions);
-        $this->printArray('Lab Surveys', $labSurveys);
+        $labs = $this->loadLabs($courseInstances, $xyQuestions);
+        $this->printArray('Lab Surveys', $labs);
 
         // Create lab xy responses
-        $completedLabSurveyResponses = $this->loadLabSurveyResponses($courseInstances);
-        $this->printArray('Completed Lab Survey Responses', $completedLabSurveyResponses);
+        $completedLabResponses = $this->loadLabResponses($courseInstances);
+        $this->printArray('Completed Lab Survey Responses', $completedLabResponses);
 
         // Commit to db
         $manager->flush();
-    }
-
-    private function createUser(callable $roleSpecificConfigFunction)
-    {
-        $user = new User();
-        $forename = $this->faker->firstname;
-        $surname = $this->faker->lastname;
-        $user->setForename($forename);
-        $user->setSurname($surname);
-        $user->setPassword(self::PASSWORD);
-
-        $roleSpecificConfigFunction($user);
-
-        // Add to db commit
-        $this->manager->persist($user);
     }
 
     private function loadFunctionalTestUsers(): array
     {
         $testStudentGuid = $this->faker->unique()->passthrough(1234567);
         $testStudentEmail = self::TEST_STUDENT_USERNAME;
-        $testStudent = $this->createStudent(
-            $guid = $testStudentGuid,
-            $email = $testStudentEmail
+        $testStudent = $this->creator->createStudent(
+            "Gareth",
+            "Sears",
+            $testStudentGuid,
+            $testStudentEmail
         );
 
         $testInstructorEmail = self::TEST_INSTUCTOR_USERNAME;
-        $testInstructor = $this->createInstructor(
-            $email = $testInstructorEmail
+        $testInstructor = $this->creator->createInstructor(
+            $this->faker->firstName(),
+            $this->faker->lastName(),
+            $testInstructorEmail
         );
 
         return [
@@ -217,55 +197,19 @@ class AppFixtures extends Fixture
         ];
     }
 
-    private function createStudent($guid = null, $email = null): Student
-    {
-        $student = new Student();
-        $guid = $guid ? $guid : $this->faker->unique()->randomNumber(7);
-        $student->setGuid($guid);
-
-        // Add to db
-        $this->manager->persist($student);
-
-        $this->createUser(function ($user) use ($guid, $email, $student) {
-            if (!$email) {
-                $firstSurnameLetter = strtolower($user->getSurname()[0]);
-                $email = $guid . $firstSurnameLetter . '@student.gla.ac.uk';
-            }
-            $user->setEmail($email);
-            $user->setStudent($student);
-        });
-
-        return $student;
-    }
-
     private function loadStudents(): array
     {
         $students = [];
 
         for ($i = 0; $i < 10; $i++) {
-            $students[] = $this->createStudent();
+            $students[] = $this->creator->createStudent(
+                $this->faker->firstName(),
+                $this->faker->lastName(),
+                $this->faker->unique()->randomNumber(7)
+            );
         }
 
         return $students;
-    }
-
-    private function createInstructor($email = null): Instructor
-    {
-        $instructor = new Instructor();
-
-        // Add to db
-        $this->manager->persist($instructor);
-
-        $this->createUser(function ($user) use ($email, $instructor) {
-            if (!$email) {
-                $email = $user->getForename() . '.' . $user->getSurname() . '@glasgow.ac.uk';
-                $email = strtolower($email);
-            }
-            $user->setEmail($email);
-            $user->setInstructor($instructor);
-        });
-
-        return $instructor;
     }
 
     private function loadInstructors(): array
@@ -273,87 +217,76 @@ class AppFixtures extends Fixture
         $instructors = [];
 
         for ($i = 0; $i < 5; $i++) {
-            $instructors[] = $this->createInstructor();
+            $instructors[] = $this->creator->createInstructor(
+                $this->faker->firstName(),
+                $this->faker->lastName()
+            );
         }
 
         return $instructors;
     }
 
-    private function createCourse(): Course
-    {
-        $course = new Course();
-
-        $courseCode = $this->faker->unique()->numerify('COMPSCI####');
-        $course->setCode($courseCode);
-
-        $name = sprintf(
-            self::COURSE_TITLE_TEMPLATES[array_rand(self::COURSE_TITLE_TEMPLATES)],
-            self::COURSE_TITLE_SUBJECTS[array_rand(self::COURSE_TITLE_SUBJECTS)]
-        );
-        $course->setName($name);
-
-        $description = $this->faker->optional()->text($maxNbChars = 400);
-        $course->setDescription($description);
-
-        $this->manager->persist($course);
-
-        return $course;
-    }
 
     private function loadCourses(): array
     {
         $courses = [];
 
         for ($i = 0; $i < 10; $i++) {
-            $courses[] = $this->createCourse();
+            $name = sprintf(
+                self::COURSE_TITLE_TEMPLATES[array_rand(self::COURSE_TITLE_TEMPLATES)],
+                self::COURSE_TITLE_SUBJECTS[array_rand(self::COURSE_TITLE_SUBJECTS)]
+            );
+
+            $courses[] = $this->creator->createCourse(
+                $this->faker->unique()->numerify('COMPSCI####'),
+                $name,
+                $this->faker->optional()->text($maxNbChars = 400)
+            );
         }
 
         return $courses;
     }
 
-    private function createCourseInstance($course, $startDate, $endDate)
-    {
-        $courseInstance = new CourseInstance();
-        $courseInstance->setCourse($course);
-        $courseInstance->setStartDate($startDate);
-        $courseInstance->setEndDate($endDate);
-        // May  need to change this...
-        $this->manager->persist($courseInstance);
-        return $courseInstance;
-    }
-
     private function loadCourseInstances(array $courses, array $instructors, array $students): array
     {
         $courseInstances = [];
+
         foreach ($courses as $course) {
 
-            // Assign a course to one term or both randomly.
-            $assigned = false;
+            $assigned = false; // Assign a course to one term or both randomly.
+
             while (!$assigned) {
 
                 if ((bool)rand(0, 1)) {
                     $startDate = date_create(self::TERM_DATES['firstTerm']['start']);
                     $endDate = date_create(self::TERM_DATES['firstTerm']['end']);
-                    $courseInstances[] = $this->createCourseInstance($course, $startDate, $endDate);
+                    $courseInstances[] = $this->creator->createCourseInstance(
+                        $course,
+                        $startDate,
+                        $endDate
+                    );
                     $assigned = true;
                 }
 
                 if ((bool)rand(0, 1)) {
                     $startDate = date_create(self::TERM_DATES['secondTerm']['start']);
                     $endDate = date_create(self::TERM_DATES['secondTerm']['end']);
-                    $courseInstances[] = $this->createCourseInstance($course, $startDate, $endDate);
+                    $courseInstances[] = $this->creator->createCourseInstance(
+                        $course,
+                        $startDate,
+                        $endDate
+                    );
                     $assigned = true;
                 }
             }
         }
 
-        // May need to touch this up to ensure that instructors have a minimum of X courses.
-        foreach ($courseInstances as $courseInstance) {
-            // Randomise instructor assignment order
-            $instructorsForInstance = $this->faker->shuffle($instructors);
-            // Assign instructors to courses (between 2-4 for each course instance):
-            for ($i = 0; $i < rand(2, 4); $i++) {
-                $courseInstance->addInstructor($instructorsForInstance[$i]);
+        foreach ($instructors as $instructor) {
+            // Randomise course assignment order
+            $coursesForInstructors = $this->faker->shuffle($courseInstances);
+            // Assign courses to instructors (between 6-8 for each instructor):
+            for ($i = 0; $i < rand(6, 8); $i++) {
+                $instructor->addCourseInstance($coursesForInstructors[$i]);
             }
         }
 
@@ -361,17 +294,16 @@ class AppFixtures extends Fixture
 
         // Assign students to courses by creating enrolment objects
         foreach ($students as $student) {
-            // Randomise course assignment order
-            $courseInstancesForStudent = $this->faker->shuffle($courseInstances);
+
+            $coursesForStudents = $this->faker->shuffle($courseInstances);
 
             // Each student is enrolled on 8-10 courses
             // Note: at present this may be the same course for 2 terms in a row. Woo!
             for ($i = 0; $i < rand(8, 10); $i++) {
-                $enrolment = new Enrolment();
-                $enrolment->setStudent($student);
-                $courseInstance = $courseInstancesForStudent[$i];
-                $courseInstance->addEnrolment($enrolment);
-                $this->manager->persist($enrolment);
+                $enrolment = $this->creator->createEnrolment(
+                    $student,
+                    $coursesForStudents[$i]
+                );
                 $enrolments[] = $enrolment;
             }
         }
@@ -387,22 +319,12 @@ class AppFixtures extends Fixture
         $affectiveFields = [];
 
         foreach (self::AFFECTIVE_FIELDS as $name => $labels) {
-            $affectiveField = new AffectiveField();
-            $affectiveField->setName($name);
-            foreach ($labels as $position => $label) {
-                switch ($position) {
-                    case 'high':
-                        $affectiveField->setHighLabel($label);
-                        break;
-                    case 'low':
-                        $affectiveField->setLowLabel($label);
-                        break;
-                    default:
-                        throw new Exception("Invalid affective field position", 1);
-                        break;
-                }
-            }
-            $this->manager->persist($affectiveField);
+            $affectiveField = $this->creator->createAffectiveField(
+                $name,
+                $labels['low'],
+                $labels['high']
+            );
+
             $affectiveFields[$name] = $affectiveField;
         }
 
@@ -414,32 +336,22 @@ class AppFixtures extends Fixture
         $xyQuestions = [];
 
         foreach (self::XY_QUESTIONS as $name => $props) {
-            $xyQuestion = new XYQuestion();
-
-            $xFieldName = $props['fields'][0];
-            $xField = $affectiveFields[$xFieldName];
-
-            $yFieldName = $props['fields'][1];
-            $yField = $affectiveFields[$yFieldName];
-
-            $xyQuestion
-                ->setName($name)
-                ->setQuestionText($props['text'])
-                ->setXField($xField)
-                ->setYField($yField);
-
-            $this->manager->persist($xyQuestion);
+            $xyQuestion = $this->creator->createXYQuestion(
+                $name,
+                $props['text'],
+                $affectiveFields[$props['fields'][0]],
+                $affectiveFields[$props['fields'][1]]
+            );
 
             $xyQuestions[$name] = $xyQuestion;
         }
 
-        $this->manager->flush();
         return $xyQuestions;
     }
 
-    public function loadLabSurveys(array $courseInstances, array $xyQuestions): array
+    public function loadLabs(array $courseInstances, array $xyQuestions): array
     {
-        $labSurveys = [];
+        $labs = [];
 
         foreach ($courseInstances as $courseInstance) {
             // Copy as we don't want to mutate the original
@@ -452,56 +364,56 @@ class AppFixtures extends Fixture
 
             // Create 10 labs every week for each course
             for ($i = 0; $i < 10; $i++) {
-                $labSurvey = new LabSurvey();
 
                 $labStartDate = clone $courseStart;
                 $labStartDate->modify('+' . $i . 'week');
 
-                $labSurvey
-                    ->setName('Lab ' . strval($i + 1))
-                    ->setStartDateTime($labStartDate);
-
-                $courseInstance->addLabSurvey($labSurvey);
+                $lab = $this->creator->createLab(
+                    'Lab ' . strval($i + 1),
+                    $labStartDate,
+                    $courseInstance
+                );
 
                 // Add stock XY Questions for each lab instance
                 foreach ($xyQuestions as $name => $xyQuestion) {
-                    $labSurveyXYQuestion = new LabSurveyXYQuestion();
+                    $labXYQuestion = $this->creator->createLabXYQuestion(
+                        self::XY_QUESTIONS[$name]['index'],
+                        $xyQuestion,
+                        $lab
+                    );
 
-                    // Set the question order by index
-                    $labSurveyXYQuestion->setIndex(self::XY_QUESTIONS[$name]['index']);
-
-
-                    $labSurveyXYQuestion
-                        ->setXyQuestion($xyQuestion);
-
-                    $labSurvey->addXyQuestion($labSurveyXYQuestion);
-
-                    $this->manager->persist($labSurveyXYQuestion);
+                    // With one basic danger zone as default
+                    $dangerZone = $this->creator->createLabXYQuestionDangerZone(
+                        2,
+                        -10,
+                        -6,
+                        -10,
+                        -6,
+                        $labXYQuestion
+                    );
                 }
 
                 // For each student in the lab, generate an empty response object
-                $students = $courseInstance->getEnrolments()->map(function ($e) {
+                $studentsInLab = $courseInstance->getEnrolments()->map(function ($e) {
                     return $e->getStudent();
                 });
 
-                foreach ($students as $student) {
-                    $labSurveyResponse = new LabSurveyResponse();
-                    $labSurveyResponse
-                        ->setSubmitted(false)
-                        ->setStudent($student)
-                        ->setLabSurvey($labSurvey);
-                    $this->manager->persist($labSurveyResponse);
+                foreach ($studentsInLab as $student) {
+                    $labResponse = $this->creator->createLabResponse(
+                        false,
+                        $student,
+                        $lab
+                    );
                 }
 
-                $this->manager->persist($labSurvey);
-                $labSurveys[] = $labSurvey;
+                $labs[] = $lab;
             }
         }
-        $this->manager->flush();
-        return $labSurveys;
+
+        return $labs;
     }
 
-    public function loadLabSurveyResponses($courseInstances)
+    public function loadLabResponses($courseInstances)
     {
         $completedResponses = [];
 
@@ -509,53 +421,41 @@ class AppFixtures extends Fixture
 
         foreach ($courseInstances as $courseInstance) {
             // Get all enrolled students on that course
-            $students = $courseInstance->getEnrolments()->map(function ($e) {
+            $studentsInCourse = $courseInstance->getEnrolments()->map(function ($e) {
                 return $e->getStudent();
             });
-            var_dump('student count  ' . count($students));
             // For each courseInstance starting before the simulated date...
             if ($courseInstance->getStartDate() <= $cutoffDate) {
 
                 // For each lab before the cutoff date / time...
-                $labSurveys = $courseInstance->getLabSurveys()->filter(
+                $labs = $courseInstance->getLabs()->filter(
                     function ($lab) use ($cutoffDate) {
                         return $lab->getStartDateTime() <= $cutoffDate;
                     }
                 )->toArray();
 
-                foreach ($labSurveys as $labSurvey) {
+                foreach ($labs as $lab) {
                     // each student...
-                    foreach ($students as $student) {
-
+                    foreach ($studentsInCourse as $student) {
                         // 80% chance of completing survey
                         if (rand(0, 10) < 8) {
+                            $labResponse = $this->manager->getRepository(LabResponse::class)
+                                ->findOneByLabAndStudent($lab, $student)
+                                ->setSubmitted(true);
 
-                            $labSurveyResponse = $this->manager->getRepository(LabSurveyResponse::class)
-                                ->findOneByLabSurveyAndStudent($labSurvey, $student);
-
-                            $labSurveyResponse->setSubmitted(true);
-
-                            // SET THE SURVEY QUESTIONS
-                            // ------------------------
-                            // XY
-                            $labSurveyXYQuestions = $labSurvey->getXyQuestions()->toArray();
+                            // XYQuestions
+                            $labXYQuestions = $lab->getLabXYQuestions()->toArray();
                             // 90% chance of completing an XY question
-                            foreach ($labSurveyXYQuestions as $xyQuestion) {
+                            foreach ($labXYQuestions as $labXYQuestion) {
                                 if (rand(0, 10) < 9) {
-                                    $xyResponse = new LabSurveyXYQuestionResponse();
-                                    $xyCoordinates = new XYCoordinates(rand(-10, 9), rand(-10, 9));
-
-                                    $xyResponse
-                                        ->setCoordinates($xyCoordinates)
-                                        ->setLabSurveyXYQuestion($xyQuestion);
-
-                                    $labSurveyResponse->addXyQuestionResponse($xyResponse);
-
-                                    $this->manager->persist($xyResponse);
+                                    $xyResponse = $this->creator->createLabXYQuestionResponse(
+                                        new XYCoordinates(rand(-10, 9), rand(-10, 9)),
+                                        $labXYQuestion,
+                                        $labResponse
+                                    );
                                 }
                             }
-
-                            $completedResponses[] = $labSurveyResponse;
+                            $completedResponses[] = $labResponse;
                         }
                     }
                 }

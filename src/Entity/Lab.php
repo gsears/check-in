@@ -2,15 +2,22 @@
 
 namespace App\Entity;
 
-use App\Repository\LabSurveyRepository;
+use App\Repository\LabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
- * @ORM\Entity(repositoryClass=LabSurveyRepository::class)
+ * @ORM\Entity(repositoryClass=LabRepository::class)
+ * @UniqueEntity(
+ *     fields={"courseInstance", "name"},
+ *     errorPath="name",
+ *     message="Lab names must be unique for each course instance."
+ * )
  */
-class LabSurvey
+class Lab
 {
     /**
      * @ORM\Id()
@@ -25,29 +32,34 @@ class LabSurvey
     private $name;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $slug;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $startDateTime;
 
     /**
-     * @ORM\ManyToOne(targetEntity=CourseInstance::class, inversedBy="labSurveys")
+     * @ORM\ManyToOne(targetEntity=CourseInstance::class, inversedBy="labs")
      * @ORM\JoinColumn(nullable=false)
      */
     private $courseInstance;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyXYQuestion::class, mappedBy="labSurvey", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabXYQuestion::class, mappedBy="lab", orphanRemoval=true)
      */
-    private $xyQuestions;
+    private $labXYQuestions;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabSurveyResponse::class, mappedBy="labSurvey", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="lab", orphanRemoval=true)
      */
     private $responses;
 
     public function __construct()
     {
-        $this->xyQuestions = new ArrayCollection();
+        $this->labXYQuestions = new ArrayCollection();
         $this->responses = new ArrayCollection();
     }
 
@@ -78,8 +90,14 @@ class LabSurvey
     public function setName(string $labName): self
     {
         $this->name = $labName;
+        $this->slug = strtolower((new AsciiSlugger())->slug($labName));
 
         return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
     }
 
     public function getStartDateTime(): ?\DateTimeInterface
@@ -107,30 +125,30 @@ class LabSurvey
     }
 
     /**
-     * @return Collection|LabSurveyXYQuestion[]
+     * @return Collection|LabXYQuestion[]
      */
-    public function getXyQuestions(): Collection
+    public function getLabXYQuestions(): Collection
     {
-        return $this->xyQuestions;
+        return $this->labXYQuestions;
     }
 
-    public function addXyQuestion(LabSurveyXYQuestion $xyQuestion): self
+    public function addLabXYQuestion(LabXYQuestion $xyQuestion): self
     {
-        if (!$this->xyQuestions->contains($xyQuestion)) {
-            $this->xyQuestions[] = $xyQuestion;
-            $xyQuestion->setLabSurvey($this);
+        if (!$this->labXYQuestions->contains($xyQuestion)) {
+            $this->labXYQuestions[] = $xyQuestion;
+            $xyQuestion->setLab($this);
         }
 
         return $this;
     }
 
-    public function removeXyQuestion(LabSurveyXYQuestion $xyQuestion): self
+    public function removeLabXYQuestion(LabXYQuestion $xyQuestion): self
     {
-        if ($this->xyQuestions->contains($xyQuestion)) {
-            $this->xyQuestions->removeElement($xyQuestion);
+        if ($this->labXYQuestions->contains($xyQuestion)) {
+            $this->labXYQuestions->removeElement($xyQuestion);
             // set the owning side to null (unless already changed)
-            if ($xyQuestion->getLabSurvey() === $this) {
-                $xyQuestion->setLabSurvey(null);
+            if ($xyQuestion->getLab() === $this) {
+                $xyQuestion->setLab(null);
             }
         }
 
@@ -144,7 +162,7 @@ class LabSurvey
     public function getQuestions(): Collection
     {
         // Join here.
-        $collection = $this->getXyQuestions();
+        $collection = $this->getLabXYQuestions();
 
         // Order here.
         $iterator = $collection->getIterator();
@@ -161,30 +179,30 @@ class LabSurvey
     }
 
     /**
-     * @return Collection|LabSurveyResponse[]
+     * @return Collection|LabResponse[]
      */
     public function getResponses(): Collection
     {
         return $this->responses;
     }
 
-    public function addResponse(LabSurveyResponse $response): self
+    public function addResponse(LabResponse $response): self
     {
         if (!$this->responses->contains($response)) {
             $this->responses[] = $response;
-            $response->setLabSurvey($this);
+            $response->setLab($this);
         }
 
         return $this;
     }
 
-    public function removeResponse(LabSurveyResponse $response): self
+    public function removeResponse(LabResponse $response): self
     {
         if ($this->responses->contains($response)) {
             $this->responses->removeElement($response);
             // set the owning side to null (unless already changed)
-            if ($response->getLabSurvey() === $this) {
-                $response->setLabSurvey(null);
+            if ($response->getLab() === $this) {
+                $response->setLab(null);
             }
         }
 

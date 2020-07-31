@@ -61,11 +61,13 @@ class User implements UserInterface
      */
     private $instructor;
 
-    public function __toString() : string
+    public function __toString(): string
     {
-        return sprintf("Name: %s - Email: %s\n",
+        return sprintf(
+            "Name: %s - Email: %s\n",
             $this->getFullname(),
-            $this->getEmail());
+            $this->getEmail()
+        );
     }
 
     public function getId(): ?int

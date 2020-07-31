@@ -1,7 +1,7 @@
 index:
   path: /
-  # Uses default TemplateController as the renderer in the Symfony package
-  # See https://symfony.com/doc/current/templates.html#rendering-a-template-directly-from-a-route
-  controller: Symfony\Bundle\FrameworkBundle\Controller\TemplateController::templateAction
+  # Redirect index to the courses page
+  controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
   defaults:
-    template: index.html.twig
+    route: "courses"
+    permanent: true

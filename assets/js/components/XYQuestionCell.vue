@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :style="sizeStyle()">
+  <div class="wrapper">
     <input
       :name="name"
       type="checkbox"
@@ -37,13 +37,6 @@ export default {
     },
   },
   methods: {
-    sizeStyle() {
-      return {
-        height: this.size + "rem",
-        width: this.size + "rem",
-        fontSize: this.size + "rem",
-      };
-    },
     handleChange(e) {
       this.$emit("change", {
         coordinates: {
@@ -69,6 +62,9 @@ export default {
 .wrapper {
   display: inline-block;
   position: relative;
+  height: 1em;
+  width: 1em;
+  font-size: 1em;
 }
 
 /*style and hide original checkbox*/

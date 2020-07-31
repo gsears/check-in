@@ -1,46 +1,35 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <div class="col"></div>
-      <div class="col-xs-6">
-        <h2 class="h5">{{ yLabelHigh }}</h2>
-      </div>
-      <div class="col"></div>
+  <div class="d-flex align-items-center">
+    <div class>
+      <h2 class="label text-right mr-2 xlabel-left">{{ xLabelLow }}</h2>
     </div>
-    <div class="row align-items-center">
-      <div class="col">
-        <h2 class="h5 text-right">{{ xLabelLow }}</h2>
-      </div>
-      <div class="col-xs-6">
-        <div class="grid-wrapper">
-          <div class="y-row" ref="rows" v-for="(y, row) in 4" :key="y">
-            <XYQuestionRange
-              class="x-range"
-              v-for="(x, col) in 4"
-              :key="x"
-              :name="name"
-              :disableCells="disableCells"
-              :cellSizeInRem="cellSizeInRem"
-              :selectedArray="selected"
-              :xMin="xMinVal(col)"
-              :xMax="xMaxVal(col)"
-              :yMin="yMinVal(row)"
-              :yMax="yMaxVal(row)"
-              @change="handleChange($event)"
-            ></XYQuestionRange>
-          </div>
+    <div class="text-center">
+      <h2 class="label">{{ yLabelHigh }}</h2>
+      <div class="grid-wrapper">
+        <!-- Note that i, j are indexed from 0, row and col from 1 -->
+        <!-- id is used to index XYQuestionRanges in this.regions -->
+        <div class="y-row" ref="rows" v-for="(row, j) in yRanges" :key="row">
+          <XYQuestionRange
+            class="x-range"
+            v-for="(col, i) in xRanges"
+            :key="col"
+            :name="name"
+            :mode="mode"
+            :dataPoints="dataPoints"
+            :dataRegions="dataRegions"
+            :xMin="xMinVal(i)"
+            :xMax="xMaxVal(i)"
+            :yMin="yMinVal(j)"
+            :yMax="yMaxVal(j)"
+            @pointChange="handlePointChange($event)"
+            @regionClick="handleRegionChange($event)"
+          ></XYQuestionRange>
         </div>
-      </div>
-      <div class="col">
-        <h2 class="h5 text-left">{{ xLabelHigh }}</h2>
+        <h2 class="label">{{ yLabelLow }}</h2>
       </div>
     </div>
-    <div class="row">
-      <div class="col"></div>
-      <div class="col-xs-6">
-        <h2 class="h5">{{ yLabelLow }}</h2>
-      </div>
-      <div class="col"></div>
+    <div class>
+      <h2 class="label text-left ml-2 xlabel-right">{{ xLabelHigh }}</h2>
     </div>
   </div>
 </template>
@@ -55,18 +44,35 @@ export default {
   },
   props: {
     name: String,
-    onChange: Function,
-    initialData: Array, // Data array
-    multiselect: {
-      type: Boolean,
-      default: false,
+    points: {
+      type: Object,
+      default: function () {
+        return {
+          data: [],
+          onChange: () => {},
+          multiselect: false,
+        };
+      },
     },
-    disableCells: {
-      default: false,
+    regions: {
+      type: Object,
+      default: function () {
+        return {
+          data: [],
+          onChange: () => {},
+          multiselect: false,
+        };
+      },
     },
-    cellSizeInRem: {
-      type: Number,
-      default: 1.5,
+    mode: {
+      type: String,
+      default: "point",
+      validator: (value) => {
+        return (
+          ["readonly-danger", "readonly", "point", "region"].indexOf(value) !==
+          -1
+        );
+      },
     },
     xRanges: {
       default: 4,
@@ -98,9 +104,9 @@ export default {
     },
   },
   data() {
-    console.log(this.initialData);
     return {
-      selected: this.initialData, // Copy
+      dataPoints: [...this.points.data],
+      dataRegions: [...this.regions.data],
     };
   },
   methods: {
@@ -120,8 +126,8 @@ export default {
         (this.yRanges / 2) * this.yRangeLength - row * this.yRangeLength - 1
       );
     },
-    setSelected(xMin, xMax, yMin, yMax) {
-      var selected = this.selected.filter((coordinates) => {
+    setPoints(xMin, xMax, yMin, yMax) {
+      var points = this.points.filter((coordinates) => {
         return (
           coordinates.x >= xMin &&
           coordinates.x <= xMax &&
@@ -129,30 +135,69 @@ export default {
           coordinates.y <= yMax
         );
       });
-      return selected;
+      return points;
     },
-    handleChange(e) {
-      if (e.checked) {
-        if (this.multiselect) {
-          this.selected.push(e.coordinates);
+    handlePointChange(e) {
+      if (this.mode === "point") {
+        // If point is checked
+        if (e.checked) {
+          if (this.points.multiselect) {
+            this.dataPoints.push(e.coordinates);
+          } else {
+            this.dataPoints = [e.coordinates];
+          }
+          // Remove (first found) from data array
         } else {
-          this.selected = [e.coordinates];
+          const index = this.dataPoints.findIndex((obj) => {
+            return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
+          });
+          this.dataPoints.splice(index, 1);
         }
-      } else {
-        var index = this.selected.findIndex((obj) => {
-          return obj.x === e.coordinates.x && obj.y === e.coordinates.y;
-        });
-        this.selected.splice(index, 1);
-      }
 
-      // Run the callback with the updated selection.
-      this.onChange([...this.selected]);
+        // Run the callback for a point change
+        this.points.onChange([...this.dataPoints]);
+      }
+    },
+    handleRegionChange(e) {
+      if (this.mode === "region") {
+        const region = e.data;
+        // Find in array, otherwise push
+        const index = this.dataRegions.findIndex((obj) => {
+          return (
+            obj.xMin === region.xMin &&
+            obj.xMax === region.xMax &&
+            obj.yMin === region.yMin &&
+            obj.yMax === region.yMax
+          );
+        });
+
+        if (index < 0) {
+          // Add if missing
+          this.dataRegions.push(region);
+        } else {
+          // Update if found
+          this.$set(this.dataRegions, index, region);
+        }
+
+        // Provide just the regions with risk levels in the callback.
+        const selectedRegions = [
+          ...this.dataRegions.filter((region) => {
+            return region.riskLevel > 0;
+          }),
+        ];
+
+        this.regions.onChange(selectedRegions);
+      }
     },
   },
 };
 </script>
 
 <style scoped>
+.label {
+  font-weight: bold;
+  font-size: 1rem;
+}
 .grid-wrapper {
   line-height: 0%;
 }
@@ -169,5 +214,16 @@ export default {
   height: 100%;
   min-width: 2px;
   background-color: black;
+}
+
+.xlabel-left {
+  writing-mode: vertical-rl;
+  height: max-content;
+  transform: rotate(180deg);
+}
+
+.xlabel-right {
+  writing-mode: vertical-rl;
+  height: max-content;
 }
 </style>

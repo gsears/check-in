@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Course;
 use App\Entity\CourseInstance;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -51,16 +52,43 @@ class CourseInstanceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
-    /*
-    public function findOneBySomeField($value): ?CourseInstance
+    public function findIfMatchesCourse($id, $courseId)
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('ci')
+            ->join('ci.course', 'c')
+            ->andWhere('ci = :id')
+            ->setParameter('id', $id)
+            ->andWhere('c = :courseId')
+            ->setParameter('courseId', $courseId)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getOneOrNullResult();
     }
-    */
+
+    public function findByIndexAndCourse($instanceIndex, $courseId)
+    {
+        return $this->createQueryBuilder('ci')
+            ->andWhere('ci.indexInCourse = :instanceIndex')
+            ->setParameter('instanceIndex', $instanceIndex)
+            ->andWhere('ci.course = :courseId')
+            ->setParameter('courseId', $courseId)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getNextIndexInCourse(Course $course): int
+    {
+        $max = $this->createQueryBuilder('ci')
+            ->select('MAX(ci.indexInCourse)')
+            ->where('ci.course = :course')
+            ->setParameter('course', $course)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $max + 1;
+    }
+
+    public function indexExistsInCourse(int $index, Course $course): bool
+    {
+        return $index < $this->getNextIndexInCourse($course);
+    }
 }

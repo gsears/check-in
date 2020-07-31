@@ -2,121 +2,133 @@
 
 namespace App\Controller;
 
-use App\Entity\CourseInstance;
-use App\Entity\LabSurvey;
-use App\Entity\LabSurveyResponse;
-use App\Entity\LabSurveyXYQuestion;
-use App\Entity\LabSurveyXYQuestionResponse;
-use App\Entity\Student;
-use App\Entity\User;
-use App\Entity\XYQuestion;
-use App\Form\Type\LabSurveyResponseType;
-use App\Form\Type\LabSurveyXYQuestionResponseType;
-use App\Form\Type\SurveyQuestionResponseType;
-use App\Form\Type\XYCoordinatesType;
 use App\Security\Roles;
-use App\Security\Voter\CourseInstanceVoter;
+use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Repository\LabRepository;
+use App\Form\Type\LabDangerZoneType;
 use App\Security\Voter\StudentVoter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
+use App\Entity\LabXYQuestionResponse;
+use App\Repository\StudentRepository;
+use App\Entity\SurveyQuestionInterface;
+use App\Form\Type\LabResponseType;
+use App\Repository\LabResponseRepository;
+use App\Security\Voter\CourseInstanceVoter;
+use App\Form\Type\LabXYQuestionResponseType;
+use App\Repository\CourseInstanceRepository;
+use App\Form\Type\SurveyQuestionResponseType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+/**
+ * @Route("/courses")
+ */
 class CourseController extends AbstractController
 {
     /**
-     * @Route("/courses", name="courses")
+     * Symfony injects in the CourseInstanceRepository.
+     *
+     * @Route("", name="courses")
      */
-    public function index()
+    public function index(CourseInstanceRepository $courseRepo, LabRepository $labRepo)
     {
         $user = $this->getUser();
 
-        if ($user->isStudent()) {
-            $courseInstances = $this->getDoctrine()
-                ->getRepository(CourseInstance::class)
-                ->findByStudent($user->getStudent());
+        $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
 
+        if ($user->isStudent()) {
+            $student = $user->getStudent();
+            $courseInstances = $courseRepo->findByStudent($user->getStudent());
+            $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
                 'courseInstances' => $courseInstances,
-                'studentId' => $user->getStudent()->getGuid()
+                'studentId' => $student->getGuid(),
+                'recentLabs' => $pendingLabs,
             ]);
         }
 
         if ($user->isInstructor()) {
-            $courseInstances = $this->getDoctrine()
-                ->getRepository(CourseInstance::class)
-                ->findByInstructor($user->getInstructor());
-
+            $instructor = $user->getInstructor();
+            $courseInstances = $courseRepo->findByInstructor($instructor);
+            $recentLabs = $labRepo->findLatestByInstructor($instructor, 5);
             return $this->render('course/courses_instructor.html.twig', [
-                'courseInstances' => $courseInstances
+                'courseInstances' => $courseInstances,
+                'recentLabs' => $recentLabs
             ]);
         }
+
+        $this->createAccessDeniedException("Invalid user role");
     }
 
     /**
+     * Symfony injects in the LabRepository.
+     *
      * Includes course ID in the URL for readability.
      *
-     * @Route("/courses/{courseId}/{instanceId}", name="view_course")
+     * @Route("/{courseId}/{instanceIndex}", name="view_course_summary")
      */
-    public function viewCourse($courseId, $instanceId)
-    {
-        // Check if exists...
-        $courseInstance = $this->getDoctrine()
-            ->getRepository(CourseInstance::class)
-            ->find($instanceId);
+    public function viewCourse(
+        $courseId,
+        $instanceIndex,
+        CourseInstanceRepository $courseInstanceRepo,
+        LabRepository $labRepo
+    ) {
 
-        if (!$this->coursePathExists($courseInstance, $courseId)) {
-            throw $this->createNotFoundException('This course does not exist');
-        }
+        // DATA
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
+
+        // SECURITY
 
         // Only instructors can access
         $this->denyAccessUnlessGranted(Roles::INSTRUCTOR);
 
-        return $this->render('course/course_summary.html.twig', ['courseInstance' => $courseInstance]);
+        // HANDLER
+
+        $labs = $labRepo->findByCourseInstance($courseInstance);
+
+        return $this->render('course/course_summary.html.twig', [
+            'courseInstance' => $courseInstance,
+            'labs' => $labs
+        ]);
     }
 
     /**
      * Includes course ID in the URL for readability.
      *
-     * @Route("/courses/{courseId}/{instanceId}/{studentId}", name="view_course_student_summary")
+     * @Route("/{courseId}/{instanceIndex}/{studentId}", name="view_course_student_summary")
      */
-    public function viewCourseStudentSummary($courseId, $instanceId, $studentId)
-    {
-        $entityManager = $this->getDoctrine();
+    public function viewCourseStudentSummary(
+        $courseId,
+        $instanceIndex,
+        $studentId,
+        CourseInstanceRepository $courseInstanceRepo,
+        StudentRepository $studentRepo,
+        LabRepository $labRepo
+    ) {
 
-        $courseInstanceRepo = $entityManager
-            ->getRepository(CourseInstance::class);
+        // DATA
 
-        $courseInstance = $courseInstanceRepo->find($instanceId);
-
-        $studentRepo = $entityManager
-            ->getRepository(Student::class);
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
         $student = $studentRepo->find($studentId);
+        if (!$student) throw $this->createNotFoundException('This student does not exist');
 
-        // ...and courseid matches up with the instance id
-        if (!($this->coursePathExists($courseInstance, $courseId) && $student)) {
-            throw $this->createNotFoundException('The course with this student does not exist');
-        }
+        // SECURITY
 
         // Check permission to view course instance
         $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
         // Check if instructor on that course or the same student
         $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
 
-        $labSurveyRepo = $entityManager
-            ->getRepository(LabSurvey::class);
+        // HANDLER
 
-        $labs = $labSurveyRepo
-            ->findByCourseInstance($courseInstance);
-
-        $completedLabs = $labSurveyRepo
-            ->findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
-
-        $pendingLabs = $labSurveyRepo
-            ->findPendingSurveysByCourseInstanceAndStudent($courseInstance, $student);
+        $completedLabs = $labRepo->findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
+        $pendingLabs = $labRepo->findPendingSurveysByCourseInstanceAndStudent($courseInstance, $student);
 
         return $this->render('course/student_summary.html.twig', [
             'user' => $this->getUser(),
@@ -128,101 +140,163 @@ class CourseController extends AbstractController
     }
 
     /**
-     * !page always generates the page number in the URL
-     * Optional
-     * @Route("/courses/{courseId}/{instanceId}/lab/{labId}/{studentId}/{!page}", name="lab_survey_response", requirements={"page"="\d+"})
+     * Includes course ID in the URL for readability.
+     *
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}", name="view_lab_summary")
      */
-    public function completeLabSurvey(Request $request, $courseId, $instanceId, $labId, $studentId, int $page = 1)
-    {
-        // Security and sanity checks:
+    public function viewLabSummary(
+        Request $request,
+        $courseId,
+        $instanceIndex,
+        $labSlug,
+        CourseInstanceRepository $courseInstanceRepo,
+        LabRepository $labRepo
+    ) {
 
-        $entityManager = $this->getDoctrine();
+        // DATA
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
 
-        $courseInstanceRepo = $entityManager
-            ->getRepository(CourseInstance::class);
+        $lab = $labRepo->findOneBy([
+            "slug" => $labSlug
+        ]);
 
-        $courseInstance = $courseInstanceRepo->find($instanceId);
+        if (!$lab) throw $this->createNotFoundException('This lab does not exist');
 
-        $studentRepo = $entityManager
-            ->getRepository(Student::class);
+        // SECURITY
 
-        $student = $studentRepo->find($studentId);
+        // Only people who can edit this course instance are allowed to view (i.e. instructors on the course)
+        // $this->denyAccessUnlessGranted(CourseInstanceVoter::EDIT, $courseInstance);
 
-        $labRepo = $entityManager
-            ->getRepository(LabSurvey::class);
+        // HANDLER
 
-        $lab = $labRepo->find($labId);
+        $form = $this->createForm(LabDangerZoneType::class, $lab);
+        $form->handleRequest($request);
 
-        if (!($this->coursePathExists($courseInstance, $courseId) && $lab && $student)) {
-            throw $this->createNotFoundException('This lab survey does not exist');
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Danger zones have been updated
+
+            // $form->getData() holds the submitted survey question response
+            $updatedLab = $form->getData();
+
+            // Update the database
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($updatedLab);
+            $entityManager->flush();
         }
 
+        return $this->render('lab/summary.html.twig', [
+            'courseName' => $courseInstance->getName(),
+            'labName' => $lab->getName(),
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}", name="lab_survey_view")
+     */
+    public function viewSurveyResponse(
+        Request $request,
+        $courseId,
+        $instanceIndex,
+        $labSlug,
+        $studentId,
+        CourseInstanceRepository $courseInstanceRepo,
+        LabRepository $labRepo,
+        StudentRepository $studentRepo,
+        LabResponseRepository $labResponseRepo
+    ) {
+        // DATA
+
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
+
+        $lab = $labRepo->findOneBy([
+            "slug" => $labSlug
+        ]);
+        if (!$lab) throw $this->createNotFoundException('This lab does not exist');
+
+        $student = $studentRepo->find($studentId);
+        if (!$student) throw $this->createNotFoundException("This student does not exist");
+
+        // Response always exists, so no error checking
+        $labResponse = $labResponseRepo->findOneByLabAndStudent($lab, $student);
+
+        // SECURITY
         // Check permission to view course instance
         $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
-        // Check if the user is the owning student
-        $this->denyAccessUnlessGranted(StudentVoter::EDIT, $student);
+        // Check if the user is the owning student or instructor, otherwise deny
+        $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
 
+        // HANDLER
+        $form = $this->createForm(LabResponseType::class, $labResponse, [
+            'read_only' => true
+        ]);
+
+        return $this->render('lab/response.html.twig', [
+            'courseName' => $courseInstance->getName(),
+            'labName' => $lab->getName(),
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * !page always generates the page number in the URL. Checks if page is a number.
+     *
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}/survey/{!page}",
+     *      name="lab_survey_response",
+     *      requirements={"page"="\d+"})
+     *
+     */
+    public function labSurvey(
+        Request $request,
+        $courseId,
+        $instanceIndex,
+        $labSlug,
+        $studentId,
+        int $page = 1,
+        CourseInstanceRepository $courseInstanceRepo,
+        LabRepository $labRepo,
+        StudentRepository $studentRepo,
+        LabResponseRepository $labResponseRepo
+    ) {
+
+        // DATA
+
+        $courseInstance = $courseInstanceRepo->findByIndexAndCourse($instanceIndex, $courseId);
+        if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
+
+        $lab = $labRepo->findOneBy([
+            "slug" => $labSlug
+        ]);
+
+        if (!$lab) throw $this->createNotFoundException('This lab does not exist');
+
+        $student = $studentRepo->find($studentId);
+        if (!$student) throw $this->createNotFoundException("This student does not exist");
+
+        // Check if question exists. Out of bounds exception means it doesn't.
         try {
             $question = $lab->getQuestions()->toArray()[$page - 1];
         } catch (\Throwable $th) {
             throw $this->createNotFoundException('This lab survey question does not exist');
         }
 
-        // Check that referrer was previous question, otherwise redirect to first question
-        // to avoid skipping.
+        // Response always exists, so no error checking
+        $labResponse = $labResponseRepo->findOneByLabAndStudent($lab, $student);
 
-        if ($page > 1) {
-            $referer = $request->headers->get('referer');
+        // SECURITY
 
-            if (!$referer) {
-                throw new AccessDeniedHttpException('Cannot skip form entry.');
-            }
-            $current = $request->getUri();
-            $regex = "/(.+)\/(\d+)$/";
+        // Check permission to view course instance
+        $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
+        // Check if the user is the owning student, otherwise deny
+        $this->denyAccessUnlessGranted(StudentVoter::EDIT, $student);
+        // Avoid jumping halfway into the form. Referrer must be a previous question.
+        $this->checkValidLabSurveyReferrer($request, $page);
 
-            preg_match($regex, $referer, $refererMatch);
-            preg_match($regex, $current, $currentMatch);
+        // HANDLER
 
-            $refererBase = $refererMatch[1];
-            $currentBase = $currentMatch[1];
-            $refererPage = intval($refererMatch[2]);
-
-            if ($refererBase !== $currentBase || !in_array($refererPage, [$page, $page - 1])) {
-                throw new AccessDeniedHttpException('Cannot skip form entry.');
-            }
-        }
-
-
-        // Generate form:
-
-        $labSurveyResponseRepo = $entityManager
-            ->getRepository(LabSurveyResponse::class);
-
-        // There is always a response object for each student
-        $response = $labSurveyResponseRepo->findOneByLabSurveyAndStudent($lab, $student);
-
-        // Perform action depending on question type
-        if ($question instanceof LabSurveyXYQuestion) {
-
-            // Get the response that matches the question
-            $questionResponse = $response->getXYQuestionResponses()->filter(
-                function (LabSurveyXYQuestionResponse $xyQuestionResponse) use ($question) {
-                    return $xyQuestionResponse->getLabSurveyXYQuestion() === $question;
-                }
-            )->first();
-
-            // If it doesn't exist, create a new empty one
-            if (!$questionResponse) {
-                $questionResponse = new LabSurveyXYQuestionResponse();
-                $questionResponse->setLabSurveyXYQuestion($question);
-                $questionResponse->setLabSurveyResponse($response);
-            }
-
-            $form = $this->createForm(LabSurveyXYQuestionResponseType::class,  $questionResponse);
-        }
-
-        // Handle form:
-
+        $form = $this->generateLabSurveyForm($question, $labResponse);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -239,8 +313,9 @@ class CourseController extends AbstractController
                     // $form->getData() holds the submitted survey question response
                     $questionResponse = $form->getData();
                     // Save the response to the database.
-                    $entityManager->getManager()->persist($questionResponse);
-                    $entityManager->getManager()->flush();
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->persist($questionResponse);
+                    $entityManager->flush();
                 }
 
                 // Redirect accordingly...
@@ -248,24 +323,21 @@ class CourseController extends AbstractController
                     // Get next page in the survey
                     return $this->redirectToRoute('lab_survey_response', [
                         'courseId' => $courseId,
-                        'instanceId' => $instanceId,
-                        'labId' => $labId,
+                        'instanceIndex' => $instanceIndex,
+                        'labSlug' => $labSlug,
                         'studentId' => $studentId,
                         'page' => $page + 1
                     ]);
                 } else {
+                    // The form is completed. Even if everything was skipped!
+                    $labResponse->setSubmitted(true);
 
-                    if (!$skipped) {
-                        // We've completed the form. Update the lab response to completed...
-                        $response->setSubmitted(true);
-                        // ...and save to the database.
-                        $entityManager->getManager()->flush();
-                    }
-
+                    // Update it in the database
+                    $this->getDoctrine()->getManager()->flush();
                     // Back to summary
                     return $this->redirectToRoute('view_course_student_summary', [
                         'courseId' => $courseId,
-                        'instanceId' => $instanceId,
+                        'instanceIndex' => $instanceIndex,
                         'studentId' => $studentId
                     ]);
                 }
@@ -273,18 +345,59 @@ class CourseController extends AbstractController
         }
 
         // Render the form. If there are submission errors, they will be displayed too.
-        return $this->render('labsurvey/page.html.twig', [
-            'form' => $form->createView()
+        return $this->render('lab/survey_page.html.twig', [
+            'courseName' => $courseInstance->getName(),
+            'labName' => $lab->getName(),
+            'form' => $form->createView(),
         ]);
     }
 
-    private function coursePathExists($courseInstance, $courseId): bool
+    private function checkValidLabSurveyReferrer(Request $request, $page)
     {
-        if ($courseInstance) {
-            $courseCode = $courseInstance->getCourse()->getCode();
-            return $courseCode === $courseId;
+        if ($page > 1) {
+            $referer = $request->headers->get('referer');
+
+            if (!$referer) {
+                throw new AccessDeniedHttpException('Cannot skip form entry.');
+            }
+
+            $current = $request->getUri();
+            $regex = "/(.+)\/(\d+)$/";
+
+            preg_match($regex, $referer, $refererMatch);
+            preg_match($regex, $current, $currentMatch);
+
+            $refererBase = $refererMatch[1];
+            $currentBase = $currentMatch[1];
+            $refererPage = intval($refererMatch[2]);
+
+            if ($refererBase !== $currentBase || !in_array($refererPage, [$page, $page - 1])) {
+                throw new AccessDeniedHttpException('Cannot skip form entry.');
+            }
+        }
+    }
+
+    private function generateLabSurveyForm(SurveyQuestionInterface $question, LabResponse $labResponse): FormInterface
+    {
+        if ($question instanceof LabXYQuestion) {
+
+            // Get the response that matches the question
+            $questionResponse = $labResponse->getXYQuestionResponses()->filter(
+                function (LabXYQuestionResponse $xyQuestionResponse) use ($question) {
+                    return $xyQuestionResponse->getLabXYQuestion() === $question;
+                }
+            )->first();
+
+            // If it doesn't exist, create a new empty one
+            if (!$questionResponse) {
+                $questionResponse = new LabXYQuestionResponse();
+                $questionResponse->setLabXYQuestion($question);
+                $questionResponse->setLabResponse($labResponse);
+            }
+
+            $form = $this->createForm(LabXYQuestionResponseType::class,  $questionResponse);
         }
 
-        return false;
+        return $form;
     }
 }
