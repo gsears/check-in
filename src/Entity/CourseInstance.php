@@ -56,6 +56,16 @@ class CourseInstance
      */
     private $indexInCourse;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $riskThreshold;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $riskConsecutiveLabCount;
+
     public function __construct()
     {
         $this->instructors = new ArrayCollection();
@@ -221,6 +231,30 @@ class CourseInstance
     public function setIndexInCourse(int $indexInCourse): self
     {
         $this->indexInCourse = $indexInCourse;
+
+        return $this;
+    }
+
+    public function getRiskThreshold(): ?int
+    {
+        return $this->riskThreshold;
+    }
+
+    public function setRiskThreshold(int $riskThreshold): self
+    {
+        $this->riskThreshold = $riskThreshold;
+
+        return $this;
+    }
+
+    public function getRiskConsecutiveLabCount(): ?int
+    {
+        return $this->riskConsecutiveLabCount;
+    }
+
+    public function setRiskConsecutiveLabCount(int $riskConsecutiveLabCount): self
+    {
+        $this->riskConsecutiveLabCount = $riskConsecutiveLabCount;
 
         return $this;
     }

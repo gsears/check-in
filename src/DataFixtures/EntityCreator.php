@@ -115,12 +115,14 @@ final class EntityCreator
         return $this->save($course);
     }
 
-    public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate): CourseInstance
+    public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate, int $riskThreshold, int $riskConsecutiveLabCount): CourseInstance
     {
         $courseInstanceRepo = $this->em->getRepository(CourseInstance::class);
         $courseInstance = (new CourseInstance())
             ->setDates(new CourseDates($startDate, $endDate))
             ->setIndexInCourse($courseInstanceRepo->getNextIndexInCourse($course))
+            ->setRiskThreshold($riskThreshold)
+            ->setRiskConsecutiveLabCount($riskConsecutiveLabCount)
             ->setCourse($course);
 
         return $this->save($courseInstance);

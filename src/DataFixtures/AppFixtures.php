@@ -58,6 +58,9 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const DEFAULT_RISK_THRESHOLD_PERCENT =  70;
+    const DEFAULT_RISK_CONSECUTIVE_LABS = 2;
+
     const SIMULATED_CURRENT_DATE = "2pm 20 November 2020";
 
     const AFFECTIVE_FIELD_INTEREST = 'interest';
@@ -253,7 +256,9 @@ class AppFixtures extends Fixture
                     $courseInstances[] = $this->creator->createCourseInstance(
                         $course,
                         $startDate,
-                        $endDate
+                        $endDate,
+                        self::DEFAULT_RISK_THRESHOLD_PERCENT,
+                        self::DEFAULT_RISK_CONSECUTIVE_LABS
                     );
                     $assigned = true;
                 }
@@ -264,7 +269,9 @@ class AppFixtures extends Fixture
                     $courseInstances[] = $this->creator->createCourseInstance(
                         $course,
                         $startDate,
-                        $endDate
+                        $endDate,
+                        self::DEFAULT_RISK_THRESHOLD_PERCENT,
+                        self::DEFAULT_RISK_CONSECUTIVE_LABS
                     );
                     $assigned = true;
                 }
