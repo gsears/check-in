@@ -174,4 +174,12 @@ class LabResponse
 
         return $this;
     }
+
+    /**
+     * @return Collection|SurveyQuestionResponseInterface[]
+     */
+    public function getQuestionResponses(): Collection
+    {
+        return $this->getXYQuestionResponses();
+    }
 }

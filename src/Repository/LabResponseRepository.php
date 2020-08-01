@@ -34,4 +34,19 @@ class LabResponseRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findCompletedByCourseInstanceAndStudent($courseInstance, $student)
+    {
+
+        return $this->createQueryBuilder('r')
+            ->join('r.lab', 'l')
+            ->andWhere('l.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->andWhere('r.student = :student')
+            ->setParameter('student', $student)
+            ->andWhere('r.submitted = true')
+            ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

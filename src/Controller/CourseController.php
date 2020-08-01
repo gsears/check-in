@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Lab;
 use App\Security\Roles;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
@@ -17,6 +18,7 @@ use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -105,9 +107,11 @@ class CourseController extends AbstractController
         $courseId,
         $instanceIndex,
         $studentId,
+        EntityManagerInterface $entityManager,
         CourseInstanceRepository $courseInstanceRepo,
         StudentRepository $studentRepo,
-        LabRepository $labRepo
+        LabRepository $labRepo,
+        LabResponseRepository $labResponseRepo
     ) {
 
         // DATA
@@ -130,11 +134,26 @@ class CourseController extends AbstractController
         $completedLabs = $labRepo->findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
         $pendingLabs = $labRepo->findPendingSurveysByCourseInstanceAndStudent($courseInstance, $student);
 
+        $completedLabResponses =  $labResponseRepo->findCompletedByCourseInstanceAndStudent($courseInstance, $student);
+
+        $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($entityManager) {
+            // Get all question repo responses
+            $questions = $labResponse->getQuestionResponses();
+            $risks = $questions->map(function ($question) use ($entityManager) {
+                $surveyQuestionRepo = $entityManager->getRepository(get_class($question));
+                return $surveyQuestionRepo->getRiskScore($question);
+            });
+            return [
+                'lab' => $labResponse->getLab(),
+                'riskLevels' => $risks
+            ];
+        }, $completedLabResponses);
+
         return $this->render('course/student_summary.html.twig', [
             'user' => $this->getUser(),
             'courseInstance' => $courseInstance,
             'pendingLabs' => $pendingLabs,
-            'completedLabs' => $completedLabs,
+            'completedLabsWithRisk' => $completedLabsWithRisk,
             'student' => $student
         ]);
     }
