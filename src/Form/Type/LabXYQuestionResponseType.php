@@ -31,6 +31,8 @@ class LabXYQuestionResponseType extends SurveyQuestionResponseType
         $xField = $xyQuestion->getXField();
         $yField = $xyQuestion->getYField();
 
+        dump($xyQuestionResponse->getXValue());
+
         // Add hidden types for XY responses. These will be filled via the js component.
         $builder
             // Do not map the xy form component to the entity.

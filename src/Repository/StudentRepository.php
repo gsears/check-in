@@ -18,4 +18,14 @@ class StudentRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Student::class);
     }
+
+    public function findByCourseInstance($courseInstance)
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.enrolments', 'e')
+            ->andWhere('e.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->getQuery()
+            ->getResult();
+    }
 }

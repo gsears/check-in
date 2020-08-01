@@ -84,7 +84,6 @@ final class EntityCreator
 
         $user->setStudent($student);
 
-        $this->em->flush();
         return $this->save($student);
     }
 
@@ -101,10 +100,8 @@ final class EntityCreator
         );
 
         $instructor = new Instructor();
-
         $user->setInstructor($instructor);
 
-        $this->em->flush();
         return $this->save($instructor);
     }
 
@@ -123,18 +120,17 @@ final class EntityCreator
         $courseInstanceRepo = $this->em->getRepository(CourseInstance::class);
         $courseInstance = (new CourseInstance())
             ->setDates(new CourseDates($startDate, $endDate))
-            ->setIndexInCourse($courseInstanceRepo->getNextIndexInCourse($course));
-
-        $course->addCourseInstance($courseInstance);
+            ->setIndexInCourse($courseInstanceRepo->getNextIndexInCourse($course))
+            ->setCourse($course);
 
         return $this->save($courseInstance);
     }
 
     public function createEnrolment(Student $student, CourseInstance $courseInstance): Enrolment
     {
-        $enrolment = (new Enrolment());
-        $student->addEnrolment($enrolment);
-        $courseInstance->addEnrolment($enrolment);
+        $enrolment = (new Enrolment())
+            ->setStudent($student)
+            ->setCourseInstance($courseInstance);
 
         return $this->save($enrolment);
     }
@@ -143,9 +139,8 @@ final class EntityCreator
     {
         $lab = (new Lab())
             ->setName($name)
-            ->setStartDateTime($startDateTime);
-
-        $courseInstance->addLab($lab);
+            ->setStartDateTime($startDateTime)
+            ->setCourseInstance($courseInstance);
 
         return $this->save($lab);
     }
@@ -175,9 +170,8 @@ final class EntityCreator
     {
         $labXYQuestion = (new LabXYQuestion())
             ->setIndex($index)
-            ->setXYQuestion($xyQuestion);
-
-        $lab->addLabXYQuestion($labXYQuestion);
+            ->setXYQuestion($xyQuestion)
+            ->setLab($lab);
 
         return $this->save($labXYQuestion);
     }
@@ -185,24 +179,21 @@ final class EntityCreator
     public function createLabResponse(bool $submitted, Student $student, Lab $lab): LabResponse
     {
         $labResponse = (new LabResponse())
-            ->setSubmitted($submitted);
+            ->setSubmitted($submitted)
+            ->setLab($lab)
+            ->setStudent($student);
 
-        $student->addLabResponse($labResponse);
-        $lab->addResponse($labResponse);
-        $this->save($labResponse);
-        $this->em->flush();
-        return $labResponse;
+        return $this->save($labResponse);
     }
 
     public function createLabXYQuestionResponse(XYCoordinates $coordinates, LabXYQuestion $question, LabResponse $response): LabXYQuestionResponse
     {
         $xyResponse = (new LabXYQuestionResponse())
-            ->setCoordinates($coordinates);
+            ->setCoordinates($coordinates)
+            ->setLabXYQuestion($question)
+            ->setLabResponse($response);
 
-        $question->addResponse($xyResponse);
-        $response->addXYQuestionResponse($xyResponse);
-
-        return $this->save($xyResponse);
+        return  $this->save($xyResponse);
     }
 
     public function createLabXYQuestionDangerZone(int $riskLevel, int $xMin, int $xMax, int $yMin, int $yMax, LabXYQuestion $question): LabXYQuestionDangerZone
@@ -210,9 +201,8 @@ final class EntityCreator
         $labXYQuestionDangerZone = (new LabXYQuestionDangerZone)
             ->setRiskLevel($riskLevel)
             ->setXBound(new Bound($xMin, $xMax))
-            ->setYBound(new Bound($yMin, $yMax));
-
-        $question->addDangerZone($labXYQuestionDangerZone);
+            ->setYBound(new Bound($yMin, $yMax))
+            ->setLabXYQuestion($question);
 
         return $this->save($labXYQuestionDangerZone);
     }

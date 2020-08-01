@@ -2,8 +2,11 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Lab;
 use Faker;
 use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
+use App\Entity\Student;
 use App\Entity\XYCoordinates;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -113,14 +116,11 @@ class AppFixtures extends Fixture
     private $faker;
     private $creator;
 
-    public function __construct(EntityCreator $creator)
-    {
-        $this->creator = $creator;
-    }
-
     public function load(ObjectManager $manager)
     {
+
         $this->manager = $manager;
+        $this->creator = new EntityCreator($manager);
 
         // Creates faker for mocking data
         $this->faker = Faker\Factory::create('en_GB');
@@ -133,44 +133,34 @@ class AppFixtures extends Fixture
 
         // Create students
         $students = $this->loadStudents();
-        $this->printArray('Students', $students);
         $allStudents = array_merge($students, [$testStudent]);
 
         // Create instructors
         $instructors = $this->loadInstructors();
         $allInstructors = array_merge($instructors, [$testInstructor]);
-        $this->printArray('Instructors', $allInstructors);
 
         // Create courses
         $courses = $this->loadCourses();
-        $this->printArray('Courses', $courses);
 
         // Create course instances, assign instructors and students
         $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents);
         $courseInstances = $courseInstancesAndEnrolments['courseInstances'];
-        $this->printArray('Course Instances', $courseInstances);
 
         $enrolements = $courseInstancesAndEnrolments['enrolments'];
-        $this->printArray('Enrolments', $enrolements);
 
         // Create affective fields for XY questions
         $affectiveFields = $this->loadAffectiveFields();
-        $this->printArray('Affective Fields', $affectiveFields);
 
         // Create XY questions
         $xyQuestions = $this->loadXYQuestions($affectiveFields);
-        $this->printArray('XY Questions', $xyQuestions);
 
         // Create lab surveys
         $labs = $this->loadLabs($courseInstances, $xyQuestions);
-        $this->printArray('Lab Surveys', $labs);
 
         // Create lab xy responses
         $completedLabResponses = $this->loadLabResponses($courseInstances);
-        $this->printArray('Completed Lab Survey Responses', $completedLabResponses);
 
-        // Commit to db
-        $manager->flush();
+        $manager->clear();
     }
 
     private function loadFunctionalTestUsers(): array
@@ -394,9 +384,8 @@ class AppFixtures extends Fixture
                 }
 
                 // For each student in the lab, generate an empty response object
-                $studentsInLab = $courseInstance->getEnrolments()->map(function ($e) {
-                    return $e->getStudent();
-                });
+                $studentsInLab = $this->manager->getRepository(Student::class)
+                    ->findByCourseInstance($courseInstance);
 
                 foreach ($studentsInLab as $student) {
                     $labResponse = $this->creator->createLabResponse(
@@ -421,42 +410,38 @@ class AppFixtures extends Fixture
 
         foreach ($courseInstances as $courseInstance) {
             // Get all enrolled students on that course
-            $studentsInCourse = $courseInstance->getEnrolments()->map(function ($e) {
-                return $e->getStudent();
-            });
-            // For each courseInstance starting before the simulated date...
-            if ($courseInstance->getStartDate() <= $cutoffDate) {
+            $studentsInCourse = $this->manager->getRepository(Student::class)
+                ->findByCourseInstance($courseInstance);
 
-                // For each lab before the cutoff date / time...
-                $labs = $courseInstance->getLabs()->filter(
-                    function ($lab) use ($cutoffDate) {
-                        return $lab->getStartDateTime() <= $cutoffDate;
-                    }
-                )->toArray();
+            // For each lab before the cutoff date / time...
+            $labs = $this->manager->getRepository(Lab::class)
+                ->findByCourseInstance($courseInstance, $cutoffDate);
 
-                foreach ($labs as $lab) {
-                    // each student...
-                    foreach ($studentsInCourse as $student) {
-                        // 80% chance of completing survey
-                        if (rand(0, 10) < 8) {
-                            $labResponse = $this->manager->getRepository(LabResponse::class)
-                                ->findOneByLabAndStudent($lab, $student)
-                                ->setSubmitted(true);
+            foreach ($labs as $lab) {
+                // each student...
+                foreach ($studentsInCourse as $student) {
+                    // 80% chance of completing survey
+                    if (rand(0, 10) < 8) {
+                        $labResponse = $this->manager->getRepository(LabResponse::class)
+                            ->findOneByLabAndStudent($lab, $student);
 
-                            // XYQuestions
-                            $labXYQuestions = $lab->getLabXYQuestions()->toArray();
-                            // 90% chance of completing an XY question
-                            foreach ($labXYQuestions as $labXYQuestion) {
-                                if (rand(0, 10) < 9) {
-                                    $xyResponse = $this->creator->createLabXYQuestionResponse(
-                                        new XYCoordinates(rand(-10, 9), rand(-10, 9)),
-                                        $labXYQuestion,
-                                        $labResponse
-                                    );
-                                }
+                        $labResponse->setSubmitted(true);
+
+                        // XYQuestions
+                        $labXYQuestions = $this->manager->getRepository(LabXYQuestion::class)
+                            ->findBy(['lab' => $lab]);
+
+                        // 90% chance of completing an XY question
+                        foreach ($labXYQuestions as $labXYQuestion) {
+                            if (rand(0, 10) < 9) {
+                                $xyResponse = $this->creator->createLabXYQuestionResponse(
+                                    new XYCoordinates(rand(-10, 9), rand(-10, 9)),
+                                    $labXYQuestion,
+                                    $labResponse
+                                );
                             }
-                            $completedResponses[] = $labResponse;
                         }
+                        $completedResponses[] = $labResponse;
                     }
                 }
             }

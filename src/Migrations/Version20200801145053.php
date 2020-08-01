@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200731125555 extends AbstractMigration
+final class Version20200801145053 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -47,7 +47,7 @@ final class Version20200731125555 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_89C14EB36528905A ON xyquestion (y_field_id)');
         $this->addSql('CREATE TABLE users (id INT NOT NULL, email VARCHAR(180) NOT NULL, forename VARCHAR(180) NOT NULL, surname VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_1483A5E9E7927C74 ON users (email)');
-        $this->addSql('CREATE TABLE lab_xyquestion_response (id INT NOT NULL, lab_xyquestion_id INT DEFAULT NULL, lab_response_id INT NOT NULL, x_value INT NOT NULL, y_value INT NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE lab_xyquestion_response (id INT NOT NULL, lab_xyquestion_id INT NOT NULL, lab_response_id INT DEFAULT NULL, x_value INT NOT NULL, y_value INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_DA476E87FA80A32 ON lab_xyquestion_response (lab_xyquestion_id)');
         $this->addSql('CREATE INDEX IDX_DA476E8771FEB27B ON lab_xyquestion_response (lab_response_id)');
         $this->addSql('CREATE TABLE student (guid INT NOT NULL, appuser_id INT NOT NULL, PRIMARY KEY(guid))');

@@ -139,12 +139,19 @@ class CourseController extends AbstractController
 
         $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($entityManager) {
             // Get all question repo responses
+
             $questions = $labResponse->getQuestionResponses();
-            $risks = $questions->map(function ($question) use ($entityManager) {
+            $risks = [];
+
+            foreach ($questions as $question) {
                 $surveyQuestionRepo = $entityManager->getRepository(get_class($question));
                 $riskLevel = $surveyQuestionRepo->getRiskLevel($question);
-                return Risk::getWeightedRisk($riskLevel);
-            });
+                dump($riskLevel);
+                if ($riskLevel > 0) {
+                    $risks[] = Risk::getWeightedRisk($riskLevel);
+                }
+            }
+
             return [
                 'lab' => $labResponse->getLab(),
                 'riskLevels' => $risks
@@ -402,12 +409,19 @@ class CourseController extends AbstractController
     {
         if ($question instanceof LabXYQuestion) {
 
+            $xyQuestionResponses = $labResponse->getXYQuestionResponses();
+            $this->getDoctrine()->getManager()->initializeObject($xyQuestionResponses);
+            dump($xyQuestionResponses);
+
             // Get the response that matches the question
             $questionResponse = $labResponse->getXYQuestionResponses()->filter(
                 function (LabXYQuestionResponse $xyQuestionResponse) use ($question) {
                     return $xyQuestionResponse->getLabXYQuestion() === $question;
                 }
             )->first();
+
+
+            dump($questionResponse);
 
             // If it doesn't exist, create a new empty one
             if (!$questionResponse) {
