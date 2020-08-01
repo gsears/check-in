@@ -138,6 +138,7 @@ class CourseController extends AbstractController
         $completedLabResponses =  $labResponseRepo->findCompletedByCourseInstanceAndStudent($courseInstance, $student);
 
         $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
+            dump($labResponseRepo->getRiskForResponse($labResponse)->getWeightedRisks());
             return [
                 'lab' => $labResponse->getLab(),
                 'weightedRisks' => $labResponseRepo->getRiskForResponse($labResponse)->getWeightedRisks(),
