@@ -22,6 +22,7 @@ dev-hot:
 	yarn encore dev-server --hot
 
 fixtures:
+	make reset_db
 	php bin/console doctrine:fixtures:load --no-interaction
 
 test:

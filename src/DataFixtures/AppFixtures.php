@@ -191,7 +191,7 @@ class AppFixtures extends Fixture
     {
         $students = [];
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $students[] = $this->creator->createStudent(
                 $this->faker->firstName(),
                 $this->faker->lastName(),
@@ -206,7 +206,7 @@ class AppFixtures extends Fixture
     {
         $instructors = [];
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $instructors[] = $this->creator->createInstructor(
                 $this->faker->firstName(),
                 $this->faker->lastName()
@@ -221,7 +221,7 @@ class AppFixtures extends Fixture
     {
         $courses = [];
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 3; $i++) {
             $name = sprintf(
                 self::COURSE_TITLE_TEMPLATES[array_rand(self::COURSE_TITLE_TEMPLATES)],
                 self::COURSE_TITLE_SUBJECTS[array_rand(self::COURSE_TITLE_SUBJECTS)]
@@ -275,7 +275,7 @@ class AppFixtures extends Fixture
             // Randomise course assignment order
             $coursesForInstructors = $this->faker->shuffle($courseInstances);
             // Assign courses to instructors (between 6-8 for each instructor):
-            for ($i = 0; $i < rand(6, 8); $i++) {
+            for ($i = 0; $i < rand(2, 3); $i++) {
                 $instructor->addCourseInstance($coursesForInstructors[$i]);
             }
         }
@@ -289,7 +289,7 @@ class AppFixtures extends Fixture
 
             // Each student is enrolled on 8-10 courses
             // Note: at present this may be the same course for 2 terms in a row. Woo!
-            for ($i = 0; $i < rand(8, 10); $i++) {
+            for ($i = 0; $i < rand(2, 3); $i++) {
                 $enrolment = $this->creator->createEnrolment(
                     $student,
                     $coursesForStudents[$i]

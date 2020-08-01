@@ -43,7 +43,7 @@ class LabResponse
     private $lab;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true, cascade={"persist"})
      */
     private $xyQuestionResponses;
 

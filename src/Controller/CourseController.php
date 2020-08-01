@@ -145,17 +145,21 @@ class CourseController extends AbstractController
 
             foreach ($questions as $question) {
                 $surveyQuestionRepo = $entityManager->getRepository(get_class($question));
+                dump($question);
                 $riskLevel = $surveyQuestionRepo->getRiskLevel($question);
-                dump($riskLevel);
                 if ($riskLevel > 0) {
                     $risks[] = Risk::getWeightedRisk($riskLevel);
                 }
             }
 
-            return [
+            $labWithRisk = [
                 'lab' => $labResponse->getLab(),
                 'riskLevels' => $risks
             ];
+
+            dump($labWithRisk);
+
+            return $labWithRisk;
         }, $completedLabResponses);
 
         return $this->render('course/student_summary.html.twig', [
