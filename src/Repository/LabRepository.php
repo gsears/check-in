@@ -6,6 +6,7 @@ use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Instructor;
 use App\Entity\Lab;
+use App\Entity\LabResponse;
 use App\Entity\Student;
 use App\Provider\DateTimeProvider;
 use DateTime;
@@ -124,5 +125,33 @@ class LabRepository extends ServiceEntityRepository
             ->orderBy('l.startDateTime', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Returns risk for students who have completed lab surveys.
+     *
+     * @param Lab $lab
+     * @return void
+     */
+    public function findStudentsAtRiskByLab(Lab $lab)
+    {
+        $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
+
+        $riskCollection = $lab->getResponses()
+            ->filter(function (LabResponse $response) {
+                return $response->getSubmitted();
+            })
+            ->map(function ($response) use ($responseRepo) {
+                return $responseRepo->getRiskForResponse($response);
+            });
+
+        $riskIterator = $riskCollection->getIterator();
+
+        // Order by highest risk
+        $riskIterator->uasort(function ($a, $b) {
+            return ($a->getRiskFactor() > $b->getRiskFactor()) ? -1 : 1;
+        });
+
+        return iterator_to_array($riskIterator);
     }
 }

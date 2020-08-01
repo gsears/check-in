@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Lab;
+use App\Entity\LabResponse;
 use App\Entity\Student;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

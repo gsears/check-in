@@ -1,0 +1,16 @@
+{% macro weightedRiskToTrafficLights(weightedRisks) %}
+	{% if weightedRisks %}
+		{% for risk in weightedRisks %}
+			{% if risk == constant('App\\Entity\\LabResponseRisk::WARNING') %}
+				<span class="badge badge-pill badge-warning">&nbsp;</span>
+			{% endif %}
+			{% if risk == constant('App\\Entity\\LabResponseRisk::DANGER') %}
+				<span class="badge badge-pill badge-danger">&nbsp;</span>
+			{% endif %}
+		{% endfor %}
+	{% else %}
+		<span class="text-success">
+			None
+		</span>
+	{% endif %}
+{% endmacro %}

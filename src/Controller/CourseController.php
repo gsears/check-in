@@ -10,7 +10,7 @@ use App\Repository\LabRepository;
 use App\Form\Type\LabDangerZoneType;
 use App\Security\Voter\StudentVoter;
 use App\Entity\LabXYQuestionResponse;
-use App\Entity\Risk;
+use App\Entity\LabResponseRisk;
 use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
 use App\Form\Type\LabResponseType;
@@ -137,29 +137,11 @@ class CourseController extends AbstractController
 
         $completedLabResponses =  $labResponseRepo->findCompletedByCourseInstanceAndStudent($courseInstance, $student);
 
-        $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($entityManager) {
-            // Get all question repo responses
-
-            $questions = $labResponse->getQuestionResponses();
-            $risks = [];
-
-            foreach ($questions as $question) {
-                $surveyQuestionRepo = $entityManager->getRepository(get_class($question));
-                dump($question);
-                $riskLevel = $surveyQuestionRepo->getRiskLevel($question);
-                if ($riskLevel > 0) {
-                    $risks[] = Risk::getWeightedRisk($riskLevel);
-                }
-            }
-
-            $labWithRisk = [
+        $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
+            return [
                 'lab' => $labResponse->getLab(),
-                'riskLevels' => $risks
+                'weightedRisks' => $labResponseRepo->getRiskForResponse($labResponse)->getWeightedRisks(),
             ];
-
-            dump($labWithRisk);
-
-            return $labWithRisk;
         }, $completedLabResponses);
 
         return $this->render('course/student_summary.html.twig', [
@@ -202,6 +184,8 @@ class CourseController extends AbstractController
 
         // HANDLER
 
+        // Danger Zone Form
+
         $form = $this->createForm(LabDangerZoneType::class, $lab);
         $form->handleRequest($request);
 
@@ -217,10 +201,14 @@ class CourseController extends AbstractController
             $entityManager->flush();
         }
 
+        // Display students at risk for lab
+        $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
+
         return $this->render('lab/summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'labResponseRisks' => $labResponseRisks,
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\LabResponse;
+use App\Entity\LabResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,7 +38,6 @@ class LabResponseRepository extends ServiceEntityRepository
 
     public function findCompletedByCourseInstanceAndStudent($courseInstance, $student)
     {
-
         return $this->createQueryBuilder('r')
             ->join('r.lab', 'l')
             ->andWhere('l.courseInstance = :courseInstance')
@@ -48,5 +48,17 @@ class LabResponseRepository extends ServiceEntityRepository
             ->orderBy('l.startDateTime', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function getRiskForResponse(LabResponse $labResponse)
+    {
+        $riskLevels = $labResponse->getQuestionResponses()->map(
+            function ($question) {
+                $surveyQuestionRepo = $this->getEntityManager()->getRepository(get_class($question));
+                return $surveyQuestionRepo->getRiskLevel($question);
+            }
+        )->toArray();
+
+        return new LabResponseRisk($riskLevels, $labResponse->getStudent());
     }
 }

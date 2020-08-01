@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\LabXYQuestionResponse;
-use App\Entity\Risk;
+use App\Entity\LabResponseRisk;
 use App\Entity\SurveyQuestionResponseInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -41,7 +41,7 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
             return $query->getSingleScalarResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return Risk::NONE;
+            return LabResponseRisk::NONE;
         }
     }
 }
