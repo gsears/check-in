@@ -15,5 +15,5 @@ interface SurveyQuestionResponseRepositoryInterface
      * @param Lab $lab
      * @return int The risk weight assigned to the response
      */
-    public function getRiskScore(SurveyQuestionResponseInterface $question): int;
+    public function getRiskLevel(SurveyQuestionResponseInterface $question): int;
 }

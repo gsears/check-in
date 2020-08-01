@@ -10,6 +10,7 @@ use App\Repository\LabRepository;
 use App\Form\Type\LabDangerZoneType;
 use App\Security\Voter\StudentVoter;
 use App\Entity\LabXYQuestionResponse;
+use App\Entity\Risk;
 use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
 use App\Form\Type\LabResponseType;
@@ -141,7 +142,8 @@ class CourseController extends AbstractController
             $questions = $labResponse->getQuestionResponses();
             $risks = $questions->map(function ($question) use ($entityManager) {
                 $surveyQuestionRepo = $entityManager->getRepository(get_class($question));
-                return $surveyQuestionRepo->getRiskScore($question);
+                $riskLevel = $surveyQuestionRepo->getRiskLevel($question);
+                return Risk::getWeightedRisk($riskLevel);
             });
             return [
                 'lab' => $labResponse->getLab(),

@@ -21,7 +21,7 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
         parent::__construct($registry, LabXYQuestionResponse::class);
     }
 
-    public function getRiskScore(SurveyQuestionResponseInterface $xyQuestionResponse): int
+    public function getRiskLevel(SurveyQuestionResponseInterface $xyQuestionResponse): int
     {
         $entityManager = $this->getEntityManager();
 
