@@ -210,6 +210,8 @@ class CourseController extends AbstractController
         // Display students at risk for lab
         $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
 
+        dump($labResponseRisks);
+
         return $this->render('lab/lab_summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),

@@ -7,6 +7,8 @@ Gareth Sears - 2493194S
 
 namespace App\Containers;
 
+use App\Entity\LabResponse;
+
 /**
  * A container class for wrapping labresponse risk queries from the question repositories.
  */
@@ -28,7 +30,7 @@ class LabResponseRisk
     private $questionRiskLevels = [];
     private $labResponse;
 
-    public function __construct($questionRiskLevels, $labResponse)
+    public function __construct($questionRiskLevels, LabResponse $labResponse)
     {
         $this->questionRiskLevels = $questionRiskLevels;
         $this->labResponse = $labResponse;
@@ -42,7 +44,7 @@ class LabResponseRisk
     public function getRiskFactor()
     {
         $maxRisk = count($this->questionRiskLevels) * self::WEIGHT_DANGER;
-        return ceil(array_sum($this->questionRiskLevels) / $maxRisk) * 100;
+        return ceil(array_sum($this->getWeightedRisks()) / $maxRisk) * 100;
     }
 
     public function getWeightedRisks(bool $excludeZeroValues = true)

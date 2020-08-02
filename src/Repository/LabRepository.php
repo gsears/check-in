@@ -145,13 +145,22 @@ class LabRepository extends ServiceEntityRepository
                 return $responseRepo->getRiskForResponse($response);
             });
 
-        $riskIterator = $riskCollection->getIterator();
+        $riskArray = $riskCollection->toArray();
 
         // Order by highest risk
-        $riskIterator->uasort(function ($a, $b) {
-            return ($a->getRiskFactor() > $b->getRiskFactor()) ? -1 : 1;
+        uasort($riskArray, function ($a, $b) {
+            $riskFactorA = $a->getRiskFactor();
+            $riskFactorB = $b->getRiskFactor();
+
+            if ($riskFactorA > $riskFactorB) {
+                return -1;
+            } else if ($riskFactorA < $riskFactorB) {
+                return 1;
+            } else {
+                return 0;
+            }
         });
 
-        return iterator_to_array($riskIterator);
+        return $riskArray;
     }
 }
