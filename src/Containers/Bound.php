@@ -1,9 +1,17 @@
 <?php
 
-namespace App\Entity;
+/*
+Bound.php
+Gareth Sears - 2493194S
+*/
+
+namespace App\Containers;
 
 use InvalidArgumentException;
 
+/**
+ * A container class for storing and validating bounds (for XY components etc.)
+ */
 class Bound
 {
     private $lowBound;

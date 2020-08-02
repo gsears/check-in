@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Containers\Bound;
 use App\Repository\LabXYQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 

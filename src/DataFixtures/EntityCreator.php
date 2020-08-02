@@ -3,26 +3,26 @@
 namespace App\DataFixtures;
 
 use DateTime;
+use Exception;
 use App\Entity\Lab;
 use App\Entity\User;
 use App\Entity\Course;
 use App\Entity\Student;
+use App\Containers\Bound;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\XYQuestion;
+use App\Entity\CourseDates;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Entity\XYCoordinates;
 use App\Entity\AffectiveField;
-use App\Entity\Bound;
-use App\Entity\CourseDates;
 use App\Entity\CourseInstance;
-use App\Entity\LabXYQuestionResponse;
-use App\Entity\LabXYQuestionDangerZone;
 use App\Repository\UserRepository;
+use App\Entity\LabXYQuestionResponse;
 use Doctrine\DBAL\Driver\PDOException;
+use App\Entity\LabXYQuestionDangerZone;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 
 /**
  * Helpers to create entities easily.
@@ -115,7 +115,7 @@ final class EntityCreator
         return $this->save($course);
     }
 
-    public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate, int $riskThreshold, int $riskConsecutiveLabCount): CourseInstance
+    public function createCourseInstance(Course $course, DateTime $startDate, DateTime $endDate, ?int $riskThreshold = 70, ?int $riskConsecutiveLabCount = 2): CourseInstance
     {
         $courseInstanceRepo = $this->em->getRepository(CourseInstance::class);
         $courseInstance = (new CourseInstance())
