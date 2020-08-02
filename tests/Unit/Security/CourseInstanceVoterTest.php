@@ -58,6 +58,7 @@ class CourseInstanceVoterTest extends TestCase
 
     public function provideCases()
     {
+        // Creating mocks in data providers leads to madness 💀
         // Test 1
         $courseInstance = new CourseInstance();
 
