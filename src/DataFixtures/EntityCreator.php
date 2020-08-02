@@ -1,9 +1,13 @@
 <?php
 
+/*
+EntityCreator.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\DataFixtures;
 
 use DateTime;
-use Exception;
 use App\Entity\Lab;
 use App\Entity\User;
 use App\Entity\Course;
@@ -12,15 +16,13 @@ use App\Containers\Bound;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\XYQuestion;
-use App\Entity\CourseDates;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Entity\XYCoordinates;
 use App\Entity\AffectiveField;
 use App\Entity\CourseInstance;
-use App\Repository\UserRepository;
+use App\Containers\CourseDates;
 use App\Entity\LabXYQuestionResponse;
-use Doctrine\DBAL\Driver\PDOException;
 use App\Entity\LabXYQuestionDangerZone;
 use Doctrine\ORM\EntityManagerInterface;
 

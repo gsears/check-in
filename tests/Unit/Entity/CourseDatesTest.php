@@ -7,8 +7,8 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Unit\Entity;
 
-use App\Entity\CourseDates;
 use InvalidArgumentException;
+use App\Containers\CourseDates;
 use PHPUnit\Framework\TestCase;
 
 class CourseDatesTest extends TestCase

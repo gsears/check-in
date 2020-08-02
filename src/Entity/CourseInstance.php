@@ -1,12 +1,17 @@
 <?php
 
+/*
+CourseInstance.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
-use App\Entity\CourseDates;
+use App\Containers\CourseDates;
 use App\Repository\CourseInstanceRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=CourseInstanceRepository::class)
