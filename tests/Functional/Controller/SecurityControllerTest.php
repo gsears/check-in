@@ -1,9 +1,17 @@
 <?php
 
+/*
+SecurityControllerTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Functional\Controller;
 
 use App\Tests\Functional\FunctionalTestCase;
 
+/**
+ * Tests for the SecurityController
+ */
 class SecurityControllerTest extends FunctionalTestCase
 {
 
