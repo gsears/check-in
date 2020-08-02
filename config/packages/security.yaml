@@ -11,10 +11,10 @@ security:
                 class: App\Entity\User
                 property: email
 
-    # Add inheritence for different roles
-    role_hierarchy:
-        ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
-        ROLE_LECTURER: [ROLE_USER, ROLE_TUTOR]
+    # Add inheritence for different roles. May be used
+    # role_hierarchy:
+    #     ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
+    #     ROLE_LECTURER: [ROLE_USER, ROLE_TUTOR]
 
     firewalls:
         dev:
@@ -29,7 +29,8 @@ security:
             # https://symfony.com/doc/current/security.html#firewalls-authentication
 
             # https://symfony.com/doc/current/security/impersonating_user.html
-            switch_user: true
+            # switch_user: true
+
             guard:
                 authenticators:
                     - App\Security\LoginFormAuthenticator
@@ -42,7 +43,9 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/profile, roles: ROLE_USER }
+        # TODO: User profiles and admin page
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/courses, roles: ROLE_USER }
+        # Homepage (may not be used)
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
