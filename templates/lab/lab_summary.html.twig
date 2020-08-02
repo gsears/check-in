@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 					{% for risk in labResponseRisks %}
-						{% set student = risk.student %}
+						{% set student = risk.labResponse.student %}
 						<tr>
 							<td>{{student.guid}}
 								-
