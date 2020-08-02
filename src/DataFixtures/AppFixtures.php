@@ -1,20 +1,25 @@
 <?php
 
+/*
+AppFixtures.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\DataFixtures;
 
-use App\Entity\Lab;
 use Faker;
+use App\Entity\Lab;
+use App\Entity\Student;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
-use App\Entity\Student;
-use App\Entity\XYCoordinates;
+use App\Containers\XYCoordinates;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * Populates the database with dummy data for testing and evaluation.
  *
- * TODO: Some extra blurb saying why this is a monolithic file
+ * Generally it is good Symfony practice to put these in one file so that variables can be passed around.
  */
 class AppFixtures extends Fixture
 {

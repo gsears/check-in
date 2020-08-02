@@ -1,27 +1,18 @@
 <?php
 
+/*
+XYCoordinatesType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
-use App\Entity\LabResponse;
-use App\Entity\LabXYQuestion;
-use App\Entity\LabXYQuestionResponse;
-use App\Entity\XYCoordinates;
-use App\Entity\XYQuestion;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;;
-
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Containers\XYCoordinates;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 /**
- * Implements DataMapperInterface to return an XYCoordinates object.
- * https://symfony.com/doc/current/form/data_mappers.html
+ * TODO: Document
  */
 class XYCoordinatesType extends AbstractXYComponentType
 {

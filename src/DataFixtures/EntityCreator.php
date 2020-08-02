@@ -7,6 +7,11 @@ Gareth Sears - 2493194S
 
 namespace App\DataFixtures;
 
+/*
+EntityCreator.php
+Gareth Sears - 2493194S
+*/
+
 use DateTime;
 use App\Entity\Lab;
 use App\Entity\User;
@@ -18,10 +23,10 @@ use App\Entity\Instructor;
 use App\Entity\XYQuestion;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
-use App\Entity\XYCoordinates;
 use App\Entity\AffectiveField;
 use App\Entity\CourseInstance;
 use App\Containers\CourseDates;
+use App\Containers\XYCoordinates;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\LabXYQuestionDangerZone;
 use Doctrine\ORM\EntityManagerInterface;

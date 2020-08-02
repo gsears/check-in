@@ -1,9 +1,17 @@
 <?php
 
-namespace App\Entity;
+/*
+XYCoordinates.php
+Gareth Sears - 2493194S
+*/
+
+namespace App\Containers;
 
 use InvalidArgumentException;
 
+/**
+ * A wrapper class to ensure valid XY coordinates
+ */
 class XYCoordinates
 {
     private $x;

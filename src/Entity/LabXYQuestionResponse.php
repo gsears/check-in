@@ -1,11 +1,16 @@
 <?php
 
+/*
+LabXYQuestionResponse.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
-use App\Entity\XYCoordinates;
-use Doctrine\ORM\Mapping as ORM;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
+use Doctrine\ORM\Mapping as ORM;
+use App\Containers\XYCoordinates;
 use App\Repository\LabXYQuestionResponseRepository;
 
 /**

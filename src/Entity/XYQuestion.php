@@ -1,10 +1,14 @@
 <?php
 
+/*
+XYQuestion.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
-use App\Form\Type\XYCoordinates;
-use App\Repository\XYQuestionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\XYQuestionRepository;
 
 /**
  * @ORM\Entity(repositoryClass=XYQuestionRepository::class)
