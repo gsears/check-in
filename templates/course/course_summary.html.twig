@@ -1,5 +1,20 @@
-{% extends "course/course_instance_base.html.twig" %}
+{% extends "base.html.twig" %}
 
-{% block content %}
-    <h1> course summary here </h1>
+{% block title %}
+	Course Summary for
+	{{courseInstance.course.code}}
+{% endblock %}
+
+{% block body %}
+	<header>
+		<h1>{{courseInstance.course.code}}
+			-
+			{{courseInstance.course.name}}</h1>
+		<p>{{courseInstance.startDate | date('d/m/Y')}}
+			-
+			{{courseInstance.endDate | date('d/m/Y')}}</p>
+	</header>
+
+
+	{% block content %}{% endblock %}
 {% endblock %}

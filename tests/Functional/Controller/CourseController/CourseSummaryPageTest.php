@@ -18,6 +18,9 @@ class CourseSummaryPageTest extends FunctionalTestCase
     private $nonMemberInstructorUser;
     private $memberInstructorUser;
 
+    private $startDate;
+    private $endDate;
+
     /**
      * Create database data for testing with. This is rolled back after each test.
      */
@@ -27,7 +30,9 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $dateTimeProvider = new DateTimeProvider();
         $courseStart =  ($dateTimeProvider->getCurrentDateTime()->modify("- 1 week"));
+        $this->startDate = $courseStart->format("d/m/Y");
         $courseEnd = ($dateTimeProvider->getCurrentDateTime()->modify("+ 1 week"));
+        $this->endDate = $courseEnd->format("d/m/Y");
 
         $testCourseOne = $creator->createCourse(
             'CS101',
@@ -121,5 +126,15 @@ class CourseSummaryPageTest extends FunctionalTestCase
         $client->loginUser($this->memberInstructorUser);
         $client->request('GET', '/courses/CS101/1');
         $this->assertResponseIsSuccessful();
+    }
+
+    public function testTitleAndHeaders()
+    {
+        $client = static::createClient();
+        $client->loginUser($this->memberInstructorUser);
+        $crawler = $client->request('GET', '/courses/CS101/1');
+        $this->assertPageTitleContains("Course Summary for CS101");
+        $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming', 'Title is not correct.');
+        $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate, $this->endDate));
     }
 }
