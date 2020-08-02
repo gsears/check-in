@@ -1,28 +1,160 @@
 <?php
 
+/*
+CourseInstanceVoterTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Unit\Security;
 
-use Exception;
-
+use App\Entity\User;
 use App\Entity\Student;
+use App\Security\Roles;
 use App\Entity\Enrolment;
 use App\Entity\Instructor;
 use App\Entity\CourseInstance;
-use App\Entity\User;
-use App\Security\Roles;
 use PHPUnit\Framework\TestCase;
 use App\Security\Voter\CourseInstanceVoter;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
- * TODO: Need to make this work. Failing as mock User is not being let through in voter.
- **/
+ * Unit tests to check that security access is correctly applied for course instances.
+ */
 class CourseInstanceVoterTest extends TestCase
 {
 
-    private function createInstructorUser()
+    public function testAnonCannotView()
+    {
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::VIEW,
+            $courseInstanceMock,
+            null,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testMemberInstructorCanView()
+    {
+        $userMock = $this->createInstructorUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, $userMock->getInstructor());
+
+        $this->vote(
+            CourseInstanceVoter::VIEW,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_GRANTED
+        );
+    }
+
+    public function testNonMemberInstructorCannotView()
+    {
+        $userMock = $this->createInstructorUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::VIEW,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testMemberStudentCanView()
+    {
+        $userMock = $this->createStudentUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock($userMock->getStudent(), null);
+
+        $this->vote(
+            CourseInstanceVoter::VIEW,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_GRANTED
+        );
+    }
+
+    public function testNonMemberStudentCannotView()
+    {
+        $userMock = $this->createStudentUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::VIEW,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testAnonCannotEdit()
+    {
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::EDIT,
+            $courseInstanceMock,
+            null,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testMemberInstructorCanEdit()
+    {
+        $userMock = $this->createInstructorUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, $userMock->getInstructor());
+
+        $this->vote(
+            CourseInstanceVoter::EDIT,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_GRANTED
+        );
+    }
+
+    public function testNonMemberInstructorCannotEdit()
+    {
+        $userMock = $this->createInstructorUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::EDIT,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testMemberStudentCannotEdit()
+    {
+        $userMock = $this->createStudentUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock($userMock->getStudent(), null);
+
+        $this->vote(
+            CourseInstanceVoter::EDIT,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    public function testNonMemberStudentCannotEdit()
+    {
+        $userMock = $this->createStudentUserMock();
+        $courseInstanceMock = $this->createCourseInstanceMock(null, null);
+
+        $this->vote(
+            CourseInstanceVoter::EDIT,
+            $courseInstanceMock,
+            $userMock,
+            Voter::ACCESS_DENIED
+        );
+    }
+
+    private function createInstructorUserMock()
     {
         $instructor = $this->createMock(Instructor::class);
 
@@ -33,7 +165,7 @@ class CourseInstanceVoterTest extends TestCase
         return $user;
     }
 
-    private function createStudentUser()
+    private function createStudentUserMock()
     {
         $student = $this->createMock(Student::class);
 
@@ -44,142 +176,32 @@ class CourseInstanceVoterTest extends TestCase
         return $user;
     }
 
-    private function createCourseInstance(int $studentId, int $instructorId)
+    private function createCourseInstanceMock($studentMock, $instructorMock)
     {
-        $enrolment = $this->createMock(Enrolment::class);
-        $enrolment->method('getStudent')->willReturn($this->createStudent($studentId));
+        $courseInstanceMock = $this->createMock(CourseInstance::class);
 
-        $courseInstance = new CourseInstance();
-        $courseInstance->addInstructor($this->createInstructor($instructorId));
-        $courseInstance->addEnrolment($enrolment);
+        $getInstructorMethod = $courseInstanceMock->method('getInstructors');
 
-        return $courseInstance;
+        if ($instructorMock) {
+            $getInstructorMethod->willReturn(new ArrayCollection([$instructorMock]));
+        } else {
+            $getInstructorMethod->willReturn(new ArrayCollection([]));
+        }
+
+        $getEnrolmentsMethod = $courseInstanceMock->method('getEnrolments');
+
+        if ($studentMock) {
+            $enrolment = $this->createMock(Enrolment::class);
+            $enrolment->method('getStudent')->willReturn($studentMock);
+            $getEnrolmentsMethod->willReturn(new ArrayCollection([$enrolment]));
+        } else {
+            $getEnrolmentsMethod->willReturn(new ArrayCollection([]));
+        }
+
+        return $courseInstanceMock;
     }
 
-    public function provideCases()
-    {
-        // Test 1
-        $courseInstance = new CourseInstance();
-
-        yield 'anonymous cannot view' => [
-            CourseInstanceVoter::VIEW,
-            $courseInstance,
-            null,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 2
-        $user = $this->createInstructorUser();
-        $courseInstance = new CourseInstance();
-        $courseInstance->addInstructor($user->getInstructor());
-
-        yield 'member instructor can view' => [
-            CourseInstanceVoter::VIEW,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_GRANTED
-        ];
-
-        // Test 3
-        $user = $this->createInstructorUser();
-        $courseInstance = new CourseInstance();
-
-        yield 'non member instructor cannot view' => [
-            CourseInstanceVoter::VIEW,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 4
-        $user = $this->createStudentUser();
-        $enrolment = $this->createMock(Enrolment::class);
-        $enrolment->method('getStudent')->willReturn($user->getStudent());
-        $courseInstance = new CourseInstance();
-        $courseInstance->addEnrolment($enrolment);
-
-        yield 'member student can view' => [
-            CourseInstanceVoter::VIEW,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_GRANTED
-        ];
-
-        // Test 5
-        $user = $this->createStudentUser();
-        $courseInstance = new CourseInstance();
-
-        yield 'non member student cannot view' => [
-            CourseInstanceVoter::VIEW,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 6
-        $courseInstance = new CourseInstance();
-
-        yield 'anonymous cannot edit' => [
-            CourseInstanceVoter::EDIT,
-            $courseInstance,
-            null,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 7
-        $user = $this->createStudentUser();
-        $enrolment = $this->createMock(Enrolment::class);
-        $enrolment->method('getStudent')->willReturn($user->getStudent());
-        $courseInstance = new CourseInstance();
-        $courseInstance->addEnrolment($enrolment);
-
-        yield 'member student cannot edit' => [
-            CourseInstanceVoter::EDIT,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 8
-        $user = $this->createStudentUser();
-        $courseInstance = new CourseInstance();
-
-        yield 'non member student cannot edit' => [
-            CourseInstanceVoter::EDIT,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_DENIED
-        ];
-
-        // Test 9
-
-        $user = $this->createInstructorUser();
-        $courseInstance = new CourseInstance();
-        $courseInstance->addInstructor($user->getInstructor());
-
-        yield 'member instructor can edit' => [
-            CourseInstanceVoter::EDIT,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_GRANTED
-        ];
-
-        // Test 10
-        $user = $this->createInstructorUser();
-        $courseInstance = new CourseInstance();
-
-        yield 'non member instructor cannot view' => [
-            CourseInstanceVoter::EDIT,
-            $courseInstance,
-            $user,
-            Voter::ACCESS_DENIED
-        ];
-    }
-
-    /**
-     * @dataProvider provideCases
-     */
-    public function testVote(
+    private function vote(
         string $attribute,
         CourseInstance $courseInstance,
         ?User $user,
