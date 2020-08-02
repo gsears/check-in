@@ -1,5 +1,26 @@
 {% extends "course/course_instance_base.html.twig" %}
 
+{% block content %}
+	<h1>USER:
+		{{user.fullname}}</h1>
+	<h2>{{student.guid}}
+		-
+		{{student.user.fullname}}</h2>
+	{{_self.instructorList(courseInstance.instructors)}}
+	{{_self.labTable("pending labs", pendingLabs, courseInstance, student, "Complete Survey")}}
+	{{_self.labTable("completed labs", completedLabs, courseInstance, student, "Edit Survey")}}
+{% endblock %}
+
+
+{% macro instructorList(instructors) %}
+	<h2>Instructors</h2>
+	<ul>
+		{% for instructor in instructors %}
+			<li>{{instructor.user.fullname}}</li>
+		{% endfor %}
+	</ul>
+{% endmacro %}
+
 {% macro labTable(title, labs, courseInstance, student, editLabel) %}
 	<h2>{{title | capitalize}}</h2>
 	{% if labs %}
@@ -32,14 +53,3 @@
 		{{title}}.
 	{% endif %}
 {% endmacro %}
-
-{% block content %}
-	<h1>USER:
-		{{user.fullname}}</h1>
-	<h2>{{student.guid}}
-		-
-		{{student.user.fullname}}</h2>
-	{{macros.instructorList(courseInstance.instructors)}}
-	{{macros.labTable("pending labs", pendingLabs, courseInstance, student, "Complete Survey")}}
-	{{macros.labTable("completed labs", completedLabs, courseInstance, student, "Edit Survey")}}
-{% endblock %}

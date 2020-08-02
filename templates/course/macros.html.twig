@@ -1,9 +1,0 @@
-{% macro instructorList(instructors) %}
-	<h2>Instructors</h2>
-	<ul>
-		{% for instructor in instructors %}
-			<li>{{instructor.user.fullname}}</li>
-		{% endfor %}
-	</ul>
-
-{% endmacro %}

@@ -1,5 +1,10 @@
 <?php
 
+/*
+LabTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Unit\Entity;
 
 use App\Entity\Lab;
@@ -31,11 +36,9 @@ class LabTest extends TestCase
         ];
     }
     /**
-     * Returns SurveyQuestionInterfaces in index order
-     *
      * @dataProvider questionProvider
      */
-    public function testQuestions(array $questions, array $expectedOrder, int $count)
+    public function testQuestionsReturnedInIndexOrder(array $questions, array $expectedOrder, int $count)
     {
         $lab = new Lab();
 
