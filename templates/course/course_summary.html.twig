@@ -1,12 +1,14 @@
 {% extends "base.html.twig" %}
 
+{% from 'macros.html.twig' import instructorCardList %}
+
 {% block title %}
 	Course Summary for
 	{{courseInstance.course.code}}
 {% endblock %}
 
 {% block body %}
-	<header>
+	<header class="mb-4">
 		<h1>{{courseInstance.course.code}}
 			-
 			{{courseInstance.course.name}}</h1>
@@ -15,6 +17,26 @@
 			{{courseInstance.endDate | date('d/m/Y')}}</p>
 	</header>
 
+	<div class="row mb-4">
+		<div class="col-8">
+			<h2>Students at Risk</h2>
+		</div>
+		<div class="col-4">
+			<div class="card">
+				<h2 class="card-header h5">Risk Settings</h4>
+				<div class="card-body">
+					<p class="card-text">Set the risk here</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row mb-4">
+		<div class="col-md-8">
+			<h2>Labs</h2>
+		</div>
+		<div class="col-md-4">
+			{{instructorCardList(courseInstance.instructors)}}
+		</div>
+	</div>
 
-	{% block content %}{% endblock %}
 {% endblock %}

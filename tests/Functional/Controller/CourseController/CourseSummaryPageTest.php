@@ -72,7 +72,7 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $testMemberInstructor = $creator->createInstructor(
             'testFirstname',
-            'testSecondName',
+            'testSurname',
             '1@test.com'
         );
 
@@ -82,7 +82,7 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $testNonMemberInstructor = $creator->createInstructor(
             'testFirstname',
-            'testSecondName',
+            'testSurname',
             '2@test.com'
         );
 
@@ -134,7 +134,20 @@ class CourseSummaryPageTest extends FunctionalTestCase
         $client->loginUser($this->memberInstructorUser);
         $crawler = $client->request('GET', '/courses/CS101/1');
         $this->assertPageTitleContains("Course Summary for CS101");
-        $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming', 'Title is not correct.');
+        $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming');
         $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate, $this->endDate));
+    }
+
+    public function testDisplayInstructorsAndEmail()
+    {
+        $client = static::createClient();
+        $client->loginUser($this->memberInstructorUser);
+        $crawler = $client->request('GET', '/courses/CS101/1');
+
+        $this->assertSelectorTextContains('#instructor-card-list li', 'testFirstname testSurname');
+        $messageLink = $crawler->filter('#instructor-card-list a')->extract(['_text', 'href'])[0];
+
+        $this->assertEquals('Message', trim($messageLink[0]));
+        $this->assertEquals('mailto:1@test.com', $messageLink[1]);
     }
 }
