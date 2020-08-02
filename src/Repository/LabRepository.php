@@ -30,7 +30,7 @@ class LabRepository extends ServiceEntityRepository
      * @return Lab[] Returns an array of Lab objects
      */
 
-    public function findByCourseInstance(CourseInstance $courseInstance, DateTime $beforeDateTime = null)
+    public function findByCourseInstanceBeforeDate(CourseInstance $courseInstance, DateTime $beforeDateTime = null)
     {
         $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();
 

@@ -18,10 +18,10 @@
 	</header>
 
 	<div class="row mb-4">
-		<div class="col-8">
+		<div class="col-md-8 order-2 order-md-1 mt-4">
 			<h2>Students at Risk</h2>
 		</div>
-		<div class="col-4">
+		<div class="col-md-4 order-1 order-md-2 mt-4">
 			<div class="card">
 				<h2 class="card-header h5">Risk Settings</h4>
 				<div class="card-body">
@@ -31,12 +31,55 @@
 		</div>
 	</div>
 	<div class="row mb-4">
-		<div class="col-md-8">
+		<div class="col-md-8 mt-4">
 			<h2>Labs</h2>
+			{{_self.labList(labs, currentDate)}}
 		</div>
-		<div class="col-md-4">
+		<div class="col-md-4 mt-4">
 			{{instructorCardList(courseInstance.instructors)}}
 		</div>
 	</div>
 
 {% endblock %}
+
+{% macro labList(labs, currentDate) %}
+	{% if labs %}
+		<table id="lab-table" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Start Date</th>
+					<th>Name</th>
+					<th>Status</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for lab in labs %}
+					{% set href = path('view_lab_summary', {
+        courseId: lab.courseInstance.course.code,
+        instanceIndex: lab.courseInstance.indexInCourse,
+        labSlug: lab.slug
+    }) %}
+					<tr>
+						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+						<td>
+							{{lab.name}}
+						</td>
+						<td>
+							{% if lab.startDateTime > currentDate %}
+								<span class="text-secondary">Inactive</span>
+							{% else %}
+								<span class="text-success">Open</span>
+							{% endif %}
+						</td>
+						<td class="text-right">
+							<a class="btn btn-info btn-sm" href="{{href}}">View</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		No labs in course.
+	{% endif %}
+{% endmacro %}

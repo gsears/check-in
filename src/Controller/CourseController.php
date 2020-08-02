@@ -21,6 +21,7 @@ use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
+use App\Provider\DateTimeProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -93,11 +94,14 @@ class CourseController extends AbstractController
 
         // HANDLER
 
-        $labs = $labRepo->findByCourseInstance($courseInstance);
+        $labs = $labRepo->findBy([
+            'courseInstance' => $courseInstance
+        ]);
 
         return $this->render('course/course_summary.html.twig', [
             'courseInstance' => $courseInstance,
-            'labs' => $labs
+            'labs' => $labs,
+            'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
         ]);
     }
 

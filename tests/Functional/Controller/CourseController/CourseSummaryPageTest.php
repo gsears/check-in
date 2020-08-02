@@ -30,9 +30,9 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $dateTimeProvider = new DateTimeProvider();
         $courseStart =  ($dateTimeProvider->getCurrentDateTime()->modify("- 1 week"));
-        $this->startDate = $courseStart->format("d/m/Y");
+        $this->startDate = $courseStart;
         $courseEnd = ($dateTimeProvider->getCurrentDateTime()->modify("+ 1 week"));
-        $this->endDate = $courseEnd->format("d/m/Y");
+        $this->endDate = $courseEnd;
 
         $testCourseOne = $creator->createCourse(
             'CS101',
@@ -40,13 +40,13 @@ class CourseSummaryPageTest extends FunctionalTestCase
             null
         );
 
-        $testCourseInstanceOne = $creator->createCourseInstance(
+        $testCourseInstance = $creator->createCourseInstance(
             $testCourseOne,
             $courseStart,
             $courseEnd
         );
 
-        $testCourseInstanceOne
+        $testCourseInstance
             ->setIndexInCourse(1);
 
         $testMemberStudent = $creator->createStudent(
@@ -67,7 +67,7 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $creator->createEnrolment(
             $testMemberStudent,
-            $testCourseInstanceOne
+            $testCourseInstance
         );
 
         $testMemberInstructor = $creator->createInstructor(
@@ -78,7 +78,7 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $this->memberInstructorUser = $testMemberInstructor->getUser();
 
-        $testCourseInstanceOne->addInstructor($testMemberInstructor);
+        $testCourseInstance->addInstructor($testMemberInstructor);
 
         $testNonMemberInstructor = $creator->createInstructor(
             'testFirstname',
@@ -87,6 +87,18 @@ class CourseSummaryPageTest extends FunctionalTestCase
         );
 
         $this->nonMemberInstructorUser = $testNonMemberInstructor->getUser();
+
+        $testLabStarted = $creator->createLab(
+            'Lab 1',
+            $courseStart,
+            $testCourseInstance
+        );
+
+        $testLabNotStarted = $creator->createLab(
+            'Lab 2',
+            $courseEnd,
+            $testCourseInstance
+        );
     }
 
     public function testAnonymousUserRedirected()
@@ -135,7 +147,7 @@ class CourseSummaryPageTest extends FunctionalTestCase
         $crawler = $client->request('GET', '/courses/CS101/1');
         $this->assertPageTitleContains("Course Summary for CS101");
         $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming');
-        $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate, $this->endDate));
+        $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate->format("d/m/Y"), $this->endDate->format("d/m/Y")));
     }
 
     public function testDisplayInstructorsAndEmail()
@@ -149,5 +161,39 @@ class CourseSummaryPageTest extends FunctionalTestCase
 
         $this->assertEquals('Message', trim($messageLink[0]));
         $this->assertEquals('mailto:1@test.com', $messageLink[1]);
+    }
+
+    public function testDisplayLabs()
+    {
+        $client = static::createClient();
+        $client->loginUser($this->memberInstructorUser);
+        $crawler = $client->request('GET', '/courses/CS101/1');
+
+        $tableText = $crawler->filter('#lab-table tbody')->filter('tr')->each(function ($tr, $i) {
+            return $tr->filter('td')->each(function ($td, $i) {
+                return trim($td->text());
+            });
+        });
+
+        // First column contains date
+        $dateText = $tableText[0][0];
+        $this->assertEquals($this->startDate->format('d/m/Y'), trim($dateText));
+
+        // Second column contains name
+        $nameText = $tableText[0][1];
+        $this->assertEquals('Lab 1', trim($nameText));
+
+        // Third column contains status (if before date: Open, else Inactive)
+        $firstLabStatus = $tableText[0][2];
+        $this->assertEquals('Open', trim($firstLabStatus));
+
+        $secondLabStatus = $tableText[1][2];
+        $this->assertEquals('Inactive', trim($secondLabStatus));
+
+        // Fourth column contains view link
+        $tableViewLinks = $crawler->filter('#lab-table tbody')->selectLink('View')->links();
+
+        $this->assertStringContainsString('/courses/CS101/1/lab/lab-1', $tableViewLinks[0]->getUri());
+        $this->assertStringContainsString('/courses/CS101/1/lab/lab-2', $tableViewLinks[1]->getUri());
     }
 }
