@@ -1,5 +1,10 @@
 <?php
 
+/*
+CoursesPageTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Functional\Controller\CourseController;
 
 use App\Provider\DateTimeProvider;
@@ -10,6 +15,9 @@ class CoursesPageTest extends FunctionalTestCase
     private $instructorUser;
     private $studentUser;
 
+    /**
+     * Create database data for testing with. This is rolled back after each test.
+     */
     protected function setUp()
     {
         $dateTimeProvider = new DateTimeProvider();
@@ -112,6 +120,55 @@ class CoursesPageTest extends FunctionalTestCase
         );
     }
 
+    public function testAnonymousUserRedirected()
+    {
+        $client = static::createClient();
+        $client->request('GET', '/courses');
+        $this->assertResponseRedirects('/login', 302, "Anonymous user is redirected");
+    }
+
+    public function testStudentCourseLists()
+    {
+        $client = static::createClient();
+        $client->loginUser($this->studentUser);
+        $crawler = $client->request('GET', '/courses');
+        $this->assertResponseIsSuccessful("Page renders for student.");
+
+        // All course links shown
+        $courseTableLinkNodes = $crawler->filter('#course-list a')->extract(['_text', 'href']);
+
+        $courseTableLinkTexts = array_map(function ($node) {
+            return $node[0];
+        }, $courseTableLinkNodes);
+
+        $this->assertContains('CS101-Programming', $courseTableLinkTexts, "Course list contains first course text");
+        $this->assertContains('CS202-Algorithms', $courseTableLinkTexts, "Course list contains second course text");
+
+        $courseTableLinkHrefs = array_map(function ($node) {
+            return $node[1];
+        }, $courseTableLinkNodes);
+
+        $this->assertContains("/courses/CS101/1/1234567", $courseTableLinkHrefs, "Course list contains link to first student course summary");
+        $this->assertContains("/courses/CS202/1/1234567", $courseTableLinkHrefs, "Course list contains link to second student course summary");
+
+        // Recent labs before date shown
+        $recentLabsTableLinkNodes = $crawler->filter('#recent-pending-lab-list a')->extract(['_text', 'href']);
+
+        $recentLabsTableLinkTexts = array_map(function ($node) {
+            return $node[0];
+        }, $recentLabsTableLinkNodes);
+
+        $this->assertContains('Lab One', $recentLabsTableLinkTexts, "Pending list contains pending lab before today's date");
+        $this->assertNotContains('Lab Two', $recentLabsTableLinkTexts, "Pending list does not contain completed lab");
+        $this->assertNotContains('Lab Three', $recentLabsTableLinkTexts, "Labs list does not contain pending lab after today's date");
+
+        $recentLabsTableLinkHrefs = array_map(function ($node) {
+            return $node[1];
+        }, $recentLabsTableLinkNodes);
+
+        $this->assertContains('/courses/CS101/1/lab/lab-one/1234567/survey/1', $recentLabsTableLinkHrefs, "Pending list contains correct link to lab survey first page");
+    }
+
     public function testInstructorCourseLists()
     {
         $client = static::createClient();
@@ -153,54 +210,5 @@ class CoursesPageTest extends FunctionalTestCase
 
         $this->assertContains('/courses/CS101/1/lab/lab-one', $recentLabsTableLinkHrefs, "Pending list contains link to first lab summary");
         $this->assertContains('/courses/CS202/1/lab/lab-two', $recentLabsTableLinkHrefs, "Pending list contains correct link to first lab summary");
-    }
-
-    public function testAnonymousUserRedirected()
-    {
-        $client = static::createClient();
-        $client->request('GET', '/courses');
-        $this->assertResponseRedirects('/login', 302, "Anonymous user is redirected");
-    }
-
-    public function testStudentCourseLists()
-    {
-        $client = static::createClient();
-        $client->loginUser($this->studentUser);
-        $crawler = $client->request('GET', '/courses');
-        $this->assertResponseIsSuccessful("Page renders for student.");
-
-        // All course links shown
-        $courseTableLinkNodes = $crawler->filter('#course-list a')->extract(['_text', 'href']);
-
-        $courseTableLinkTexts = array_map(function ($node) {
-            return $node[0];
-        }, $courseTableLinkNodes);
-
-        $this->assertContains('CS303-Programming', $courseTableLinkTexts, "Course list contains first course text");
-        $this->assertContains('CS404-Algorithms', $courseTableLinkTexts, "Course list contains second course text");
-
-        $courseTableLinkHrefs = array_map(function ($node) {
-            return $node[1];
-        }, $courseTableLinkNodes);
-
-        $this->assertContains("/courses/CS303/1/7654321", $courseTableLinkHrefs, "Course list contains link to first student course summary");
-        $this->assertContains("/courses/CS404/1/7654321", $courseTableLinkHrefs, "Course list contains link to second student course summary");
-
-        // Recent labs before date shown
-        $recentLabsTableLinkNodes = $crawler->filter('#recent-pending-lab-list a')->extract(['_text', 'href']);
-
-        $recentLabsTableLinkTexts = array_map(function ($node) {
-            return $node[0];
-        }, $recentLabsTableLinkNodes);
-
-        $this->assertContains('Lab One', $recentLabsTableLinkTexts, "Pending list contains pending lab before today's date");
-        $this->assertNotContains('Lab Two', $recentLabsTableLinkTexts, "Pending list does not contain completed lab");
-        $this->assertNotContains('Lab Three', $recentLabsTableLinkTexts, "Labs list does not contain pending lab after today's date");
-
-        $recentLabsTableLinkHrefs = array_map(function ($node) {
-            return $node[1];
-        }, $recentLabsTableLinkNodes);
-
-        $this->assertContains('/courses/CS303/1/lab/lab-one/7654321/survey/1', $recentLabsTableLinkHrefs, "Pending list contains correct link to lab survey first page");
     }
 }

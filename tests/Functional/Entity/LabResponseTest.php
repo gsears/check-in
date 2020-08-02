@@ -1,15 +1,18 @@
 <?php
 
+/*
+LabResponseTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Functional\Entity;
 
-use App\Entity\Lab;
 use App\Entity\LabResponse;
-use App\Entity\Student;
 use App\Tests\Functional\FunctionalTestCase;
 
 class LabResponseTest extends FunctionalTestCase
 {
-    public function testTimestamps()
+    public function testTimestampsSetOnCreateAndUpdate()
     {
         $em = $this->getEntityManager();
 

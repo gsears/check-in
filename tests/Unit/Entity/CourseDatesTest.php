@@ -1,5 +1,10 @@
 <?php
 
+/*
+CourseDatesTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Unit\Entity;
 
 use App\Entity\CourseDates;
@@ -32,7 +37,7 @@ class CourseDatesTest extends TestCase
             $this->expectException(InvalidArgumentException::class);
         }
 
-        $courseDates = new CourseDates(date_create($startDate), date_create($endDate));
+        new CourseDates(date_create($startDate), date_create($endDate));
 
         $this->assertTrue(true);
     }

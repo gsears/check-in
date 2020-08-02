@@ -1,0 +1,5 @@
+doctrine:
+  dbal:
+    # Use sqlite for testing
+    driver: pdo_sqlite
+    url: "sqlite:///%kernel.project_dir%/var/test.db"

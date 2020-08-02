@@ -1,13 +1,20 @@
 <?php
 
-namespace App\Tests\Unit\Entity;
+/*
+LabXYQuestionTest.php
+Gareth Sears - 2493194S
+*/
 
+namespace App\Tests\Unit\Entity;
 
 use App\Entity\LabXYQuestion;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
-class LabXYQuestionTest extends TestCase
+/**
+ * Checks that SurveyQuestionInterface classes have valid state
+ */
+class SurveyQuestionInterfaceTest extends TestCase
 {
     public function indexProvider()
     {
@@ -20,7 +27,7 @@ class LabXYQuestionTest extends TestCase
     /**
      * @dataProvider indexProvider
      */
-    public function testIndex($index, $expectedPass)
+    public function testLabXYQuestionHasValidIndex($index, $expectedPass)
     {
         if (!$expectedPass) {
             $this->expectException(InvalidArgumentException::class);

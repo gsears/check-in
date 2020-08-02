@@ -1,5 +1,10 @@
 <?php
 
+/*
+BoundTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Unit\Entity;
 
 use App\Entity\Bound;
@@ -31,7 +36,7 @@ class BoundTest extends TestCase
             $this->expectException(InvalidArgumentException::class);
         }
 
-        $bound = new Bound($lowBound, $highBound);
+        new Bound($lowBound, $highBound);
 
         $this->assertTrue(true);
     }
