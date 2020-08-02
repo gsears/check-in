@@ -3,10 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\LabXYQuestionResponse;
-use App\Entity\LabResponseRisk;
+use App\Containers\LabResponseRisk;
 use App\Entity\SurveyQuestionResponseInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
 
 /**
  * @method LabXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
@@ -38,10 +39,16 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
         )->setParameter('xyResponse', $xyQuestionResponse);
 
         try {
-            return $query->getSingleScalarResult();
+            $riskLevel = $query->getSingleScalarResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return LabResponseRisk::NONE;
+            return LabResponseRisk::WEIGHT_NONE;
         }
+
+        if (!in_array($riskLevel, LabResponseRisk::getRiskLevels())) {
+            throw new InvalidTypeException("Invalid risk level fetched: " . $riskLevel, 1);
+        }
+
+        return $riskLevel;
     }
 }

@@ -1,9 +1,14 @@
 <?php
 
+/*
+LabResponseRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\LabResponse;
-use App\Entity\LabResponseRisk;
+use App\Containers\LabResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -59,6 +64,6 @@ class LabResponseRepository extends ServiceEntityRepository
             }
         )->toArray();
 
-        return new LabResponseRisk($riskLevels, $labResponse->getStudent());
+        return new LabResponseRisk($riskLevels, $labResponse);
     }
 }
