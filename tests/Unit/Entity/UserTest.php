@@ -1,59 +1,42 @@
 <?php
 
+/*
+UserTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Unit\Entity;
 
-use App\Entity\Instructor;
-use App\Entity\Student;
-use App\Entity\User;
-use App\Security\Roles;
 use LogicException;
+use App\Entity\User;
+use App\Entity\Student;
+use App\Security\Roles;
+use App\Entity\Instructor;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Checks that student and instructor states are correct when a user is assigned as one.
+ */
 class UserTest extends TestCase
 {
-    public function rolesProvider()
-    {
-        yield [
-            $userType = Instructor::class,
-            $contains = [Roles::INSTRUCTOR],
-            $notContains = [Roles::STUDENT]
-        ];
-
-        yield [
-            $userType = Student::class,
-            $contains = [Roles::STUDENT],
-            $notContains = [Roles::INSTRUCTOR]
-        ];
-    }
-
-    /**
-     * @dataProvider rolesProvider
-     *
-     * @param string $userType
-     * @param string[] $is
-     * @param string[] $isNot
-     */
-    public function testCorrectRoles(string $userType, array $contains, array $notContains)
+    public function testInstructorHasCorrectRoles()
     {
         $user = new User();
+        $instructor = $this->createMock(Instructor::class);
+        $user->setInstructor($instructor);
 
-        if ($userType === Instructor::class) {
-            $instructor = $this->createMock(Instructor::class);
-            $user->setInstructor($instructor);
-        }
+        $this->assertContains(Roles::INSTRUCTOR, $user->getRoles());
+        $this->assertNotContains(Roles::STUDENT, $user->getRoles());
+    }
 
-        if ($userType === Student::class) {
-            $student = $this->createMock(Student::class);
-            $user->setStudent($student);
-        }
+    public function testStudentHasCorrectRoles()
+    {
+        $user = new User();
+        $student = $this->createMock(Student::class);
+        $user->setStudent($student);
 
-        foreach ($contains as $role) {
-            $this->assertContains($role, $user->getRoles());
-        }
-
-        foreach ($notContains as $role) {
-            $this->assertNotContains($role, $user->getRoles());
-        }
+        $this->assertContains(Roles::STUDENT, $user->getRoles());
+        $this->assertNotContains(Roles::INSTRUCTOR, $user->getRoles());
     }
 
     public function testInstructorCannotBeStudent()
