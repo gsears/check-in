@@ -54,11 +54,10 @@ class LabResponseRepository extends ServiceEntityRepository
     {
         $riskLevels = $labResponse->getQuestionResponses()->map(
             function ($question) {
-                return $question->getRiskLevel();
+                $surveyQuestionRepo = $this->getEntityManager()->getRepository(get_class($question));
+                return $surveyQuestionRepo->getRiskLevel($question);
             }
         )->toArray();
-
-        dump($riskLevels);
 
         return new LabResponseRisk($riskLevels, $labResponse->getStudent());
     }

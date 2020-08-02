@@ -7,5 +7,4 @@ namespace App\Entity;
  */
 interface SurveyQuestionResponseInterface
 {
-    public function getRiskLevel(): int;
 }

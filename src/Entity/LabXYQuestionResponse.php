@@ -7,7 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Repository\LabXYQuestionResponseRepository;
-use InvalidArgumentException;
 
 /**
  * @ORM\Entity(repositoryClass=LabXYQuestionResponseRepository::class)
@@ -41,11 +40,6 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
      * @ORM\ManyToOne(targetEntity=LabResponse::class, inversedBy="xyQuestionResponses")
      */
     private $labResponse;
-
-    /**
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $riskLevel;
 
     public function __toString(): string
     {
@@ -110,25 +104,6 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
     {
         $this->labResponse = $labResponse;
 
-        return $this;
-    }
-
-    public function getRiskLevel(): int
-    {
-        if (is_null($this->riskLevel)) {
-            return 0;
-        } else {
-            return $this->riskLevel;
-        }
-    }
-
-    public function setRiskLevel(int $riskLevel): self
-    {
-        if ($riskLevel < 0 || $riskLevel > 2) {
-            throw new InvalidArgumentException("Risk level must be between 0 and 2", 1);
-        }
-
-        $this->riskLevel = $riskLevel;
         return $this;
     }
 }
