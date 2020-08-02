@@ -54,27 +54,31 @@ class SecurityControllerTest extends FunctionalTestCase
 
         // simulate $testUser being logged in
         $client->loginUser($testUser);
-
         $crawler = $client->request('GET', '/login');
-
         $this->assertResponseRedirects('/courses', 302);
     }
 
-    public function userProvider()
+    public function testLogoutStudent()
     {
-        yield [$this->getEntityCreator()->createInstructor('test', 'test')];
-        yield [$this->getEntityCreator()->createStudent('test', 'test', '1234')];
+        $student = $this->getEntityCreator()->createStudent('test', 'test', '1234');
+
+        $client = static::createClient();
+        $client->loginUser($student->getUser());
+        $client->request('GET', '/courses');
+        $this->assertResponseIsSuccessful();
+
+        $client->clickLink("Logout");
+
+        // Use full path as we are redirecting from firewall in security.yaml
+        $this->assertResponseRedirects('http://localhost/login', 302);
     }
 
-    /**
-     * @dataProvider userProvider
-     *
-     * Assert that clicking the logout button logs out for all users
-     */
-    public function testLogout($userType)
+    public function testLogoutInstructor()
     {
+        $instructor = $this->getEntityCreator()->createInstructor('test', 'test');
+
         $client = static::createClient();
-        $client->loginUser($userType->getUser());
+        $client->loginUser($instructor->getUser());
         $client->request('GET', '/courses');
         $this->assertResponseIsSuccessful();
 
