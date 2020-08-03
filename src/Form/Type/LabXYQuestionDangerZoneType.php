@@ -75,7 +75,6 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
             return null;
         }
 
-        dump($viewData);
         // Serialise the XYQuestionDangerZone collection, ignoring the labXYQuestion field,
         // as this won't be set by the javascript component and would result in circular
         // serialization.

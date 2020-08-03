@@ -48,7 +48,6 @@ class LabXYQuestionType extends AbstractType
                 $studentResponse = $labXYQuestion
                     ->getResponses()
                     ->filter(function (LabXYQuestionResponse $response) use ($student) {
-                        dump($student);
                         return $response->getLabResponse()->getStudent() === $student;
                     })->first();
                 if ($studentResponse) {
