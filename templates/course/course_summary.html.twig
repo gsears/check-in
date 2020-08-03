@@ -20,6 +20,7 @@
 	<div class="row mb-4">
 		<div class="col-md-8 order-2 order-md-1 mt-4">
 			<h2>Students at Risk</h2>
+			{{_self.studentsAtRiskTable(studentsAtRisk)}}
 		</div>
 		<div class="col-md-4 order-1 order-md-2 mt-4">
 			<div class="card">
@@ -33,7 +34,7 @@
 	<div class="row mb-4">
 		<div class="col-md-8 mt-4">
 			<h2>Labs</h2>
-			{{_self.labList(labs, currentDate)}}
+			{{_self.labTable(labs, currentDate)}}
 		</div>
 		<div class="col-md-4 mt-4">
 			{{instructorCardList(courseInstance.instructors)}}
@@ -42,7 +43,7 @@
 
 {% endblock %}
 
-{% macro labList(labs, currentDate) %}
+{% macro labTable(labs, currentDate) %}
 	{% if labs %}
 		<table id="lab-table" class="table table-sm">
 			<thead>
@@ -55,9 +56,10 @@
 			</thead>
 			<tbody>
 				{% for lab in labs %}
+					{% set courseInstance = lab.courseInstance %}
 					{% set href = path('view_lab_summary', {
-        courseId: lab.courseInstance.course.code,
-        instanceIndex: lab.courseInstance.indexInCourse,
+        courseId: courseInstance.course.code,
+        instanceIndex: courseInstance.indexInCourse,
         labSlug: lab.slug
     }) %}
 					<tr>
@@ -81,5 +83,43 @@
 		</table>
 	{% else %}
 		No labs in course.
+	{% endif %}
+{% endmacro %}
+
+
+{% macro studentsAtRiskTable(enrolmentRisks) %}
+	{% if enrolmentRisks %}
+		<table id="lab-table" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Average Risk Factor</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for enrolmentRisk in enrolmentRisks %}
+					{% set enrolment = enrolmentRisk.enrolment %}
+					{% set student = enrolment.student %}
+					{% set courseInstance = enrolment.courseInstance %}
+					{% set href = path('view_course_student_summary', {
+        courseId: courseInstance.course.code,
+        instanceIndex: courseInstance.indexInCourse,
+        studentId: student.guid
+    }) %}
+					<tr>
+						<td>
+							<a href="{{href}}">{{student.guid}}
+								-
+								{{student.user.fullname}}</a>
+						</td>
+						<td>
+							<span class="text-danger">{{enrolmentRisk.averageRiskFactor}}%</span>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		No students found to be at risk.
 	{% endif %}
 {% endmacro %}

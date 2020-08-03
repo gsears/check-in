@@ -43,7 +43,8 @@ class LabResponseRisk
      */
     public function getRiskFactor()
     {
-        $maxRisk = count($this->questionRiskLevels) * self::WEIGHT_DANGER;
+        $questionCount = $this->labResponse->getLab()->getQuestionCount();
+        $maxRisk = $questionCount * self::WEIGHT_DANGER;
         return ceil(array_sum($this->getWeightedRisks()) / $maxRisk) * 100;
     }
 
