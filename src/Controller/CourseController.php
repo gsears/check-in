@@ -210,8 +210,6 @@ class CourseController extends AbstractController
         // Display students at risk for lab
         $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
 
-        dump($labResponseRisks);
-
         return $this->render('lab/lab_summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
@@ -411,7 +409,6 @@ class CourseController extends AbstractController
 
             $xyQuestionResponses = $labResponse->getXYQuestionResponses();
             $this->getDoctrine()->getManager()->initializeObject($xyQuestionResponses);
-            dump($xyQuestionResponses);
 
             // Get the response that matches the question
             $questionResponse = $labResponse->getXYQuestionResponses()->filter(
@@ -419,9 +416,6 @@ class CourseController extends AbstractController
                     return $xyQuestionResponse->getLabXYQuestion() === $question;
                 }
             )->first();
-
-
-            dump($questionResponse);
 
             // If it doesn't exist, create a new empty one
             if (!$questionResponse) {

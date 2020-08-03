@@ -37,8 +37,6 @@ class XYCoordinatesType extends AbstractXYComponentType
 
     public function provideJsonContent($viewData): ?string
     {
-        dump($viewData);
-
         if (!$viewData) {
             return null;
         }
