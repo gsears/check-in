@@ -11,6 +11,7 @@ use App\Containers\EnrolmentRisk;
 use App\Entity\Lab;
 use App\Security\Roles;
 use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
 use App\Repository\LabRepository;
 use App\Form\Type\LabResponseType;
 use App\Form\Type\LabDangerZoneType;
@@ -28,6 +29,7 @@ use App\Repository\LabResponseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
