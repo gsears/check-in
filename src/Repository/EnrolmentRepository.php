@@ -26,7 +26,7 @@ class EnrolmentRepository extends ServiceEntityRepository
         $this->labResponseRepo = $labResponseRepo;
     }
 
-    public function findEnrolmentRisksByCourseInstance(CourseInstance $courseInstance)
+    public function findEnrolmentRisksByCourseInstance(CourseInstance $courseInstance, bool $onlyAtRisk = false)
     {
         $currentTime = (new DateTimeProvider)->getCurrentDateTime();
         $riskThreshold = $courseInstance->getRiskThreshold();
@@ -60,7 +60,7 @@ class EnrolmentRepository extends ServiceEntityRepository
 
         $responsesByStudent = array_chunk($labResponses, $consecutiveLabCount);
 
-        $courseInstanceRisks = array_map(function ($responseChunk) use ($courseInstance) {
+        $enrolmentRisks = array_map(function ($responseChunk) use ($courseInstance) {
             $labResponseRisks = array_map(function ($response) {
                 return $this->labResponseRepo->getRiskForResponse($response);
             }, $responseChunk);
@@ -74,6 +74,14 @@ class EnrolmentRepository extends ServiceEntityRepository
             return new EnrolmentRisk($labResponseRisks, $enrolment);
         }, $responsesByStudent);
 
-        return $courseInstanceRisks;
+        if ($onlyAtRisk) {
+            $enrolmentRisks = array_filter($enrolmentRisks, function (EnrolmentRisk $enrolmentRisk) use ($riskThreshold) {
+                return $enrolmentRisk->areAllRisksAbove($riskThreshold);
+            });
+        }
+
+        EnrolmentRisk::sortByAverageRisk($enrolmentRisks);
+
+        return $enrolmentRisks;
     }
 }

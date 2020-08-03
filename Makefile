@@ -27,3 +27,9 @@ fixtures:
 
 test:
 	./bin/phpunit
+
+cron_setup:
+	# Note: Needs to be run in project directory
+	# https://github.com/rewieer/TaskSchedulerBundle
+	# # (crontab -l; echo "$(line)" ) | crontab -
+	@./bin/setup_cron.sh

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\EnrolmentRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,6 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Enrolment
 {
+    const FLAG_AUTOMATIC = 1;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -29,11 +32,23 @@ class Enrolment
      */
     private $courseInstance;
 
-    public function __toString() : string
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $riskFlag;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $riskFlagDateTime;
+
+    public function __toString(): string
     {
-        return sprintf("Enrolment: Student %s <-> Course %s\n",
+        return sprintf(
+            "Enrolment: Student %s <-> Course %s\n",
             $this->getStudent()->getUser()->getFullname(),
-            $this->getCourseInstance()->getCourse()->getCode());
+            $this->getCourseInstance()->getCourse()->getCode()
+        );
     }
 
     public function getId(): ?int
@@ -63,5 +78,28 @@ class Enrolment
         $this->courseInstance = $courseInstance;
 
         return $this;
+    }
+
+    public function getRiskFlag(): ?int
+    {
+        return $this->riskFlag;
+    }
+
+    public function setRiskFlag(?int $riskFlag): self
+    {
+        $this->riskFlag = $riskFlag;
+
+        if (is_null($riskFlag)) {
+            $this->riskFlagDateTime = null;
+        } else {
+            $this->riskFlagDateTime = new DateTime();
+        }
+
+        return $this;
+    }
+
+    public function getRiskFlagDateTime(): ?\DateTime
+    {
+        return $this->riskFlagDateTime;
     }
 }

@@ -25,6 +25,18 @@ class CourseInstanceRepository extends ServiceEntityRepository
         $this->labResponseRepo = $labResponseRepo;
     }
 
+    public function findAllActive()
+    {
+        $currentDate = (new DateTimeProvider)->getCurrentDateTime();
+        return $this->createQueryBuilder('ci')
+            ->andWhere('ci.startDate <= :currentDate')
+            ->andWhere('ci.endDate >= :currentDate')
+            ->setParameter('currentDate', $currentDate)
+            ->orderBy('ci.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * Finds all CourseInstance objects which match the student.
      * @return CourseInstance[] Returns an array of CourseInstance objects

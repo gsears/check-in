@@ -70,4 +70,9 @@ class EnrolmentRisk
 
         return true;
     }
+
+    public function flagStudent()
+    {
+        $this->enrolment->setRiskFlag(Enrolment::FLAG_AUTOMATIC);
+    }
 }

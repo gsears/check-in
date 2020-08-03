@@ -94,6 +94,8 @@
 				<tr>
 					<th>Student</th>
 					<th>Average Risk Factor</th>
+					<th>Flag</th>
+					<th>When</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -115,6 +117,24 @@
 						<td>
 							<span class="text-danger">{{enrolmentRisk.averageRiskFactor}}%</span>
 						</td>
+						<td>
+							{% if enrolment.riskFlag %}
+								{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
+									<span class="text-danger">Flagged Automatically</span>
+								{% endif %}
+							{% else %}
+								<span class="text-secondary">-</span>
+							{% endif %}
+
+						</td>
+						<td>
+							{% if enrolment.riskFlagDateTime %}
+								{{enrolment.riskFlagDateTime | date('d/m/Y H:i')}}
+							{% else %}
+								<span class="text-secondary">Scheduled for Saturday</span>
+							{% endif %}
+						</td>
+
 					</tr>
 				{% endfor %}
 			</tbody>

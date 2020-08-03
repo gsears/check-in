@@ -26,6 +26,7 @@ use App\Form\Type\SurveyQuestionResponseType;
 use App\Provider\DateTimeProvider;
 use App\Repository\EnrolmentRepository;
 use App\Repository\LabResponseRepository;
+use App\Task\FlagStudentsTask;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -86,7 +87,8 @@ class CourseController extends AbstractController
         $instanceIndex,
         CourseInstanceRepository $courseInstanceRepo,
         LabRepository $labRepo,
-        EnrolmentRepository $enrolmentRepo
+        EnrolmentRepository $enrolmentRepo,
+        FlagStudentsTask $flagStudentsTask
     ) {
 
         // DATA
@@ -105,17 +107,13 @@ class CourseController extends AbstractController
         ]);
 
         // Find students at risk
-        $enrolmentRisks = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance);
-        $studentsAtRisk = array_filter($enrolmentRisks, function (EnrolmentRisk $enrolmentRisk) use ($courseInstance) {
-            return $enrolmentRisk->areAllRisksAbove($courseInstance->getRiskThreshold());
-        });
+        $studentsAtRisk = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance, true);
 
-        EnrolmentRisk::sortByAverageRisk($studentsAtRisk);
+        // $flagStudentsTask->run();
 
         return $this->render('course/course_summary.html.twig', [
             'courseInstance' => $courseInstance,
             'studentsAtRisk' => $studentsAtRisk,
-            'enrolmentRisks' => $enrolmentRisks,
             'labs' => $labs,
             'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
         ]);
