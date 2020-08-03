@@ -199,7 +199,7 @@ class AppFixtures extends Fixture
     {
         $students = [];
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $students[] = $this->creator->createStudent(
                 $this->faker->firstName(),
                 $this->faker->lastName(),
@@ -229,7 +229,7 @@ class AppFixtures extends Fixture
     {
         $courses = [];
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $name = sprintf(
                 self::COURSE_TITLE_TEMPLATES[array_rand(self::COURSE_TITLE_TEMPLATES)],
                 self::COURSE_TITLE_SUBJECTS[array_rand(self::COURSE_TITLE_SUBJECTS)]
