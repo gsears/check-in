@@ -7,6 +7,7 @@ Gareth Sears - 2493194S
 
 namespace App\Controller;
 
+use App\Containers\EnrolmentRisk;
 use App\Entity\Lab;
 use App\Security\Roles;
 use App\Entity\LabResponse;
@@ -22,6 +23,8 @@ use App\Form\Type\LabXYQuestionResponseType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
 use App\Provider\DateTimeProvider;
+use App\Repository\EnrolmentRepository;
+use App\Repository\LabResponseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,7 +42,7 @@ class CourseController extends AbstractController
      *
      * @Route("", name="courses")
      */
-    public function index(CourseInstanceRepository $courseRepo, LabRepository $labRepo)
+    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo)
     {
         $user = $this->getUser();
 
@@ -47,7 +50,7 @@ class CourseController extends AbstractController
 
         if ($user->isStudent()) {
             $student = $user->getStudent();
-            $courseInstances = $courseRepo->findByStudent($user->getStudent());
+            $courseInstances = $courseInstanceRepo->findByStudent($user->getStudent());
             $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
                 'courseInstances' => $courseInstances,
@@ -58,7 +61,7 @@ class CourseController extends AbstractController
 
         if ($user->isInstructor()) {
             $instructor = $user->getInstructor();
-            $courseInstances = $courseRepo->findByInstructor($instructor);
+            $courseInstances = $courseInstanceRepo->findByInstructor($instructor);
             $recentLabs = $labRepo->findLatestByInstructor($instructor, 5);
             return $this->render('course/courses_instructor.html.twig', [
                 'courseInstances' => $courseInstances,
@@ -80,7 +83,8 @@ class CourseController extends AbstractController
         $courseId,
         $instanceIndex,
         CourseInstanceRepository $courseInstanceRepo,
-        LabRepository $labRepo
+        LabRepository $labRepo,
+        EnrolmentRepository $enrolmentRepo
     ) {
 
         // DATA
@@ -98,8 +102,18 @@ class CourseController extends AbstractController
             'courseInstance' => $courseInstance
         ]);
 
+        // Find students at risk
+        $enrolmentRisks = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance);
+        $studentsAtRisk = array_filter($enrolmentRisks, function (EnrolmentRisk $enrolmentRisk) use ($courseInstance) {
+            return $enrolmentRisk->areAllRisksAbove($courseInstance->getRiskThreshold());
+        });
+
+        EnrolmentRisk::sortByAverageRisk($studentsAtRisk);
+
         return $this->render('course/course_summary.html.twig', [
             'courseInstance' => $courseInstance,
+            'studentsAtRisk' => $studentsAtRisk,
+            'enrolmentRisks' => $enrolmentRisks,
             'labs' => $labs,
             'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
         ]);
