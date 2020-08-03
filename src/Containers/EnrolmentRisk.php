@@ -12,16 +12,16 @@ use App\Entity\Enrolment;
 
 class EnrolmentRisk
 {
-    public static function sortByAverageRisk(array $enrolmentRisks)
+    public static function sortByAverageRisk($enrolmentRisks)
     {
         uasort($enrolmentRisks, function ($a, $b) {
             $riskFactorA = $a->getAverageRiskFactor();
             $riskFactorB = $b->getAverageRiskFactor();
 
             if ($riskFactorA > $riskFactorB) {
-                return -1;
-            } else if ($riskFactorA < $riskFactorB) {
                 return 1;
+            } else if ($riskFactorA < $riskFactorB) {
+                return -1;
             } else {
                 return 0;
             }
