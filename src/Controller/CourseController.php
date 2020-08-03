@@ -21,6 +21,7 @@ use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
+use App\Form\Type\RiskSettingsType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
 use App\Provider\DateTimeProvider;
@@ -83,6 +84,7 @@ class CourseController extends AbstractController
      * @Route("/{courseId}/{instanceIndex}", name="view_course_summary")
      */
     public function viewCourse(
+        Request $request,
         $courseId,
         $instanceIndex,
         CourseInstanceRepository $courseInstanceRepo,
@@ -109,6 +111,22 @@ class CourseController extends AbstractController
         // Find students at risk
         $studentsAtRisk = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance, true);
 
+        $riskSettingsForm = $this->createForm(RiskSettingsType::class, $courseInstance);
+        $riskSettingsForm->handleRequest($request);
+
+        if ($riskSettingsForm->isSubmitted() && $riskSettingsForm->isValid()) {
+            // Risk thresholds have been updated
+            $updatedCourseInstance = $riskSettingsForm->getData();
+
+            // Update the database
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($updatedCourseInstance);
+            $entityManager->flush();
+
+            // Force rerender of page to update
+            return $this->redirect($request->getUri());
+        }
+
         // $flagStudentsTask->run();
 
         return $this->render('course/course_summary.html.twig', [
@@ -116,6 +134,7 @@ class CourseController extends AbstractController
             'studentsAtRisk' => $studentsAtRisk,
             'labs' => $labs,
             'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
+            'riskSettingsForm' => $riskSettingsForm->createView()
         ]);
     }
 
@@ -224,12 +243,17 @@ class CourseController extends AbstractController
         // Display students at risk for lab
         $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
 
-        return $this->render('lab/lab_summary.html.twig', [
+        $response = $this->render('lab/lab_summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
             'form' => $form->createView(),
             'labResponseRisks' => $labResponseRisks,
         ]);
+
+        // Don't cache to always update with latest info, even after form submission:
+        $response->headers->addCacheControlDirective('no-cache', true);
+
+        return $response;
     }
 
     /**

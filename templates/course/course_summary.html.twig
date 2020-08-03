@@ -27,119 +27,120 @@
 				<h2 class="card-header h5">Risk Settings</h4>
 				<div class="card-body">
 					<p class="card-text">Set the risk here</p>
+					{{form(riskSettingsForm)}}
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="row mb-4">
-		<div class="col-md-8 mt-4">
-			<h2>Labs</h2>
-			{{_self.labTable(labs, currentDate)}}
+		<div class="row mb-4">
+			<div class="col-md-8 mt-4">
+				<h2>Labs</h2>
+				{{_self.labTable(labs, currentDate)}}
+			</div>
+			<div class="col-md-4 mt-4">
+				{{instructorCardList(courseInstance.instructors)}}
+			</div>
 		</div>
-		<div class="col-md-4 mt-4">
-			{{instructorCardList(courseInstance.instructors)}}
-		</div>
-	</div>
 
-{% endblock %}
+	{% endblock %}
 
-{% macro labTable(labs, currentDate) %}
-	{% if labs %}
-		<table id="lab-table" class="table table-sm">
-			<thead>
-				<tr>
-					<th>Start Date</th>
-					<th>Name</th>
-					<th>Status</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for lab in labs %}
-					{% set courseInstance = lab.courseInstance %}
-					{% set href = path('view_lab_summary', {
+	{% macro labTable(labs, currentDate) %}
+		{% if labs %}
+			<table id="lab-table" class="table table-sm">
+				<thead>
+					<tr>
+						<th>Start Date</th>
+						<th>Name</th>
+						<th>Status</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for lab in labs %}
+						{% set courseInstance = lab.courseInstance %}
+						{% set href = path('view_lab_summary', {
         courseId: courseInstance.course.code,
         instanceIndex: courseInstance.indexInCourse,
         labSlug: lab.slug
     }) %}
+						<tr>
+							<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+							<td>
+								{{lab.name}}
+							</td>
+							<td>
+								{% if lab.startDateTime > currentDate %}
+									<span class="text-secondary">Inactive</span>
+								{% else %}
+									<span class="text-success">Open</span>
+								{% endif %}
+							</td>
+							<td class="text-right">
+								<a class="btn btn-info btn-sm" href="{{href}}">View</a>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			No labs in course.
+		{% endif %}
+	{% endmacro %}
+
+
+	{% macro studentsAtRiskTable(enrolmentRisks) %}
+		{% if enrolmentRisks %}
+			<table id="lab-table" class="table table-sm">
+				<thead>
 					<tr>
-						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
-						<td>
-							{{lab.name}}
-						</td>
-						<td>
-							{% if lab.startDateTime > currentDate %}
-								<span class="text-secondary">Inactive</span>
-							{% else %}
-								<span class="text-success">Open</span>
-							{% endif %}
-						</td>
-						<td class="text-right">
-							<a class="btn btn-info btn-sm" href="{{href}}">View</a>
-						</td>
+						<th>Student</th>
+						<th>Average Risk Factor</th>
+						<th>Flag</th>
+						<th>When</th>
 					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	{% else %}
-		No labs in course.
-	{% endif %}
-{% endmacro %}
-
-
-{% macro studentsAtRiskTable(enrolmentRisks) %}
-	{% if enrolmentRisks %}
-		<table id="lab-table" class="table table-sm">
-			<thead>
-				<tr>
-					<th>Student</th>
-					<th>Average Risk Factor</th>
-					<th>Flag</th>
-					<th>When</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for enrolmentRisk in enrolmentRisks %}
-					{% set enrolment = enrolmentRisk.enrolment %}
-					{% set student = enrolment.student %}
-					{% set courseInstance = enrolment.courseInstance %}
-					{% set href = path('view_course_student_summary', {
+				</thead>
+				<tbody>
+					{% for enrolmentRisk in enrolmentRisks %}
+						{% set enrolment = enrolmentRisk.enrolment %}
+						{% set student = enrolment.student %}
+						{% set courseInstance = enrolment.courseInstance %}
+						{% set href = path('view_course_student_summary', {
         courseId: courseInstance.course.code,
         instanceIndex: courseInstance.indexInCourse,
         studentId: student.guid
     }) %}
-					<tr>
-						<td>
-							<a href="{{href}}">{{student.guid}}
-								-
-								{{student.user.fullname}}</a>
-						</td>
-						<td>
-							<span class="text-danger">{{enrolmentRisk.averageRiskFactor}}%</span>
-						</td>
-						<td>
-							{% if enrolment.riskFlag %}
-								{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-									<span class="text-danger">Flagged Automatically</span>
+						<tr>
+							<td>
+								<a href="{{href}}">{{student.guid}}
+									-
+									{{student.user.fullname}}</a>
+							</td>
+							<td>
+								<span class="text-danger">{{enrolmentRisk.averageRiskFactor}}%</span>
+							</td>
+							<td>
+								{% if enrolment.riskFlag %}
+									{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
+										<span class="text-danger">Flagged Automatically</span>
+									{% endif %}
+								{% else %}
+									<span class="text-secondary">-</span>
 								{% endif %}
-							{% else %}
-								<span class="text-secondary">-</span>
-							{% endif %}
 
-						</td>
-						<td>
-							{% if enrolment.riskFlagDateTime %}
-								{{enrolment.riskFlagDateTime | date('d/m/Y H:i')}}
-							{% else %}
-								<span class="text-secondary">Scheduled for Saturday</span>
-							{% endif %}
-						</td>
+							</td>
+							<td>
+								{% if enrolment.riskFlagDateTime %}
+									{{enrolment.riskFlagDateTime | date('d/m/Y H:i')}}
+								{% else %}
+									<span class="text-secondary">Scheduled</span>
+								{% endif %}
+							</td>
 
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-	{% else %}
-		No students found to be at risk.
-	{% endif %}
-{% endmacro %}
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			No students found to be at risk.
+		{% endif %}
+	{% endmacro %}
