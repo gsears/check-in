@@ -21,7 +21,7 @@ class FlagStudentsTask extends AbstractScheduledTask
     protected function initialize(Schedule $schedule)
     {
         $schedule
-            ->everyMinutes(5); // Every week the task is run.
+            ->everyMinutes(60); // Every week the task is run.
     }
 
     public function run()
