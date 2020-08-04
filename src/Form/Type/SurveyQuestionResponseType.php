@@ -25,7 +25,7 @@ abstract class SurveyQuestionResponseType extends AbstractType
     final public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // Child components implement this method. It creates the body of the form.
-        $builder = $this->buildFormBody($builder);
+        $builder = $this->buildFormBody($builder, $options);
 
         $builder->add(self::SKIP_BUTTON_NAME, SubmitType::class, [
             'label' => 'Skip Question',
@@ -39,7 +39,7 @@ abstract class SurveyQuestionResponseType extends AbstractType
         ]);
     }
 
-    final public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
@@ -47,5 +47,5 @@ abstract class SurveyQuestionResponseType extends AbstractType
         ]);
     }
 
-    abstract public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface;
+    abstract public function buildFormBody(FormBuilderInterface $builder, array $options): FormBuilderInterface;
 }
