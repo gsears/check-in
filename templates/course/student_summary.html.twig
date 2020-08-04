@@ -1,14 +1,12 @@
 {% extends "course/course_instance_base.html.twig" %}
 
+{% from 'macros.html.twig' import weightedRiskToTrafficLights %}
+
 {% block content %}
-	<h1>USER:
-		{{user.fullname}}</h1>
-	<h2>{{student.guid}}
-		-
-		{{student.user.fullname}}</h2>
+	<h2>{{student.guid}}-{{student.user.fullname}}</h2>
 	{{_self.instructorList(courseInstance.instructors)}}
-	{{_self.labTable("pending labs", pendingLabs, courseInstance, student, "Complete Survey")}}
-	{{_self.labTable("completed labs", completedLabs, courseInstance, student, "Edit Survey")}}
+	{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student)}}
+	{{_self.completedLabTable("completed labs", completedLabsWithRisk, courseInstance, student)}}
 {% endblock %}
 
 
@@ -21,8 +19,8 @@
 	</ul>
 {% endmacro %}
 
-{% macro labTable(title, labs, courseInstance, student, editLabel) %}
-	<h2>{{title | capitalize}}</h2>
+{% macro pendingLabTable(title, labs, courseInstance, student) %}
+	<h2>Pending Lab Surveys</h2>
 	{% if labs %}
 		<table class="table">
 			<thead>
@@ -41,7 +39,7 @@
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						<td>
 							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
-								{{editLabel}}
+								Complete Survey
 							</a>
 						</td>
 					</tr>
@@ -49,7 +47,43 @@
 			</tbody>
 		</table>
 	{% else %}
-		No
-		{{title}}.
+		No pending labs to complete.
+	{% endif %}
+{% endmacro %}
+
+{% macro completedLabTable(title, labsWithRisk, courseInstance, student) %}
+	<h2>Completed Lab Surveys</h2>
+	{% if labsWithRisk %}
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">Lab Name</th>
+					<th scope="col">Date</th>
+					<th scope="col">Start Time</th>
+					<th scope="col">Risk</th>
+					<th scope="col"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for labWithRisk in labsWithRisk %}
+					{% set lab = labWithRisk.lab %}
+					<tr>
+						<td>{{lab.name}}</td>
+						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+						<td>{{lab.startDateTime | date("H:i")}}</td>
+						{# From Macros #}
+						<td>{{weightedRiskToTrafficLights(labWithRisk.weightedRisks)}}</td>
+						<td>
+							{# TODO: CHANGE LINK #}
+							<a class="btn btn-secondary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
+								View Response
+							</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		No pending labs to complete.
 	{% endif %}
 {% endmacro %}

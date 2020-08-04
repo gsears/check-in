@@ -1,0 +1,42 @@
+{% extends "base.html.twig" %}
+
+{% from 'macros.html.twig' import weightedRiskToTrafficLights %}
+
+{% block body %}
+	<header>
+		<h1>{{labName}}</h1>
+		<p>{{courseName}}</p>
+	</header>
+
+	{{form(form)}}
+
+		<h2>Student Responses</h2>
+
+		{% if labResponseRisks %}
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Student</th>
+						<th scope="col">Risk</th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for risk in labResponseRisks %}
+						{% set student = risk.labResponse.student %}
+						<tr>
+							<td>{{student.guid}}
+								-
+								{{student.user.fullname}}</td>
+							<td>{{weightedRiskToTrafficLights(risk.weightedRisks)}},</td>
+							<td></td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			No students in course.
+		{% endif %}
+
+
+	{% endblock %}

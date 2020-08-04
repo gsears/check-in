@@ -1,12 +1,17 @@
 <?php
 
+/*
+CourseInstance.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
-use App\Entity\CourseDates;
+use App\Containers\CourseDates;
 use App\Repository\CourseInstanceRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=CourseInstanceRepository::class)
@@ -55,6 +60,16 @@ class CourseInstance
      * @ORM\Column(type="integer")
      */
     private $indexInCourse;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $riskThreshold;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $riskConsecutiveLabCount;
 
     public function __construct()
     {
@@ -221,6 +236,30 @@ class CourseInstance
     public function setIndexInCourse(int $indexInCourse): self
     {
         $this->indexInCourse = $indexInCourse;
+
+        return $this;
+    }
+
+    public function getRiskThreshold(): ?int
+    {
+        return $this->riskThreshold;
+    }
+
+    public function setRiskThreshold(int $riskThreshold): self
+    {
+        $this->riskThreshold = $riskThreshold;
+
+        return $this;
+    }
+
+    public function getRiskConsecutiveLabCount(): ?int
+    {
+        return $this->riskConsecutiveLabCount;
+    }
+
+    public function setRiskConsecutiveLabCount(int $riskConsecutiveLabCount): self
+    {
+        $this->riskConsecutiveLabCount = $riskConsecutiveLabCount;
 
         return $this;
     }

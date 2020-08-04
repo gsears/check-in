@@ -7,20 +7,31 @@ Gareth Sears - 2493194S
 
 namespace App\Controller;
 
+use App\Containers\EnrolmentRisk;
+use App\Entity\Lab;
 use App\Security\Roles;
 use App\Entity\LabResponse;
+use App\Entity\LabXYQuestion;
 use App\Repository\LabRepository;
 use App\Form\Type\LabResponseType;
 use App\Form\Type\LabDangerZoneType;
 use App\Security\Voter\StudentVoter;
 use App\Entity\LabXYQuestionResponse;
+use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
+use App\Form\Type\RiskSettingsType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
+use App\Provider\DateTimeProvider;
+use App\Repository\EnrolmentRepository;
+use App\Repository\LabResponseRepository;
+use App\Task\FlagStudentsTask;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -35,7 +46,7 @@ class CourseController extends AbstractController
      *
      * @Route("", name="courses")
      */
-    public function index(CourseInstanceRepository $courseRepo, LabRepository $labRepo)
+    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo)
     {
         $user = $this->getUser();
 
@@ -43,7 +54,7 @@ class CourseController extends AbstractController
 
         if ($user->isStudent()) {
             $student = $user->getStudent();
-            $courseInstances = $courseRepo->findByStudent($user->getStudent());
+            $courseInstances = $courseInstanceRepo->findByStudent($user->getStudent());
             $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
                 'courseInstances' => $courseInstances,
@@ -54,7 +65,7 @@ class CourseController extends AbstractController
 
         if ($user->isInstructor()) {
             $instructor = $user->getInstructor();
-            $courseInstances = $courseRepo->findByInstructor($instructor);
+            $courseInstances = $courseInstanceRepo->findByInstructor($instructor);
             $recentLabs = $labRepo->findLatestByInstructor($instructor, 5);
             return $this->render('course/courses_instructor.html.twig', [
                 'courseInstances' => $courseInstances,
@@ -73,10 +84,13 @@ class CourseController extends AbstractController
      * @Route("/{courseId}/{instanceIndex}", name="view_course_summary")
      */
     public function viewCourse(
+        Request $request,
         $courseId,
         $instanceIndex,
         CourseInstanceRepository $courseInstanceRepo,
-        LabRepository $labRepo
+        LabRepository $labRepo,
+        EnrolmentRepository $enrolmentRepo,
+        FlagStudentsTask $flagStudentsTask
     ) {
 
         // DATA
@@ -90,11 +104,37 @@ class CourseController extends AbstractController
 
         // HANDLER
 
-        $labs = $labRepo->findByCourseInstance($courseInstance);
+        $labs = $labRepo->findBy([
+            'courseInstance' => $courseInstance
+        ]);
+
+        // Find students at risk
+        $studentsAtRisk = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance, true);
+
+        $riskSettingsForm = $this->createForm(RiskSettingsType::class, $courseInstance);
+        $riskSettingsForm->handleRequest($request);
+
+        if ($riskSettingsForm->isSubmitted() && $riskSettingsForm->isValid()) {
+            // Risk thresholds have been updated
+            $updatedCourseInstance = $riskSettingsForm->getData();
+
+            // Update the database
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($updatedCourseInstance);
+            $entityManager->flush();
+
+            // Force rerender of page to update
+            return $this->redirect($request->getUri());
+        }
+
+        // $flagStudentsTask->run();
 
         return $this->render('course/course_summary.html.twig', [
             'courseInstance' => $courseInstance,
-            'labs' => $labs
+            'studentsAtRisk' => $studentsAtRisk,
+            'labs' => $labs,
+            'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
+            'riskSettingsForm' => $riskSettingsForm->createView()
         ]);
     }
 
@@ -107,9 +147,11 @@ class CourseController extends AbstractController
         $courseId,
         $instanceIndex,
         $studentId,
+        EntityManagerInterface $entityManager,
         CourseInstanceRepository $courseInstanceRepo,
         StudentRepository $studentRepo,
-        LabRepository $labRepo
+        LabRepository $labRepo,
+        LabResponseRepository $labResponseRepo
     ) {
 
         // DATA
@@ -132,11 +174,20 @@ class CourseController extends AbstractController
         $completedLabs = $labRepo->findCompletedSurveysByCourseInstanceAndStudent($courseInstance, $student);
         $pendingLabs = $labRepo->findPendingSurveysByCourseInstanceAndStudent($courseInstance, $student);
 
+        $completedLabResponses =  $labResponseRepo->findCompletedByCourseInstanceAndStudent($courseInstance, $student);
+
+        $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
+            return [
+                'lab' => $labResponse->getLab(),
+                'weightedRisks' => $labResponseRepo->getRiskForResponse($labResponse)->getWeightedRisks(),
+            ];
+        }, $completedLabResponses);
+
         return $this->render('course/student_summary.html.twig', [
             'user' => $this->getUser(),
             'courseInstance' => $courseInstance,
             'pendingLabs' => $pendingLabs,
-            'completedLabs' => $completedLabs,
+            'completedLabsWithRisk' => $completedLabsWithRisk,
             'student' => $student
         ]);
     }
@@ -172,6 +223,8 @@ class CourseController extends AbstractController
 
         // HANDLER
 
+        // Danger Zone Form
+
         $form = $this->createForm(LabDangerZoneType::class, $lab);
         $form->handleRequest($request);
 
@@ -187,11 +240,20 @@ class CourseController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->render('lab/summary.html.twig', [
+        // Display students at risk for lab
+        $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
+
+        $response = $this->render('lab/lab_summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'labResponseRisks' => $labResponseRisks,
         ]);
+
+        // Don't cache to always update with latest info, even after form submission:
+        $response->headers->addCacheControlDirective('no-cache', true);
+
+        return $response;
     }
 
     /**
@@ -382,6 +444,9 @@ class CourseController extends AbstractController
     private function generateLabSurveyForm(SurveyQuestionInterface $question, LabResponse $labResponse): FormInterface
     {
         if ($question instanceof LabXYQuestion) {
+
+            $xyQuestionResponses = $labResponse->getXYQuestionResponses();
+            $this->getDoctrine()->getManager()->initializeObject($xyQuestionResponses);
 
             // Get the response that matches the question
             $questionResponse = $labResponse->getXYQuestionResponses()->filter(

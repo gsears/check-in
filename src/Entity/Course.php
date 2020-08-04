@@ -1,5 +1,10 @@
 <?php
 
+/*
+Course.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
 use App\Repository\CourseRepository;
@@ -38,11 +43,13 @@ class Course
         $this->courseInstances = new ArrayCollection();
     }
 
-    public function __toString() : string
+    public function __toString(): string
     {
-        return sprintf("Code: %s - Name: %s\n",
+        return sprintf(
+            "Code: %s - Name: %s\n",
             $this->getCode(),
-            $this->getName());
+            $this->getName()
+        );
     }
 
     public function getCode(): ?string

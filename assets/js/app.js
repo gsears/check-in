@@ -6,25 +6,29 @@
  */
 
 // any CSS you import will output into a single css file (app.css in this case)
-import '../css/app.scss';
+import "../css/app.scss";
+
+import "@fortawesome/fontawesome-free/js/fontawesome";
+import "@fortawesome/fontawesome-free/js/solid";
+import "@fortawesome/fontawesome-free/js/regular";
+import "@fortawesome/fontawesome-free/js/brands";
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
 // import $ from 'jquery';
 
 // console.log('Hello Webpack Encore! Edit me in assets/js/app.js');
 
-import Vue from 'vue';
-import XYQuestion from '@c/XYQuestion.vue';
+import Vue from "vue";
+import XYQuestion from "@c/XYQuestion.vue";
 
 global.XYQuestionWidgetFactory = (el, props) => {
   return new Vue({
     el,
-    render: h => h(XYQuestion, {
-      props: {
-        ...props
-      }
-    })
+    render: (h) =>
+      h(XYQuestion, {
+        props: {
+          ...props,
+        },
+      }),
   });
-}
-
-
+};

@@ -1,0 +1,41 @@
+{% macro weightedRiskToTrafficLights(weightedRisks) %}
+	{% if weightedRisks %}
+		{% for risk in weightedRisks %}
+			{% if risk == constant('App\\Containers\\LabResponseRisk::WEIGHT_WARNING') %}
+				<span class="badge badge-pill badge-warning">&nbsp;</span>
+			{% endif %}
+			{% if risk == constant('App\\Containers\\LabResponseRisk::WEIGHT_DANGER') %}
+				<span class="badge badge-pill badge-danger">&nbsp;</span>
+			{% endif %}
+		{% endfor %}
+	{% else %}
+		<span class="text-success">
+			None
+		</span>
+	{% endif %}
+{% endmacro %}
+
+{% macro instructorCardList(instructors) %}
+	<div id="instructor-card-list" class="card">
+		<h2 class="card-header h5">
+			Course Instructors
+		</h2>
+
+		{% if instructors %}
+			<ul class="list-group list-group-flush">
+				{% for instructor in instructors %}
+					<li class="list-group-item d-flex justify-content-between">{{instructor.user.fullname}}
+						<a href="mailto:{{instructor.user.email}}" class="btn btn-primary btn-sm">
+							<i class="fa fa-envelope mr-2" aria-hidden="true"></i>
+							Message
+						</a>
+					</li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<p class="card-text">
+				No instructors teach on this course.
+			</p>
+		{% endif %}
+	</div>
+{% endmacro %}

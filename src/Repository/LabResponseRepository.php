@@ -1,8 +1,14 @@
 <?php
 
+/*
+LabResponseRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\LabResponse;
+use App\Containers\LabResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -33,5 +39,31 @@ class LabResponseRepository extends ServiceEntityRepository
             ->orderBy('l.id', 'ASC')
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findCompletedByCourseInstanceAndStudent($courseInstance, $student)
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.lab', 'l')
+            ->andWhere('l.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->andWhere('r.student = :student')
+            ->setParameter('student', $student)
+            ->andWhere('r.submitted = true')
+            ->orderBy('l.startDateTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getRiskForResponse(LabResponse $labResponse)
+    {
+        $riskLevels = $labResponse->getQuestionResponses()->map(
+            function ($question) {
+                $surveyQuestionRepo = $this->getEntityManager()->getRepository(get_class($question));
+                return $surveyQuestionRepo->getRiskLevel($question);
+            }
+        )->toArray();
+
+        return new LabResponseRisk($riskLevels, $labResponse);
     }
 }

@@ -5,9 +5,9 @@ BoundTest.php
 Gareth Sears - 2493194S
 */
 
-namespace App\Tests\Unit\Entity;
+namespace App\Tests\Unit\Containers;
 
-use App\Entity\Bound;
+use App\Containers\Bound;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

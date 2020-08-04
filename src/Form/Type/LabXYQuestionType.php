@@ -1,27 +1,21 @@
 <?php
 
+/*
+LabXYQuestionType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
-use App\Entity\XYQuestion;
-use App\Form\Type\XYCoordinates;
-use App\Entity\LabResponse;
-use App\Form\Type\XYCoordinatesType;
 use App\Entity\LabXYQuestion;
-use Symfony\Component\Form\FormView;
+use App\Entity\LabXYQuestionResponse;
+use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormInterface;
-use App\Entity\LabXYQuestionResponse;
-use App\Entity\LabXYQuestionDangerZone;
-use Exception;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Validator\Constraints\NotBlank;
+
 
 class LabXYQuestionType extends AbstractType
 {
@@ -54,7 +48,6 @@ class LabXYQuestionType extends AbstractType
                 $studentResponse = $labXYQuestion
                     ->getResponses()
                     ->filter(function (LabXYQuestionResponse $response) use ($student) {
-                        dump($student);
                         return $response->getLabResponse()->getStudent() === $student;
                     })->first();
                 if ($studentResponse) {

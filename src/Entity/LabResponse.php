@@ -43,7 +43,7 @@ class LabResponse
     private $lab;
 
     /**
-     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true, cascade={"persist"})
      */
     private $xyQuestionResponses;
 
@@ -173,5 +173,13 @@ class LabResponse
         $this->submitted = $submitted;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|SurveyQuestionResponseInterface[]
+     */
+    public function getQuestionResponses(): Collection
+    {
+        return $this->getXYQuestionResponses();
     }
 }

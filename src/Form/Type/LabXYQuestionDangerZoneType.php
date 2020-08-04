@@ -1,34 +1,24 @@
 <?php
 
+/*
+LabXYQuestionDangerZoneType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
-use App\Entity\LabResponse;
-use App\Entity\LabXYQuestion;
-use App\Entity\LabXYQuestionResponse;
-use App\Entity\XYCoordinates;
-use App\Entity\XYQuestion;
-use App\Entity\LabXYQuestionDangerZone;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;;
-
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormView;
+use App\Entity\LabXYQuestionDangerZone;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
 /**
- * Implements DataMapperInterface to return an XYCoordinates object.
- * https://symfony.com/doc/current/form/data_mappers.html
+ * TODO: Document
  */
 class LabXYQuestionDangerZoneType extends AbstractXYComponentType
 {
@@ -85,7 +75,6 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
             return null;
         }
 
-        dump($viewData);
         // Serialise the XYQuestionDangerZone collection, ignoring the labXYQuestion field,
         // as this won't be set by the javascript component and would result in circular
         // serialization.

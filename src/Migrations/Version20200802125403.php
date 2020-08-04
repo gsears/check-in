@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200802113921 extends AbstractMigration
+final class Version20200802125403 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -37,7 +37,7 @@ final class Version20200802113921 extends AbstractMigration
         $this->addSql('CREATE UNIQUE INDEX UNIQ_31FC43DDBB5E5996 ON instructor (appuser_id)');
         $this->addSql('CREATE TABLE lab (id INT NOT NULL, course_instance_id INT NOT NULL, name VARCHAR(255) NOT NULL, slug VARCHAR(255) NOT NULL, start_date_time TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_61D6B1C44E3F42C9 ON lab (course_instance_id)');
-        $this->addSql('CREATE TABLE course_instance (id INT NOT NULL, course_id VARCHAR(12) NOT NULL, start_date DATE NOT NULL, end_date DATE NOT NULL, index_in_course INT NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE course_instance (id INT NOT NULL, course_id VARCHAR(12) NOT NULL, start_date DATE NOT NULL, end_date DATE NOT NULL, index_in_course INT NOT NULL, risk_threshold INT NOT NULL, risk_consecutive_lab_count INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_EB84DC88591CC992 ON course_instance (course_id)');
         $this->addSql('CREATE TABLE course_instance_instructor (course_instance_id INT NOT NULL, instructor_id INT NOT NULL, PRIMARY KEY(course_instance_id, instructor_id))');
         $this->addSql('CREATE INDEX IDX_3FBB60CC4E3F42C9 ON course_instance_instructor (course_instance_id)');
@@ -47,7 +47,7 @@ final class Version20200802113921 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_89C14EB36528905A ON xyquestion (y_field_id)');
         $this->addSql('CREATE TABLE users (id INT NOT NULL, email VARCHAR(180) NOT NULL, forename VARCHAR(180) NOT NULL, surname VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_1483A5E9E7927C74 ON users (email)');
-        $this->addSql('CREATE TABLE lab_xyquestion_response (id INT NOT NULL, lab_xyquestion_id INT DEFAULT NULL, lab_response_id INT NOT NULL, x_value INT NOT NULL, y_value INT NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE lab_xyquestion_response (id INT NOT NULL, lab_xyquestion_id INT NOT NULL, lab_response_id INT DEFAULT NULL, x_value INT NOT NULL, y_value INT NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_DA476E87FA80A32 ON lab_xyquestion_response (lab_xyquestion_id)');
         $this->addSql('CREATE INDEX IDX_DA476E8771FEB27B ON lab_xyquestion_response (lab_response_id)');
         $this->addSql('CREATE TABLE student (guid INT NOT NULL, appuser_id INT NOT NULL, PRIMARY KEY(guid))');

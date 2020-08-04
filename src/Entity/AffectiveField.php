@@ -1,5 +1,10 @@
 <?php
 
+/*
+AffectiveField.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
 use App\Repository\AffectiveFieldRepository;
@@ -34,10 +39,12 @@ class AffectiveField
 
     public function __toString()
     {
-        return sprintf("Affective Field: %s <- %s -> %s\n",
+        return sprintf(
+            "Affective Field: %s <- %s -> %s\n",
             $this->getLowLabel(),
             $this->getName(),
-            $this->getHighLabel());
+            $this->getHighLabel()
+        );
     }
 
     public function getId(): ?int

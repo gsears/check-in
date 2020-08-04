@@ -1,6 +1,11 @@
 <?php
 
-namespace App\Entity;
+/*
+CourseDates.php
+Gareth Sears - 2493194S
+*/
+
+namespace App\Containers;
 
 use DateTime;
 use InvalidArgumentException;

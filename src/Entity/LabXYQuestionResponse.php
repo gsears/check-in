@@ -1,11 +1,16 @@
 <?php
 
+/*
+LabXYQuestionResponse.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Entity;
 
-use App\Entity\XYCoordinates;
-use Doctrine\ORM\Mapping as ORM;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
+use Doctrine\ORM\Mapping as ORM;
+use App\Containers\XYCoordinates;
 use App\Repository\LabXYQuestionResponseRepository;
 
 /**
@@ -32,12 +37,12 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=LabXYQuestion::class, inversedBy="responses")
+     * @ORM\JoinColumn(nullable=false)
      */
     private $labXYQuestion;
 
     /**
      * @ORM\ManyToOne(targetEntity=LabResponse::class, inversedBy="xyQuestionResponses")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $labResponse;
 
@@ -56,12 +61,22 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
         return $this->id;
     }
 
+    public function getXValue(): ?int
+    {
+        return $this->xValue;
+    }
+
+    public function getYValue(): ?int
+    {
+        return $this->yValue;
+    }
+
     public function getCoordinates(): ?XYCoordinates
     {
-        if ($this->xValue && $this->yValue) {
-            return new XYCoordinates($this->xValue, $this->yValue);
-        } else {
+        if (is_null($this->xValue) || is_null($this->yValue)) {
             return null;
+        } else {
+            return new XYCoordinates($this->xValue, $this->yValue);
         }
     }
 

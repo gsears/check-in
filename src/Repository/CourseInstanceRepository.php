@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\Containers\EnrolmentRisk;
 use App\Entity\Course;
 use App\Entity\CourseInstance;
+use App\Provider\DateTimeProvider;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -15,9 +17,24 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CourseInstanceRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $labResponseRepo;
+
+    public function __construct(ManagerRegistry $registry, LabResponseRepository $labResponseRepo)
     {
         parent::__construct($registry, CourseInstance::class);
+        $this->labResponseRepo = $labResponseRepo;
+    }
+
+    public function findAllActive()
+    {
+        $currentDate = (new DateTimeProvider)->getCurrentDateTime();
+        return $this->createQueryBuilder('ci')
+            ->andWhere('ci.startDate <= :currentDate')
+            ->andWhere('ci.endDate >= :currentDate')
+            ->setParameter('currentDate', $currentDate)
+            ->orderBy('ci.id', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -64,7 +81,7 @@ class CourseInstanceRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findByIndexAndCourse($instanceIndex, $courseId)
+    public function findByIndexAndCourse($instanceIndex, $courseId): CourseInstance
     {
         return $this->createQueryBuilder('ci')
             ->andWhere('ci.indexInCourse = :instanceIndex')

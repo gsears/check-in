@@ -6,6 +6,7 @@ use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Instructor;
 use App\Entity\Lab;
+use App\Entity\LabResponse;
 use App\Entity\Student;
 use App\Provider\DateTimeProvider;
 use DateTime;
@@ -29,7 +30,7 @@ class LabRepository extends ServiceEntityRepository
      * @return Lab[] Returns an array of Lab objects
      */
 
-    public function findByCourseInstance(CourseInstance $courseInstance, DateTime $beforeDateTime = null)
+    public function findByCourseInstanceBeforeDate(CourseInstance $courseInstance, DateTime $beforeDateTime = null)
     {
         $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();
 
@@ -124,5 +125,42 @@ class LabRepository extends ServiceEntityRepository
             ->orderBy('l.startDateTime', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Returns risk for students who have completed lab surveys.
+     *
+     * @param Lab $lab
+     * @return void
+     */
+    public function findStudentsAtRiskByLab(Lab $lab)
+    {
+        $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
+
+        $riskCollection = $lab->getResponses()
+            ->filter(function (LabResponse $response) {
+                return $response->getSubmitted();
+            })
+            ->map(function ($response) use ($responseRepo) {
+                return $responseRepo->getRiskForResponse($response);
+            });
+
+        $riskArray = $riskCollection->toArray();
+
+        // Order by highest risk
+        uasort($riskArray, function ($a, $b) {
+            $riskFactorA = $a->getRiskFactor();
+            $riskFactorB = $b->getRiskFactor();
+
+            if ($riskFactorA > $riskFactorB) {
+                return -1;
+            } else if ($riskFactorA < $riskFactorB) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        return $riskArray;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use App\Entity\Lab;
+use App\Entity\LabResponse;
 use App\Entity\Student;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -17,5 +19,15 @@ class StudentRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Student::class);
+    }
+
+    public function findByCourseInstance($courseInstance)
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.enrolments', 'e')
+            ->andWhere('e.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->getQuery()
+            ->getResult();
     }
 }
