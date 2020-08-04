@@ -7,12 +7,14 @@ Gareth Sears - 2493194S
 
 namespace App\DataFixtures;
 
+use App\Containers\LabResponseRisk;
 use Faker;
 use App\Entity\Lab;
 use App\Entity\Student;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Containers\XYCoordinates;
+use App\Entity\SentimentQuestion;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -120,6 +122,13 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const SENTIMENT_QUESTIONS = [
+        "journal" => [
+            "index" => 4,
+            "text" => "Reflect on the course so far. Think about:\n- Course Materials\n- Workload / Time Management\n- Communication with faculty\n- Coursework\n- Lectures",
+        ]
+    ];
+
     private $manager;
     private $faker;
     private $creator;
@@ -162,8 +171,11 @@ class AppFixtures extends Fixture
         // Create XY questions
         $xyQuestions = $this->loadXYQuestions($affectiveFields);
 
+        // Create Sentiment questions
+        $sentimentQuestions = $this->loadSentimentQuestions();
+
         // Create lab surveys
-        $labs = $this->loadLabs($courseInstances, $xyQuestions);
+        $labs = $this->loadLabs($courseInstances, $xyQuestions, $sentimentQuestions);
 
         // Create lab xy responses
         $completedLabResponses = $this->loadLabResponses($courseInstances);
@@ -351,7 +363,23 @@ class AppFixtures extends Fixture
         return $xyQuestions;
     }
 
-    public function loadLabs(array $courseInstances, array $xyQuestions): array
+    public function loadSentimentQuestions(): array
+    {
+        $sentimentQuestions = [];
+
+        foreach (self::SENTIMENT_QUESTIONS as $name => $props) {
+            $sentimentQuestion = $this->creator->createSentimentQuestion(
+                $name,
+                $props['text'],
+            );
+
+            $sentimentQuestions[$name] = $sentimentQuestion;
+        }
+
+        return $sentimentQuestion;
+    }
+
+    public function loadLabs(array $courseInstances, array $xyQuestions, array $sentimentQuestions): array
     {
         $labs = [];
 
@@ -386,7 +414,7 @@ class AppFixtures extends Fixture
 
                     // With one basic danger zone as default
                     $dangerZone = $this->creator->createLabXYQuestionDangerZone(
-                        2,
+                        LabResponseRisk::LEVEL_DANGER,
                         -10,
                         -6,
                         -10,
@@ -396,12 +424,39 @@ class AppFixtures extends Fixture
 
                     // And one warning zone
                     $warningZone = $this->creator->createLabXYQuestionDangerZone(
-                        1,
+                        LabResponseRisk::LEVEL_WARNING,
                         -10,
                         -6,
                         -5,
                         -1,
                         $labXYQuestion
+                    );
+                }
+
+                // Add stock sentiment questions to each lab instance
+                foreach ($sentimentQuestions as $name => $sentimentQuestion) {
+                    $labSentimentQuestion = $this->creator->createLabSentimentQuestion(
+                        self::SENTIMENT_QUESTIONS[$name]['index'],
+                        $sentimentQuestion,
+                        $lab
+                    );
+
+                    // Warning zones as below
+                    $dangerZone = $this->creator->createLabSentimentQuestionDangerZone(
+                        LabResponseRisk::LEVEL_DANGER,
+                        SentimentQuestion::NEGATIVE,
+                        0.5,
+                        1.0,
+                        $labSentimentQuestion
+                    );
+
+                    // Warning zones as below
+                    $warningZone = $this->creator->createLabSentimentQuestionDangerZone(
+                        LabResponseRisk::LEVEL_WARNING,
+                        SentimentQuestion::NEGATIVE,
+                        0.0,
+                        0.5,
+                        $labSentimentQuestion
                     );
                 }
 
