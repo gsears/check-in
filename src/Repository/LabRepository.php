@@ -131,10 +131,13 @@ class LabRepository extends ServiceEntityRepository
      * Returns risk for students who have completed lab surveys.
      *
      * @param Lab $lab
-     * @return void
+     * @return LabResponseRisk[]
      */
     public function findStudentsAtRiskByLab(Lab $lab)
     {
+        /**
+         * @var LabResponseRepository
+         */
         $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
 
         $riskCollection = $lab->getResponses()
