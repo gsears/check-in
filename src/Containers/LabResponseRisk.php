@@ -22,9 +22,9 @@ class LabResponseRisk
     const WEIGHT_WARNING = 1;
     const WEIGHT_DANGER = 3;
 
-    public static function getRiskLevels(): array
+    public static function isValidRiskLevel(int $riskLevel): bool
     {
-        return [self::LEVEL_NONE, self::LEVEL_WARNING, self::LEVEL_DANGER];
+        return in_array($riskLevel, [self::LEVEL_NONE, self::LEVEL_WARNING, self::LEVEL_DANGER]);
     }
 
     private $questionRiskLevels = [];

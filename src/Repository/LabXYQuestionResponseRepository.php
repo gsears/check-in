@@ -22,30 +22,27 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
         parent::__construct($registry, LabXYQuestionResponse::class);
     }
 
-    public function getRiskLevel(SurveyQuestionResponseInterface $xyQuestionResponse): int
+    public function getRiskLevel(SurveyQuestionResponseInterface $questionResponse): int
     {
-        $entityManager = $this->getEntityManager();
-
-        $query = $entityManager->createQuery(
-            'SELECT dz.riskLevel
-            FROM App\Entity\LabXyQuestionResponse xyr
-            JOIN xyr.labXYQuestion xyq
-            JOIN xyq.dangerZones dz
-            WHERE xyr = :xyResponse AND
-                dz.xMin <= xyr.xValue AND
-                dz.xMax >= xyr.xValue AND
-                dz.yMin <= xyr.yValue AND
-                dz.yMax >= xyr.yValue'
-        )->setParameter('xyResponse', $xyQuestionResponse);
+        $query = $this->getQueryBuilder('xyr')
+            ->join('xyr.labXYQuestion', 'xyq')
+            ->join('xyq.dangerZones', 'dz')
+            ->andWhere('sr = :questionResponse')
+            ->setParameter('questionResponse', $questionResponse)
+            ->andWhere('dz.xMin <= xyr.xValue')
+            ->andWhere('dz.xMax >= xyr.xValue')
+            ->andWhere('dz.yMin <= xyr.yValue')
+            ->andWhere('dz.yMax >= xyr.yValue')
+            ->getQuery();
 
         try {
             $riskLevel = $query->getSingleScalarResult();
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return LabResponseRisk::WEIGHT_NONE;
+            return LabResponseRisk::LEVEL_NONE;
         }
 
-        if (!in_array($riskLevel, LabResponseRisk::getRiskLevels())) {
+        if (!LabResponseRisk::isValidRiskLevel($riskLevel)) {
             throw new InvalidTypeException("Invalid risk level fetched: " . $riskLevel, 1);
         }
 

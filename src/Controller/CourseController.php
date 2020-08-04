@@ -445,11 +445,11 @@ class CourseController extends AbstractController
     {
         if ($question instanceof LabXYQuestion) {
 
-            $xyQuestionResponses = $labResponse->getXYQuestionResponses();
+            $xyQuestionResponses = $labResponse->getLabXYQuestionResponses();
             $this->getDoctrine()->getManager()->initializeObject($xyQuestionResponses);
 
             // Get the response that matches the question
-            $questionResponse = $labResponse->getXYQuestionResponses()->filter(
+            $questionResponse = $labResponse->getLabXYQuestionResponses()->filter(
                 function (LabXYQuestionResponse $xyQuestionResponse) use ($question) {
                     return $xyQuestionResponse->getLabXYQuestion() === $question;
                 }

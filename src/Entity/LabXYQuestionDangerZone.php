@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=LabXYQuestionDangerZoneRepository::class)
  */
-class LabXYQuestionDangerZone
+class LabXYQuestionDangerZone implements SurveyQuestionDangerZoneInterface
 {
     /**
      * @ORM\Id()

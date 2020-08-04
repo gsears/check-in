@@ -53,6 +53,11 @@ class Lab
     private $labXYQuestions;
 
     /**
+     * @ORM\OneToMany(targetEntity=LabSentimentQuestion::class, mappedBy="lab", orphanRemoval=true)
+     */
+    private $labSentimentQuestions;
+
+    /**
      * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="lab", orphanRemoval=true)
      */
     private $responses;
@@ -61,6 +66,7 @@ class Lab
     {
         $this->labXYQuestions = new ArrayCollection();
         $this->responses = new ArrayCollection();
+        $this->labSentimentQuestions = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -156,21 +162,55 @@ class Lab
     }
 
     /**
+     * @return Collection|LabSentimentQuestion[]
+     */
+    public function getLabSentimentQuestions(): Collection
+    {
+        return $this->labSentimentQuestions;
+    }
+
+    public function addLabSentimentQuestion(LabSentimentQuestion $labSentimentQuestion): self
+    {
+        if (!$this->labSentimentQuestions->contains($labSentimentQuestion)) {
+            $this->labSentimentQuestions[] = $labSentimentQuestion;
+            $labSentimentQuestion->setLab($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabSentimentQuestion(LabSentimentQuestion $labSentimentQuestion): self
+    {
+        if ($this->labSentimentQuestions->contains($labSentimentQuestion)) {
+            $this->labSentimentQuestions->removeElement($labSentimentQuestion);
+            // set the owning side to null (unless already changed)
+            if ($labSentimentQuestion->getLab() === $this) {
+                $labSentimentQuestion->setLab(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Returns all the question in this survey of all types in order
      * @return Collection|SurveyQuestionInterface[]
      */
     public function getQuestions(): Collection
     {
-        // Join here.
-        $collection = $this->getLabXYQuestions();
+        // Merge all questions
+        $questions = array_merge(
+            $this->labXYQuestions->toArray(),
+            $this->labSentimentQuestions->toArray()
+        );
 
-        // Order here.
-        $iterator = $collection->getIterator();
-        $iterator->uasort(function ($a, $b) {
+        // Sort by question order
+        uasort($questions, function ($a, $b) {
             return ($a->getIndex() < $b->getIndex()) ? -1 : 1;
         });
 
-        return new ArrayCollection(iterator_to_array($iterator));
+        // Return as a collection
+        return new ArrayCollection($questions);
     }
 
     public function getQuestionCount(): int
