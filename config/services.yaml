@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
   app.monkeylearn_api_key: "%env(MONKEYLEARN_API_KEY)"
+  app.monkeylearn_model_id: "%env(MONKEYLEARN_MODEL_ID)"
 
 services:
   # default configuration for services in *this* file

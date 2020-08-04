@@ -40,7 +40,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * @Route("/courses")
@@ -386,9 +388,17 @@ class CourseController extends AbstractController
 
                 // Persist to the database if the form was not skipped
                 if (!$skipped  && $isValid) {
-                    $questionResponse = $form->getData();
-                    $this->entityManager->persist($questionResponse);
-                    $this->entityManager->flush();
+                    try {
+                        $this->processFormData($form);
+                    } catch (\Throwable $th) {
+                        // Render the form with a custom error message
+                        return $this->render('lab/survey_page.html.twig', [
+                            'courseName' => $courseInstance->getName(),
+                            'labName' => $lab->getName(),
+                            'form' => $form->createView(),
+                            'error' => null
+                        ]);
+                    }
                 }
 
                 // Redirect accordingly...
@@ -490,6 +500,35 @@ class CourseController extends AbstractController
         }
 
         return $form;
+    }
+
+    private function processFormData(FormInterface $form)
+    {
+        $questionResponse = $form->getData();
+
+        if ($questionResponse instanceof LabSentimentQuestionResponse) {
+            // Make an API call
+            $monkeyLearnApiKey = $this->getParameter('app.monkeylearn_api_key');
+            $monkeyLearnModel = $this->getParameter("app.monkeylearn_model_id");
+            $ml = new \MonkeyLearn\Client($monkeyLearnApiKey);
+            $res = $ml->classifiers->classify($monkeyLearnModel, [$questionResponse->getText()]);
+
+            // Parse the response
+            $json = $res['result'];
+            $data = json_decode($json);
+
+            if ($data['error']) {
+                throw new \Exception("Bad request from monkeylearn.\n" . $json, 1);
+            }
+
+            // Set the results on the entity
+            $classification = $data['classifications'][0];
+            $questionResponse->setClassification($classification['tag_name']);
+            $questionResponse->setConfidence($classification['confidence']);
+        }
+
+        $this->entityManager->persist($questionResponse);
+        $this->entityManager->flush();
     }
 
     /**
