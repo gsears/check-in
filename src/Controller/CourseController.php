@@ -35,6 +35,7 @@ use App\Repository\EnrolmentRepository;
 use App\Repository\LabResponseRepository;
 use App\Task\FlagStudentsTask;
 use Doctrine\ORM\EntityManagerInterface;
+use Monolog\Logger;
 use OutOfBoundsException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -389,8 +390,13 @@ class CourseController extends AbstractController
 
                 // Persist to the database if the form was not skipped
                 if (!$skipped  && $isValid) {
-                    $this->processFormData($form);
-                    dump($lab->getQuestionCount());
+                    try {
+                        $this->processFormData($form);
+                    } catch (\MonkeyLearn\MonkeyLearnException $e) {
+                        // Render the form with a custom monkeylearn exception
+                        // TODO: Throw some kind of exception if API call does not happen...
+                        // Probably to instructors / admin
+                    }
                 }
 
                 // Redirect accordingly...
@@ -514,7 +520,7 @@ class CourseController extends AbstractController
             dump($data);
 
             if ($data['error']) {
-                throw new \Exception("Bad request from monkeylearn.\n", 1);
+                throw new \MonkeyLearn\MonkeyLearnException("Bad request from monkeylearn.\n", 1);
             }
 
             // Set the results on the entity
