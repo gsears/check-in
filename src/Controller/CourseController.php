@@ -58,9 +58,9 @@ class CourseController extends AbstractController
 
     private $entityManager;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->entityManager = $this->getDoctrine()->getManager();
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -547,11 +547,15 @@ class CourseController extends AbstractController
         if (array_key_exists(self::COURSE_INSTANCE_QUERY, $params)) {
 
             $courseInstanceQuery = $params[self::COURSE_INSTANCE_QUERY];
+
+            /**
+             * @var CourseInstanceRepository
+             */
             $courseInstanceRepo = $this->entityManager->getRepository(CourseInstance::class);
 
             $courseInstance = $courseInstanceRepo->findByIndexAndCourse(
-                $courseInstanceQuery[self::COURSE_QUERY],
-                $courseInstanceQuery[self::COURSE_INSTANCE_INDEX]
+                $courseInstanceQuery[self::COURSE_INSTANCE_INDEX],
+                $courseInstanceQuery[self::COURSE_QUERY]
             );
 
             if (!$courseInstance) throw $this->createNotFoundException('This course does not exist');
@@ -571,7 +575,7 @@ class CourseController extends AbstractController
 
                 if (!$lab) throw $this->createNotFoundException('This lab does not exist in this course');
 
-                $resultDictionary[self::LAB_QUERY_BY_SLUG] = $courseInstance;
+                $resultDictionary[self::LAB_QUERY_BY_SLUG] = $lab;
             }
         }
 
@@ -583,7 +587,7 @@ class CourseController extends AbstractController
 
             if (!$student) throw $this->createNotFoundException('This student does not exist');
 
-            $resultDictionary[self::STUDENT_QUERY] = $courseInstance;
+            $resultDictionary[self::STUDENT_QUERY] = $student;
         }
 
         return $resultDictionary;

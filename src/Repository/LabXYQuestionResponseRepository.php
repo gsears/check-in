@@ -24,16 +24,19 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
 
     public function getRiskLevel(SurveyQuestionResponseInterface $questionResponse): int
     {
-        $query = $this->getQueryBuilder('xyr')
-            ->join('xyr.labXYQuestion', 'xyq')
-            ->join('xyq.dangerZones', 'dz')
-            ->andWhere('sr = :questionResponse')
-            ->setParameter('questionResponse', $questionResponse)
-            ->andWhere('dz.xMin <= xyr.xValue')
-            ->andWhere('dz.xMax >= xyr.xValue')
-            ->andWhere('dz.yMin <= xyr.yValue')
-            ->andWhere('dz.yMax >= xyr.yValue')
-            ->getQuery();
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            'SELECT dz.riskLevel
+            FROM App\Entity\LabXyQuestionResponse xyr
+            JOIN xyr.labXYQuestion xyq
+            JOIN xyq.dangerZones dz
+            WHERE xyr = :questionResponse AND
+                dz.xMin <= xyr.xValue AND
+                dz.xMax >= xyr.xValue AND
+                dz.yMin <= xyr.yValue AND
+                dz.yMax >= xyr.yValue'
+        )->setParameter('questionResponse', $questionResponse);
 
         try {
             $riskLevel = $query->getSingleScalarResult();
