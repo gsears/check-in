@@ -376,7 +376,7 @@ class AppFixtures extends Fixture
             $sentimentQuestions[$name] = $sentimentQuestion;
         }
 
-        return $sentimentQuestion;
+        return $sentimentQuestions;
     }
 
     public function loadLabs(array $courseInstances, array $xyQuestions, array $sentimentQuestions): array
@@ -479,6 +479,12 @@ class AppFixtures extends Fixture
         return $labs;
     }
 
+    /**
+     * Note: TODO: sentiment question responses are added.
+     *
+     * @param [type] $courseInstances
+     * @return void
+     */
     public function loadLabResponses($courseInstances)
     {
         $completedResponses = [];

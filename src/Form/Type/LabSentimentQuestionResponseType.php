@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabSentimentQuestionResponseType extends SurveyQuestionResponseType
 {
@@ -21,7 +22,12 @@ class LabSentimentQuestionResponseType extends SurveyQuestionResponseType
         $builder
             ->add('text', TextareaType::class, [
                 'label' => $sentimentQuestion->getQuestionText(),
-                'not_blank' => true
+                'required' => false,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please complete the text field or skip.'
+                    ])
+                ],
             ]);
 
         return $builder;

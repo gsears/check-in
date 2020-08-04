@@ -32,9 +32,9 @@ class LabSentimentQuestionResponseRepository extends ServiceEntityRepository imp
             JOIN sr.labSentimentQuestion sq
             JOIN sq.dangerZones dz
             WHERE sr = :questionResponse AND
-            dz.classification = sq.classification AND
-            dz.confidenceMin <= sq.confidence AND
-            dz.confidenceMax > sq.confidence'
+            dz.classification = sr.classification AND
+            dz.confidenceMin <= sr.confidence AND
+            dz.confidenceMax > sr.confidence'
         )->setParameter('questionResponse', $questionResponse);
 
         try {

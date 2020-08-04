@@ -24,6 +24,7 @@ use App\Entity\LabXYQuestionResponse;
 use App\Entity\Student;
 use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
+use App\Form\Type\LabSentimentQuestionResponseType;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Form\Type\LabXYQuestionResponseType;
 use App\Form\Type\RiskSettingsType;
@@ -388,17 +389,8 @@ class CourseController extends AbstractController
 
                 // Persist to the database if the form was not skipped
                 if (!$skipped  && $isValid) {
-                    try {
-                        $this->processFormData($form);
-                    } catch (\Throwable $th) {
-                        // Render the form with a custom error message
-                        return $this->render('lab/survey_page.html.twig', [
-                            'courseName' => $courseInstance->getName(),
-                            'labName' => $lab->getName(),
-                            'form' => $form->createView(),
-                            'error' => null
-                        ]);
-                    }
+                    $this->processFormData($form);
+                    dump($lab->getQuestionCount());
                 }
 
                 // Redirect accordingly...
@@ -507,18 +499,22 @@ class CourseController extends AbstractController
         $questionResponse = $form->getData();
 
         if ($questionResponse instanceof LabSentimentQuestionResponse) {
+            dump("Here");
             // Make an API call
             $monkeyLearnApiKey = $this->getParameter('app.monkeylearn_api_key');
             $monkeyLearnModel = $this->getParameter("app.monkeylearn_model_id");
+            dump($monkeyLearnApiKey);
+            dump($monkeyLearnModel);
             $ml = new \MonkeyLearn\Client($monkeyLearnApiKey);
             $res = $ml->classifiers->classify($monkeyLearnModel, [$questionResponse->getText()]);
-
             // Parse the response
-            $json = $res['result'];
-            $data = json_decode($json);
+            $data = $res->result[0];
+            // $data = json_decode($json);
+
+            dump($data);
 
             if ($data['error']) {
-                throw new \Exception("Bad request from monkeylearn.\n" . $json, 1);
+                throw new \Exception("Bad request from monkeylearn.\n", 1);
             }
 
             // Set the results on the entity
@@ -529,6 +525,8 @@ class CourseController extends AbstractController
 
         $this->entityManager->persist($questionResponse);
         $this->entityManager->flush();
+        dump("here");
+        return;
     }
 
     /**
