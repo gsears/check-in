@@ -8,36 +8,42 @@ Gareth Sears - 2493194S
 namespace App\Tests\Unit\Containers;
 
 use App\Containers\Bound;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class BoundTest extends TestCase
 {
-    public function boundProvider()
+    public function validBoundProvider()
     {
-        yield 'High bound cannot be below low bound' => [
-            5,
-            4,
-            false
-        ];
-        yield 'Valid bounds' => [
-            4,
-            5,
-            true
-        ];
+        yield [1, 2];
+        yield [-2, 3];
+        yield [-5, -3];
+        yield [0, 0];
+        yield [1, 1];
+        yield [-1, -1];
     }
 
     /**
-     * @dataProvider boundProvider
+     * @dataProvider validBoundProvider
      */
-    public function testValidBounds(int $lowBound, int $highBound, $expectedPass)
+    public function testValidBounds(int $lowBound, int $highBound)
     {
-        if (!$expectedPass) {
-            $this->expectException(InvalidArgumentException::class);
-        }
-
         new Bound($lowBound, $highBound);
-
         $this->assertTrue(true);
+    }
+
+    public function invalidBoundProvider()
+    {
+        yield [5, 4];
+        yield [2, -1];
+        yield [-1, -3];
+    }
+
+    /**
+     * @dataProvider invalidBoundProvider
+     */
+    public function testInvalidBounds(int $lowBound, int $highBound)
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new Bound($lowBound, $highBound);
     }
 }
