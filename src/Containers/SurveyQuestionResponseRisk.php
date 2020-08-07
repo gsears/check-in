@@ -36,7 +36,7 @@ class SurveyQuestionResponseRisk
         return $this->riskLevel;
     }
 
-    public function getWeightedRiskLevel(): int
+    public function getWeightedRiskLevel(): float
     {
         return [
             self::WEIGHT_NONE,

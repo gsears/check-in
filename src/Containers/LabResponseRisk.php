@@ -14,56 +14,74 @@ use App\Entity\LabResponse;
  */
 class LabResponseRisk
 {
-    const LEVEL_NONE = 0;
-    const LEVEL_WARNING = 1;
-    const LEVEL_DANGER = 2;
-
-    const WEIGHT_NONE = 0;
-    const WEIGHT_WARNING = 1;
-    const WEIGHT_DANGER = 3;
-
-    public static function isValidRiskLevel(int $riskLevel): bool
-    {
-        return in_array($riskLevel, [self::LEVEL_NONE, self::LEVEL_WARNING, self::LEVEL_DANGER]);
-    }
-
-    private $questionRiskLevels = [];
+    private $surveyQuestionResponseRisks = [];
     private $labResponse;
 
-    public function __construct($questionRiskLevels, LabResponse $labResponse)
+    /**
+     * Creates a wrapper containing all question response risk objects for a lab survey.
+     *
+     * @param SurveyQuestionResponseRisk[] $surveyQuestionResponseRisks
+     * @param LabResponse $labResponse
+     */
+    public function __construct(array $surveyQuestionResponseRisks, LabResponse $labResponse)
     {
-        $this->questionRiskLevels = $questionRiskLevels;
+        $this->surveyQuestionResponseRisks = $surveyQuestionResponseRisks;
         $this->labResponse = $labResponse;
     }
 
     /**
-     * Return the risk factor as a percentage.
+     * Returns the weighted risk factor, which is the % of maximum possible risk for this lab.
      *
-     * @return void
+     * For example, if a student is in a danger zone for every lab question, their factor is 100%.
+     * If a student is in a danger zone for 1 / 2 questions, their risk factor is 50%.
+     *
+     * @return float The risk factor for this lab as a %.
      */
-    public function getRiskFactor()
+    public function getWeightedRiskFactor(): float
     {
         $questionCount = $this->labResponse->getLab()->getQuestionCount();
-        $maxRisk = $questionCount * self::WEIGHT_DANGER;
-        return (array_sum($this->getWeightedRisks()) / $maxRisk) * 100;
+        $maxRisk = $questionCount * SurveyQuestionResponseRisk::WEIGHT_DANGER;
+
+        return (array_sum($this->getWeightedRiskLevels()) / $maxRisk) * 100.0;
     }
 
-    public function getWeightedRisks(bool $excludeZeroValues = true)
+    /**
+     * Returns the SurveyQuestionResponseRisk objects for this lab response.
+     *
+     * @param boolean $excludeWithRiskLevelNone If true, any objects with a risk level of 0 will not be returned.
+     * @return SurveyQuestionResponseRisks[]
+     */
+    public function getSurveyQuestionResponseRisks(bool $excludeWithRiskLevelNone = true): array
     {
-        $weightedRisks = array_map(function ($riskLevel) {
-            return [self::WEIGHT_NONE, self::WEIGHT_WARNING, self::WEIGHT_DANGER][$riskLevel];
-        }, $this->questionRiskLevels);
-
-        if ($excludeZeroValues) {
-            $weightedRisks = array_filter($weightedRisks, function ($weightedRisk) {
-                return $weightedRisk > 0;
-            });
+        if (!$excludeWithRiskLevelNone) {
+            return $this->surveyQuestionResponseRisks;
         }
 
-        return $weightedRisks;
+        // array_values resets keys to count from 0
+        return array_values(array_filter($this->surveyQuestionResponseRisks, function (SurveyQuestionResponseRisk $sqrr) {
+            return $sqrr->getRiskLevel() !== SurveyQuestionResponseRisk::LEVEL_NONE;
+        }));
     }
 
-    public function getLabResponse()
+    /**
+     * Returns the weighted risks of each question response in the lab survey in an array.
+     *
+     * @param boolean $excludeWithRiskLevelNone - If true, any objects with a risk level of 0 will not be returned.
+     * @return float[]
+     */
+    public function getWeightedRiskLevels(bool $excludeWithRiskLevelNone = true): array
+    {
+        return array_map(function (SurveyQuestionResponseRisk $sqrr) {
+            return $sqrr->getWeightedRiskLevel();
+        }, $this->getSurveyQuestionResponseRisks($excludeWithRiskLevelNone));
+    }
+
+    /**
+     * Returns the lab response associated with this risk wrapper.
+     *
+     * @return LabResponse
+     */
+    public function getLabResponse(): LabResponse
     {
         return $this->labResponse;
     }
