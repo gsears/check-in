@@ -157,7 +157,6 @@ class LabResponse
         return $this;
     }
 
-
     /**
      * @return Collection|LabSentimentQuestionResponse[]
      */

@@ -68,7 +68,7 @@ class LabSentimentQuestionResponseRepositoryTest extends FunctionalTestCase
             $lab
         );
 
-        $labXYQuestionResponse = $creator->createLabSentimentQuestionResponse(
+        $labSentimentQuestionResponse = $creator->createLabSentimentQuestionResponse(
             'test response',
             SentimentQuestion::NEUTRAL,
             0.9,
@@ -80,11 +80,11 @@ class LabSentimentQuestionResponseRepositoryTest extends FunctionalTestCase
          * @var LabXYQuestionResponseRepository
          */
         $repo = $this->getEntityManager()->getRepository(LabXYQuestionResponse::class);
-        $surveyQuestionResponseRisk = $repo->getSurveyQuestionResponseRisk($labXYQuestionResponse);
+        $surveyQuestionResponseRisk = $repo->getSurveyQuestionResponseRisk($labSentimentQuestionResponse);
 
         $this->assertNotNull($surveyQuestionResponseRisk);
         $this->assertEquals(SurveyQuestionResponseRisk::LEVEL_NONE, $surveyQuestionResponseRisk->getRiskLevel());
-        $this->assertEquals($labXYQuestionResponse, $surveyQuestionResponseRisk->getSurveyQuestionResponse());
+        $this->assertEquals($labSentimentQuestionResponse, $surveyQuestionResponseRisk->getSurveyQuestionResponse());
     }
 
     public function dangerZoneLevelProvider()
@@ -154,7 +154,7 @@ class LabSentimentQuestionResponseRepositoryTest extends FunctionalTestCase
             $labSentimentQuestion
         );
 
-        $labXYQuestionResponse = $creator->createLabSentimentQuestionResponse(
+        $labSentimentQuestionResponse = $creator->createLabSentimentQuestionResponse(
             'test response',
             SentimentQuestion::NEGATIVE,
             0.9,
@@ -166,10 +166,10 @@ class LabSentimentQuestionResponseRepositoryTest extends FunctionalTestCase
          * @var LabSentimentQuestionResponseRepository
          */
         $repo = $this->getEntityManager()->getRepository(LabSentimentQuestionResponse::class);
-        $surveyQuestionResponseRisk = $repo->getSurveyQuestionResponseRisk($labXYQuestionResponse);
+        $surveyQuestionResponseRisk = $repo->getSurveyQuestionResponseRisk($labSentimentQuestionResponse);
 
         $this->assertNotNull($surveyQuestionResponseRisk);
         $this->assertEquals($riskLevel, $surveyQuestionResponseRisk->getRiskLevel());
-        $this->assertEquals($labXYQuestionResponse, $surveyQuestionResponseRisk->getSurveyQuestionResponse());
+        $this->assertEquals($labSentimentQuestionResponse, $surveyQuestionResponseRisk->getSurveyQuestionResponse());
     }
 }

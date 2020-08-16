@@ -30,7 +30,7 @@ class LabResponseRepository extends ServiceEntityRepository
      *
      * @return LabResponse
      */
-    public function findOneByLabAndStudent($lab, $student): LabResponse
+    public function findOneByLabAndStudent($lab, $student): ?LabResponse
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.student = :student')
