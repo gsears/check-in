@@ -1,5 +1,10 @@
 <?php
 
+/*
+StudentVoter.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Security\Voter;
 
 use App\Entity\Instructor;
@@ -11,6 +16,10 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * A voter class which controls access to Student specific pages / information based on the user
+ * and their roles.
+ */
 class StudentVoter extends Voter
 {
     const VIEW = "STUDENT_VIEW";
