@@ -1,13 +1,66 @@
 <?php
 
+/*
+CourseInstanceRepositoryTest.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Functional\Repository;
 
-use Faker;
+use DateTime;
 use App\Entity\CourseInstance;
 use App\Tests\Functional\FunctionalTestCase;
 
 class CourseInstanceRepositoryTest extends FunctionalTestCase
 {
+    public function testFindAllActive()
+    {
+        $creator = $this->getEntityCreator();
+
+        $course = $creator->createCourse(
+            '1234',
+            'test_course',
+            null
+        );
+
+        $testCurrentDate = new DateTime('2pm 20 November 2020');
+
+        $activeCourseInstanceOne = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 20 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        $activeCourseInstanceTwo = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 19 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        $inactiveCourseInstanceOne = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 19 November 2020'),
+            new DateTime('1pm 20 November 2020')
+        );
+
+        $inactiveCourseInstanceTwo = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 21 November 2020'),
+            new DateTime('1pm 22 November 2020')
+        );
+
+        /**
+         * @var CourseInstanceRepository
+         */
+        $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
+        $testResult = $repo->findAllActive($testCurrentDate);
+
+        $this->assertContains($activeCourseInstanceOne, $testResult);
+        $this->assertContains($activeCourseInstanceTwo, $testResult);
+        $this->assertNotContains($inactiveCourseInstanceOne, $testResult);
+        $this->assertNotContains($inactiveCourseInstanceTwo, $testResult);
+    }
+
     public function testFindByStudent()
     {
         $creator = $this->getEntityCreator();
@@ -53,8 +106,10 @@ class CourseInstanceRepositoryTest extends FunctionalTestCase
             }
         }
 
+        /**
+         * @var CourseInstanceRepository
+         */
         $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
-
         $courseInstances = $repo->findByStudent($student);
 
         $this->assertEquals($expectedCourseInstances, $courseInstances);
@@ -100,49 +155,103 @@ class CourseInstanceRepositoryTest extends FunctionalTestCase
             }
         }
 
+        /**
+         * @var CourseInstanceRepository
+         */
         $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
-
         $courseInstances = $repo->findByInstructor($instructor1);
 
         $this->assertEquals($expectedCourseInstances, $courseInstances);
     }
 
-    public function testFindIfMatchesCourse()
+    public function testGetNextIndexInCourse()
     {
         $creator = $this->getEntityCreator();
 
-        $course1 = $creator->createCourse(
+        $course = $creator->createCourse(
             '1234',
             'test_course',
             null
         );
 
-        $course2 = $creator->createCourse(
-            '4321',
+        $courseInstanceOne = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 20 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        $courseInstanceTwo = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 19 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        /**
+         * @var CourseInstanceRepository
+         */
+        $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
+
+        $this->assertEquals(3, $repo->getNextIndexInCourse($course));
+    }
+
+    public function testIndexExistsInCourse()
+    {
+        $creator = $this->getEntityCreator();
+
+        $course = $creator->createCourse(
+            '1234',
             'test_course',
             null
         );
 
-        $courseInstance1 = $creator->createCourseInstance(
-            $course1,
-            date_create("20 November 2020"),
-            date_create("21 November 2020")
+        $courseInstanceOne = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 20 November 2020'),
+            new DateTime('2pm 21 November 2020')
         );
 
-        $courseInstance2 = $creator->createCourseInstance(
-            $course2,
-            date_create("20 November 2020"),
-            date_create("21 November 2020")
-        );
-
+        /**
+         * @var CourseInstanceRepository
+         */
         $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
 
-        $this->assertEquals($courseInstance1, $repo->findIfMatchesCourse($courseInstance1, $course1));
-        $this->assertNull($repo->findIfMatchesCourse($courseInstance2, $course1));
-        $this->assertNull($repo->findIfMatchesCourse($courseInstance1, $course2));
+        $this->assertTrue($repo->indexExistsInCourse(1, $course));
+        $this->assertFalse($repo->indexExistsInCourse(2, $course));
     }
 
-    public function isEvenFunction(int $i)
+    public function testFindByIndexAndCourseId()
+    {
+        $creator = $this->getEntityCreator();
+
+        $course = $creator->createCourse(
+            '1234',
+            'test_course',
+            null
+        );
+
+        $courseInstanceOne = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 20 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        $courseInstanceTwo = $creator->createCourseInstance(
+            $course,
+            new DateTime('2pm 19 November 2020'),
+            new DateTime('2pm 21 November 2020')
+        );
+
+        /**
+         * @var CourseInstanceRepository
+         */
+        $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
+
+        $this->assertEquals($courseInstanceOne, $repo->findByIndexAndCourseId(1, '1234'));
+        $this->assertEquals($courseInstanceTwo, $repo->findByIndexAndCourseId(2, '1234'));
+        $this->assertNull($repo->findByIndexAndCourseId(3, '1234'));
+    }
+
+    private function isEvenFunction(int $i)
     {
         return $i % 2 === 0;
     }
