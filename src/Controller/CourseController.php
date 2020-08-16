@@ -207,7 +207,7 @@ class CourseController extends AbstractController
         $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
             return [
                 'lab' => $labResponse->getLab(),
-                'weightedRisks' => $labResponseRepo->getRiskForResponse($labResponse)->getWeightedRisks(),
+                'weightedRisks' => $labResponseRepo->getLabResponseRisk($labResponse)->getWeightedRisks(),
             ];
         }, $completedLabResponses);
 

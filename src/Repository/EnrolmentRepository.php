@@ -62,7 +62,7 @@ class EnrolmentRepository extends ServiceEntityRepository
 
         $enrolmentRisks = array_map(function ($responseChunk) use ($courseInstance) {
             $labResponseRisks = array_map(function ($response) {
-                return $this->labResponseRepo->getRiskForResponse($response);
+                return $this->labResponseRepo->getLabResponseRisk($response);
             }, $responseChunk);
 
             $student = $responseChunk[0]->getStudent();

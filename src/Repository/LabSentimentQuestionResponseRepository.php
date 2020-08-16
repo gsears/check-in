@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Containers\LabResponseRisk;
+use App\Containers\SurveyQuestionResponseRisk;
 use App\Entity\LabSentimentQuestionResponse;
 use App\Entity\SurveyQuestionResponseInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -22,7 +23,7 @@ class LabSentimentQuestionResponseRepository extends ServiceEntityRepository imp
         parent::__construct($registry, LabSentimentQuestionResponse::class);
     }
 
-    public function getRiskLevel(SurveyQuestionResponseInterface $questionResponse): int
+    public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $questionResponse): SurveyQuestionResponseRisk
     {
         $entityManager = $this->getEntityManager();
 
@@ -38,16 +39,16 @@ class LabSentimentQuestionResponseRepository extends ServiceEntityRepository imp
         )->setParameter('questionResponse', $questionResponse);
 
         try {
-            $riskLevel = $query->getSingleScalarResult();
+            return new SurveyQuestionResponseRisk(
+                $query->getSingleScalarResult(),
+                $questionResponse
+            );
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return LabResponseRisk::LEVEL_NONE;
+            return new SurveyQuestionResponseRisk(
+                SurveyQuestionResponseRisk::LEVEL_NONE,
+                $questionResponse
+            );
         }
-
-        if (!LabResponseRisk::isValidRiskLevel($riskLevel)) {
-            throw new InvalidTypeException("Invalid risk level fetched: " . $riskLevel, 1);
-        }
-
-        return $riskLevel;
     }
 }

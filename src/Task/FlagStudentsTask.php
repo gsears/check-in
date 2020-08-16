@@ -21,7 +21,7 @@ class FlagStudentsTask extends AbstractScheduledTask
     protected function initialize(Schedule $schedule)
     {
         $schedule
-            ->everyMinutes(60); // Every week the task is run.
+            ->everyMinutes(5); // Every week the task is run.
     }
 
     public function run()
@@ -41,7 +41,7 @@ class FlagStudentsTask extends AbstractScheduledTask
 
         // Flag the student (as automatically flagged)
         foreach ($enrolmentRisks as $enrolmentRisk) {
-            $enrolmentRisk->flagStudent();
+            $enrolmentRisk->getEnrolment()->setRiskFlag(Enrolment::FLAG_AUTOMATIC);
         }
 
         $this->entityManager->flush();

@@ -145,7 +145,7 @@ class LabRepository extends ServiceEntityRepository
                 return $response->getSubmitted();
             })
             ->map(function ($response) use ($responseRepo) {
-                return $responseRepo->getRiskForResponse($response);
+                return $responseRepo->getLabResponseRisk($response);
             });
 
         $riskArray = $riskCollection->toArray();
