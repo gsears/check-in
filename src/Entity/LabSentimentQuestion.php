@@ -33,7 +33,8 @@ class LabSentimentQuestion implements SurveyQuestionInterface
     private $sentimentQuestion;
 
     /**
-     * @ORM\Column(type="integer")
+     * Change the name to prevent functional test syntax errors.
+     * @ORM\Column(type="integer", name="questionIndex"))
      * @Assert\NotNull
      */
     private $index;

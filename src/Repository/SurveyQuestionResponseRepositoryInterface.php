@@ -13,7 +13,6 @@ interface SurveyQuestionResponseRepositoryInterface
      * assigned to the response.
      *
      * @param SurveyQuestionResponseInterface $question
-     * @param Lab $lab
      * @return int The risk weight assigned to the response
      */
     public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $question): SurveyQuestionResponseRisk;

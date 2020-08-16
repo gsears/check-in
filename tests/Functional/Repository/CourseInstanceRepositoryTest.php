@@ -219,7 +219,7 @@ class CourseInstanceRepositoryTest extends FunctionalTestCase
         $this->assertFalse($repo->indexExistsInCourse(2, $course));
     }
 
-    public function testFindByIndexAndCourseId()
+    public function testFindByIndexAndCourseCode()
     {
         $creator = $this->getEntityCreator();
 
@@ -246,9 +246,9 @@ class CourseInstanceRepositoryTest extends FunctionalTestCase
          */
         $repo = $this->getEntityManager()->getRepository(CourseInstance::class);
 
-        $this->assertEquals($courseInstanceOne, $repo->findByIndexAndCourseId(1, '1234'));
-        $this->assertEquals($courseInstanceTwo, $repo->findByIndexAndCourseId(2, '1234'));
-        $this->assertNull($repo->findByIndexAndCourseId(3, '1234'));
+        $this->assertEquals($courseInstanceOne, $repo->findByIndexAndCourseCode(1, '1234'));
+        $this->assertEquals($courseInstanceTwo, $repo->findByIndexAndCourseCode(2, '1234'));
+        $this->assertNull($repo->findByIndexAndCourseCode(3, '1234'));
     }
 
     private function isEvenFunction(int $i)

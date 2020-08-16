@@ -23,6 +23,15 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
         parent::__construct($registry, LabXYQuestionResponse::class);
     }
 
+    /**
+     * Returns the SurveyQuestionResponseRisk object for this type of question.
+     *
+     * It essentially checks if the responses are within the danger zones associated with
+     * the XYQuestion, and gives them the appropriate risk level if they are.
+     *
+     * @param SurveyQuestionResponseInterface $questionResponse
+     * @return SurveyQuestionResponseRisk
+     */
     public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $questionResponse): SurveyQuestionResponseRisk
     {
         $entityManager = $this->getEntityManager();

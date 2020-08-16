@@ -8,6 +8,7 @@ Gareth Sears - 2493194S
 namespace App\DataFixtures;
 
 use App\Containers\LabResponseRisk;
+use App\Containers\SurveyQuestionResponseRisk;
 use Faker;
 use App\Entity\Lab;
 use App\Entity\Student;
@@ -414,7 +415,7 @@ class AppFixtures extends Fixture
 
                     // With one basic danger zone as default
                     $dangerZone = $this->creator->createLabXYQuestionDangerZone(
-                        LabResponseRisk::LEVEL_DANGER,
+                        SurveyQuestionResponseRisk::LEVEL_DANGER,
                         -10,
                         -6,
                         -10,
@@ -424,7 +425,7 @@ class AppFixtures extends Fixture
 
                     // And one warning zone
                     $warningZone = $this->creator->createLabXYQuestionDangerZone(
-                        LabResponseRisk::LEVEL_WARNING,
+                        SurveyQuestionResponseRisk::LEVEL_WARNING,
                         -10,
                         -6,
                         -5,
@@ -443,7 +444,7 @@ class AppFixtures extends Fixture
 
                     // Warning zones as below
                     $dangerZone = $this->creator->createLabSentimentQuestionDangerZone(
-                        LabResponseRisk::LEVEL_DANGER,
+                        SurveyQuestionResponseRisk::LEVEL_DANGER,
                         SentimentQuestion::NEGATIVE,
                         0.5,
                         1.0,
@@ -452,7 +453,7 @@ class AppFixtures extends Fixture
 
                     // Warning zones as below
                     $warningZone = $this->creator->createLabSentimentQuestionDangerZone(
-                        LabResponseRisk::LEVEL_WARNING,
+                        SurveyQuestionResponseRisk::LEVEL_WARNING,
                         SentimentQuestion::NEGATIVE,
                         0.0,
                         0.5,

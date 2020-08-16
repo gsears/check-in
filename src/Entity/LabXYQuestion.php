@@ -37,9 +37,8 @@ class LabXYQuestion implements SurveyQuestionInterface
     private $responses;
 
     /**
-     * The order of the question in the survey
-     *
-     * @ORM\Column(type="integer")
+     * Change the name to prevent functional test syntax errors.
+     * @ORM\Column(type="integer", name="questionIndex")
      * @Assert\NotNull
      */
     private $index;

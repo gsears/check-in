@@ -78,16 +78,16 @@ class CourseInstanceRepository extends ServiceEntityRepository
      * Find a course instance by its course and its instance index number
      *
      * @param integer $instanceIndex
-     * @param integer $courseId
+     * @param integer $courseCode
      * @return CourseInstance
      */
-    public function findByIndexAndCourseId(int $instanceIndex, int $courseId): ?CourseInstance
+    public function findByIndexAndCourseCode(int $instanceIndex, string $courseCode): ?CourseInstance
     {
         return $this->createQueryBuilder('ci')
             ->andWhere('ci.indexInCourse = :instanceIndex')
             ->setParameter('instanceIndex', $instanceIndex)
             ->andWhere('ci.course = :courseId')
-            ->setParameter('courseId', $courseId)
+            ->setParameter('courseId', $courseCode)
             ->getQuery()
             ->getOneOrNullResult();
     }

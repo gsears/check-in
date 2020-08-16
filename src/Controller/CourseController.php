@@ -557,7 +557,7 @@ class CourseController extends AbstractController
              */
             $courseInstanceRepo = $this->entityManager->getRepository(CourseInstance::class);
 
-            $courseInstance = $courseInstanceRepo->findByIndexAndCourseId(
+            $courseInstance = $courseInstanceRepo->findByIndexAndCourseCode(
                 $courseInstanceQuery[self::COURSE_INSTANCE_INDEX],
                 $courseInstanceQuery[self::COURSE_QUERY]
             );
