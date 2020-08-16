@@ -10,19 +10,16 @@ namespace App\Containers;
 use InvalidArgumentException;
 
 /**
- * A wrapper class to ensure valid XY coordinates
+ * A wrapper class for XY Coordinates
  */
 class XYCoordinates
 {
     private $x;
     private $y;
 
+    // Null checks not needed because of type hints
     public function __construct(int $x, int $y)
     {
-        if (is_null($x) || is_null($y)) {
-            throw new InvalidArgumentException("X and Y must exist!", 1);
-        }
-
         $this->x = $x;
         $this->y = $y;
     }
