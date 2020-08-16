@@ -1,5 +1,10 @@
 <?php
 
+/*
+SentimentQuestionRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\SentimentQuestion;
@@ -18,33 +23,4 @@ class SentimentQuestionRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, SentimentQuestion::class);
     }
-
-    // /**
-    //  * @return SentimentQuestion[] Returns an array of SentimentQuestion objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?SentimentQuestion
-    {
-        return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

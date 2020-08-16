@@ -1,5 +1,10 @@
 <?php
 
+/*
+LabSentimentQuestionDangerZoneRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\LabSentimentQuestionDangerZone;
@@ -18,33 +23,4 @@ class LabSentimentQuestionDangerZoneRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, LabSentimentQuestionDangerZone::class);
     }
-
-    // /**
-    //  * @return LabSentimentQuestionDangerZone[] Returns an array of LabSentimentQuestionDangerZone objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('l.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?LabSentimentQuestionDangerZone
-    {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

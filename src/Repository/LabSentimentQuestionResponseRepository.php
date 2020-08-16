@@ -1,14 +1,17 @@
 <?php
 
+/*
+LabSentimentQuestionResponseRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
-use App\Containers\LabResponseRisk;
 use App\Containers\SurveyQuestionResponseRisk;
 use App\Entity\LabSentimentQuestionResponse;
 use App\Entity\SurveyQuestionResponseInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
 
 /**
  * @method LabSentimentQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
