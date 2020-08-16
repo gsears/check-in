@@ -90,6 +90,9 @@ class LabSentimentQuestion implements SurveyQuestionInterface
 
     public function setIndex(int $index): self
     {
+        if ($index < 0) {
+            throw new \InvalidArgumentException("Index cannot be < 0", 1);
+        }
         $this->index = $index;
 
         return $this;

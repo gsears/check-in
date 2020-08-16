@@ -5,7 +5,6 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -133,7 +132,7 @@ class LabXYQuestion implements SurveyQuestionInterface
     public function setIndex(int $index): self
     {
         if ($index < 0) {
-            throw new InvalidArgumentException("Index cannot be < 0", 1);
+            throw new \InvalidArgumentException("Index cannot be < 0", 1);
         }
         $this->index = $index;
 

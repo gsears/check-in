@@ -10,6 +10,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
+ * TODO: Error checks for valid question indicies, although this is
+ * not needed until users can create their own surveys.
+ *
  * @ORM\Entity(repositoryClass=LabRepository::class)
  * @UniqueEntity(
  *     fields={"courseInstance", "name"},
@@ -61,6 +64,8 @@ class Lab
      * @ORM\OneToMany(targetEntity=LabResponse::class, mappedBy="lab", orphanRemoval=true)
      */
     private $responses;
+
+    private $questionCount;
 
     public function __construct()
     {
