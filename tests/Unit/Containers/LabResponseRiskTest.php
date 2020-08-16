@@ -143,4 +143,32 @@ class LabResponseRiskTest extends TestCase
 
         $this->assertEquals($expectedPercentage, $testInstance->getWeightedRiskFactor());
     }
+
+    public function testSortByWeightedRiskFactor()
+    {
+        $labResponseRiskOrderOne = $this->createMock(LabResponseRisk::class);
+        $labResponseRiskOrderOne->method('getWeightedRiskFactor')->willReturn(1.0);
+        $labResponseRiskOrderTwo = $this->createMock(LabResponseRisk::class);
+        $labResponseRiskOrderTwo->method('getWeightedRiskFactor')->willReturn(0.6);
+        $labResponseRiskOrderThree = $this->createMock(LabResponseRisk::class);
+        $labResponseRiskOrderThree->method('getWeightedRiskFactor')->willReturn(0.3);
+        $labResponseRiskOrderFour = $this->createMock(LabResponseRisk::class);
+        $labResponseRiskOrderFour->method('getWeightedRiskFactor')->willReturn(0.0);
+
+        $testArray = [
+            $labResponseRiskOrderFour,
+            $labResponseRiskOrderTwo,
+            $labResponseRiskOrderThree,
+            $labResponseRiskOrderOne
+        ];
+
+        LabResponseRisk::sortByWeightedRiskFactor($testArray);
+
+        $this->assertEquals([
+            $labResponseRiskOrderOne,
+            $labResponseRiskOrderTwo,
+            $labResponseRiskOrderThree,
+            $labResponseRiskOrderFour
+        ], $testArray);
+    }
 }

@@ -74,13 +74,16 @@ class InstructorRepositoryTest extends FunctionalTestCase
 
         $em->flush(); // Update all assignments
 
+        /**
+         * @var InstructorRepository
+         */
         $repo = $em->getRepository(Instructor::class);
 
         $this->assertEquals([$instructor1, $instructor2], $repo->findByStudent($student1));
         $this->assertEquals([$instructor2], $repo->findByStudent($student2));
     }
 
-    public function isEvenFunction(int $i)
+    private function isEvenFunction(int $i)
     {
         return $i % 2 === 0;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Containers\LabResponseRisk;
 use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Entity\Instructor;
@@ -140,30 +141,19 @@ class LabRepository extends ServiceEntityRepository
          */
         $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
 
-        $riskCollection = $lab->getResponses()
+        // Get the labResponseRisks for each submitted survey response
+        $labResponseRisks = $lab->getResponses()
             ->filter(function (LabResponse $response) {
                 return $response->getSubmitted();
             })
             ->map(function ($response) use ($responseRepo) {
                 return $responseRepo->getLabResponseRisk($response);
-            });
-
-        $riskArray = $riskCollection->toArray();
+            })
+            ->toArray();
 
         // Order by highest risk
-        uasort($riskArray, function ($a, $b) {
-            $riskFactorA = $a->getRiskFactor();
-            $riskFactorB = $b->getRiskFactor();
+        LabResponseRisk::sortByWeightedRiskFactor($labResponseRisks);
 
-            if ($riskFactorA > $riskFactorB) {
-                return -1;
-            } else if ($riskFactorA < $riskFactorB) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-
-        return $riskArray;
+        return $labResponseRisks;
     }
 }

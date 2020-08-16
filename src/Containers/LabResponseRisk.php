@@ -14,6 +14,22 @@ use App\Entity\LabResponse;
  */
 class LabResponseRisk
 {
+    public static function sortByWeightedRiskFactor(array $labResponseRisks)
+    {
+        uasort($labResponseRisks, function (LabResponseRisk $a, LabResponseRisk $b) {
+            $riskFactorA = $a->getWeightedRiskFactor();
+            $riskFactorB = $b->getWeightedRiskFactor();
+
+            if ($riskFactorA > $riskFactorB) {
+                return -1;
+            } else if ($riskFactorA < $riskFactorB) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    }
+
     private $surveyQuestionResponseRisks = [];
     private $labResponse;
 
