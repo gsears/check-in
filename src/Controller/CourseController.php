@@ -207,7 +207,7 @@ class CourseController extends AbstractController
         $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
             return [
                 'lab' => $labResponse->getLab(),
-                'weightedRisks' => $labResponseRepo->getLabResponseRisk($labResponse)->getWeightedRisks(),
+                'weightedRisks' => $labResponseRepo->getLabResponseRisk($labResponse)->getWeightedRiskLevels(),
             ];
         }, $completedLabResponses);
 
@@ -465,7 +465,8 @@ class CourseController extends AbstractController
             $labXYQuestionResponseRepo = $this->entityManager->getRepository(LabXYQuestionResponse::class);
 
             $questionResponse = $labXYQuestionResponseRepo->findOneBy([
-                'labXYQuestion' => $question
+                'labXYQuestion' => $question,
+                'labResponse' => $labResponse
             ]);
 
             // If it doesn't exist, create a new empty one
@@ -484,7 +485,8 @@ class CourseController extends AbstractController
             $labXYQuestionResponseRepo = $this->entityManager->getRepository(LabSentimentQuestionResponse::class);
 
             $questionResponse = $labXYQuestionResponseRepo->findOneBy([
-                'labSentimentQuestion' => $question
+                'labSentimentQuestion' => $question,
+                'labResponse' => $labResponse
             ]);
 
             // If it doesn't exist, create a new empty one
