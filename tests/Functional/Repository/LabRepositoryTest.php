@@ -7,8 +7,8 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Functional\Repository;
 
-use App\Entity\Lab;
 use DateTime;
+use App\Entity\Lab;
 use App\Tests\Functional\FunctionalTestCase;
 
 class LabRepositoryTest extends FunctionalTestCase
