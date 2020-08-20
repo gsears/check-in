@@ -1,12 +1,12 @@
 {% extends "course/course_instance_base.html.twig" %}
 
-{% from 'macros.html.twig' import weightedRiskToTrafficLights %}
+{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights %}
 
 {% block content %}
 	<h2>{{student.guid}}-{{student.user.fullname}}</h2>
 	{{_self.instructorList(courseInstance.instructors)}}
 	{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student)}}
-	{{_self.completedLabTable("completed labs", completedLabsWithRisk, courseInstance, student)}}
+	{{_self.completedLabTable("completed labs", completedLabResponseRisks, courseInstance, student)}}
 {% endblock %}
 
 
@@ -51,34 +51,28 @@
 	{% endif %}
 {% endmacro %}
 
-{% macro completedLabTable(title, labsWithRisk, courseInstance, student) %}
+{% macro completedLabTable(title, completedLabResponseRisks, courseInstance, student) %}
 	<h2>Completed Lab Surveys</h2>
-	{% if labsWithRisk %}
+	{% if completedLabResponseRisks %}
 		<table class="table">
 			<thead>
 				<tr>
 					<th scope="col">Lab Name</th>
 					<th scope="col">Date</th>
 					<th scope="col">Start Time</th>
-					<th scope="col">Risk</th>
-					<th scope="col"></th>
+					<th scope="col">Responses</th>
+
 				</tr>
 			</thead>
 			<tbody>
-				{% for labWithRisk in labsWithRisk %}
-					{% set lab = labWithRisk.lab %}
+				{% for labResponseRisk in completedLabResponseRisks %}
+					{% set lab = labResponseRisk.labResponse.lab %}
 					<tr>
 						<td>{{lab.name}}</td>
 						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						{# From Macros #}
-						<td>{{weightedRiskToTrafficLights(labWithRisk.weightedRisks)}}</td>
-						<td>
-							{# TODO: CHANGE LINK #}
-							<a class="btn btn-secondary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
-								View Response
-							</a>
-						</td>
+						<td>{{surveyQuestionResponseRisksToTrafficLights(labResponseRisk.surveyQuestionResponseRisks)}}</td>
 					</tr>
 				{% endfor %}
 			</tbody>

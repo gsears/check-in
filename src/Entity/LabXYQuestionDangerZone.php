@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Containers\Bound;
-use App\Containers\SurveyQuestionResponseRisk;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 use App\Repository\LabXYQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 

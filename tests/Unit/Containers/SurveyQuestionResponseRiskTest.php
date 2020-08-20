@@ -7,9 +7,9 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Unit\Containers;
 
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Entity\SurveyQuestionResponseInterface;
 use PHPUnit\Framework\TestCase;
+use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 class SurveyQuestionResponseRiskTest extends TestCase
 {

@@ -3,21 +3,22 @@
 namespace App\Repository;
 
 use App\Entity\LabXYQuestionResponse;
-use App\Containers\LabResponseRisk;
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Entity\SurveyQuestionResponseInterface;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
+use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\LabXYQuestionResponseRisk;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+
 
 /**
  * @method LabXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabXYQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
- * @method LabXYQuestionResponse[]    findAll()
+ * @method LabXYQuestionRespons e[]    findAll()
  * @method LabXYQuestionResponse[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class LabXYQuestionResponseRepository extends ServiceEntityRepository implements SurveyQuestionResponseRepositoryInterface
 {
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, LabXYQuestionResponse::class);
@@ -49,16 +50,18 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
         )->setParameter('questionResponse', $questionResponse);
 
         try {
-            return new SurveyQuestionResponseRisk(
+            $labXYQuestionResponseRisk = new LabXYQuestionResponseRisk(
                 $query->getSingleScalarResult(),
                 $questionResponse
             );
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return new SurveyQuestionResponseRisk(
+            $labXYQuestionResponseRisk = new LabXYQuestionResponseRisk(
                 SurveyQuestionResponseRisk::LEVEL_NONE,
                 $questionResponse
             );
         }
+
+        return $labXYQuestionResponseRisk;
     }
 }

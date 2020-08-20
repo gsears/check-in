@@ -108,4 +108,9 @@ class LabSentimentQuestionResponse implements SurveyQuestionResponseInterface
 
         return $this;
     }
+
+    public function getSurveyQuestion(): SurveyQuestionInterface
+    {
+        return $this->labSentimentQuestion;
+    }
 }

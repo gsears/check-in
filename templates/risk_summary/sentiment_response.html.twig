@@ -1,0 +1,19 @@
+{% extends "risk_summary/response.html.twig" %}
+
+{% block info %}
+	<h4 class='h6 mt-2'>Response</h4>
+
+	<small>{{text}}</small>
+
+	<h4 class='h6 mt-2'>Analysis</h4>
+	<ul>
+		<li>
+			<span>Classification:</span>
+			{{classification}}
+		</li>
+		<li>
+			<span>Confidence:</span>
+			{{confidence * 100 |number_format(2, '.', ',')}}%
+		</li>
+	</ul>
+{% endblock %}

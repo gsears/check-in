@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Containers;
+namespace App\Containers\Risk;
 
 /*
 CourseInstanceRisk.php

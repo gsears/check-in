@@ -7,10 +7,10 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Unit\Containers;
 
-use App\Containers\EnrolmentRisk;
-use App\Containers\LabResponseRisk;
 use App\Entity\Enrolment;
 use PHPUnit\Framework\TestCase;
+use App\Containers\Risk\EnrolmentRisk;
+use App\Containers\Risk\LabResponseRisk;
 
 class EnrolmentRiskTest extends TestCase
 {

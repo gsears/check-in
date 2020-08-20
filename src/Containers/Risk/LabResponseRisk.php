@@ -5,7 +5,7 @@ LabResponseRisk.php
 Gareth Sears - 2493194S
 */
 
-namespace App\Containers;
+namespace App\Containers\Risk;
 
 use App\Entity\LabResponse;
 
@@ -14,20 +14,14 @@ use App\Entity\LabResponse;
  */
 class LabResponseRisk
 {
-    public static function sortByWeightedRiskFactor(array $labResponseRisks)
+    public static function sortByWeightedRiskFactor(array $labResponseRisks): array
     {
+        // Sorts in place, but array is not pass by reference so need to return local variable.
         uasort($labResponseRisks, function (LabResponseRisk $a, LabResponseRisk $b) {
-            $riskFactorA = $a->getWeightedRiskFactor();
-            $riskFactorB = $b->getWeightedRiskFactor();
-
-            if ($riskFactorA > $riskFactorB) {
-                return -1;
-            } else if ($riskFactorA < $riskFactorB) {
-                return 1;
-            } else {
-                return 0;
-            }
+            return $a->getWeightedRiskFactor() >= $b->getWeightedRiskFactor() ? -1 : 1;
         });
+
+        return $labResponseRisks;
     }
 
     private $surveyQuestionResponseRisks = [];
@@ -41,6 +35,11 @@ class LabResponseRisk
      */
     public function __construct(array $surveyQuestionResponseRisks, LabResponse $labResponse)
     {
+        // Sort surveyQuestionResponseRisks into question order for retrieval.
+        uasort($surveyQuestionResponseRisks, function (SurveyQuestionResponseRisk $a, SurveyQuestionResponseRisk $b) {
+            return $a->getQuestionIndex() >= $b->getQuestionIndex() ? 1 : -1;
+        });
+
         $this->surveyQuestionResponseRisks = $surveyQuestionResponseRisks;
         $this->labResponse = $labResponse;
     }
@@ -67,7 +66,7 @@ class LabResponseRisk
      * @param boolean $excludeWithRiskLevelNone If true, any objects with a risk level of 0 will not be returned.
      * @return SurveyQuestionResponseRisks[]
      */
-    public function getSurveyQuestionResponseRisks(bool $excludeWithRiskLevelNone = true): array
+    public function getSurveyQuestionResponseRisks(bool $excludeWithRiskLevelNone = false): array
     {
         if (!$excludeWithRiskLevelNone) {
             return $this->surveyQuestionResponseRisks;
@@ -85,7 +84,7 @@ class LabResponseRisk
      * @param boolean $excludeWithRiskLevelNone - If true, any objects with a risk level of 0 will not be returned.
      * @return float[]
      */
-    public function getWeightedRiskLevels(bool $excludeWithRiskLevelNone = true): array
+    public function getWeightedRiskLevels(bool $excludeWithRiskLevelNone = false): array
     {
         return array_map(function (SurveyQuestionResponseRisk $sqrr) {
             return $sqrr->getWeightedRiskLevel();

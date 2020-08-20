@@ -7,8 +7,7 @@ Gareth Sears - 2493194S
 
 namespace App\DataFixtures;
 
-use App\Containers\LabResponseRisk;
-use App\Containers\SurveyQuestionResponseRisk;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 use Faker;
 use App\Entity\Lab;
 use App\Entity\Student;

@@ -3,10 +3,9 @@
 namespace App\Entity;
 
 use App\Containers\Bound;
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Repository\LabSentimentQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
-use InvalidArgumentException;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
+use App\Repository\LabSentimentQuestionDangerZoneRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LabSentimentQuestionDangerZoneRepository::class)
@@ -87,7 +86,7 @@ class LabSentimentQuestionDangerZone implements SurveyQuestionDangerZoneInterfac
     public function setClassification(string $classification): self
     {
         if (!SentimentQuestion::isValidClassification($classification)) {
-            throw new InvalidArgumentException(sprintf($classification . " is not a valid classification."), 1);
+            throw new \InvalidArgumentException(sprintf($classification . " is not a valid classification."), 1);
         }
 
         $this->classification = $classification;

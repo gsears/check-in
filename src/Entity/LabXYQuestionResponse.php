@@ -111,4 +111,9 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
 
         return $this;
     }
+
+    public function getSurveyQuestion(): SurveyQuestionInterface
+    {
+        return $this->labXYQuestion;
+    }
 }

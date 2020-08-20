@@ -7,11 +7,12 @@ Gareth Sears - 2493194S
 
 namespace App\Repository;
 
-use App\Containers\SurveyQuestionResponseRisk;
+use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\LabSentimentQuestionResponse;
 use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
+use App\Containers\Risk\LabSentimentQuestionResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method LabSentimentQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
@@ -42,16 +43,18 @@ class LabSentimentQuestionResponseRepository extends ServiceEntityRepository imp
         )->setParameter('questionResponse', $questionResponse);
 
         try {
-            return new SurveyQuestionResponseRisk(
+            $labSentimentQuestionResponseRisk = new LabSentimentQuestionResponseRisk(
                 $query->getSingleScalarResult(),
                 $questionResponse
             );
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return new SurveyQuestionResponseRisk(
+            $labSentimentQuestionResponseRisk = new LabSentimentQuestionResponseRisk(
                 SurveyQuestionResponseRisk::LEVEL_NONE,
                 $questionResponse
             );
         }
+
+        return $labSentimentQuestionResponseRisk;
     }
 }

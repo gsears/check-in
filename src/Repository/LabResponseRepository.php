@@ -8,9 +8,9 @@ Gareth Sears - 2493194S
 namespace App\Repository;
 
 use App\Entity\LabResponse;
-use App\Containers\LabResponseRisk;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Containers\Risk\LabResponseRisk;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method LabResponse|null find($id, $lockMode = null, $lockVersion = null)

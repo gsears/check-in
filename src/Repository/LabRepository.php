@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Containers\LabResponseRisk;
-use App\Entity\Course;
-use App\Entity\CourseInstance;
-use App\Entity\Instructor;
-use App\Entity\Lab;
-use App\Entity\LabResponse;
-use App\Entity\Student;
-use App\Provider\DateTimeProvider;
 use DateTime;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\Lab;
+use App\Entity\Course;
+use App\Entity\Student;
+use App\Entity\Instructor;
+use App\Entity\LabResponse;
+use App\Entity\CourseInstance;
+use App\Provider\DateTimeProvider;
+use App\Containers\Risk\LabResponseRisk;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Lab|null find($id, $lockMode = null, $lockVersion = null)
@@ -134,7 +134,7 @@ class LabRepository extends ServiceEntityRepository
      * @param Lab $lab
      * @return LabResponseRisk[]
      */
-    public function findStudentsAtRiskByLab(Lab $lab)
+    public function getLabResponseRisks(Lab $lab)
     {
         /**
          * @var LabResponseRepository
@@ -142,18 +142,18 @@ class LabRepository extends ServiceEntityRepository
         $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
 
         // Get the labResponseRisks for each submitted survey response
-        $labResponseRisks = $lab->getResponses()
+        // array_values resets numbering after filter for sorting
+        $labResponseRisks = array_values($lab->getResponses()
             ->filter(function (LabResponse $response) {
                 return $response->getSubmitted();
             })
             ->map(function ($response) use ($responseRepo) {
                 return $responseRepo->getLabResponseRisk($response);
             })
-            ->toArray();
+            ->toArray());
+
 
         // Order by highest risk
-        LabResponseRisk::sortByWeightedRiskFactor($labResponseRisks);
-
-        return $labResponseRisks;
+        return LabResponseRisk::sortByWeightedRiskFactor($labResponseRisks);
     }
 }

@@ -7,4 +7,5 @@ namespace App\Entity;
  */
 interface SurveyQuestionResponseInterface
 {
+    public function getSurveyQuestion(): SurveyQuestionInterface;
 }

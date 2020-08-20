@@ -7,12 +7,12 @@ Gareth Sears - 2493194S
 
 namespace App\Repository;
 
-use App\Entity\Enrolment;
-use App\Entity\CourseInstance;
-use App\Containers\EnrolmentRisk;
-use App\Entity\LabResponse;
-use App\Provider\DateTimeProvider;
 use DateTime;
+use App\Entity\Enrolment;
+use App\Entity\LabResponse;
+use App\Entity\CourseInstance;
+use App\Provider\DateTimeProvider;
+use App\Containers\Risk\EnrolmentRisk;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 

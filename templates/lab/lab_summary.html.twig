@@ -1,6 +1,6 @@
 {% extends "base.html.twig" %}
 
-{% from 'macros.html.twig' import weightedRiskToTrafficLights %}
+{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights %}
 
 {% block body %}
 	<header>
@@ -28,7 +28,7 @@
 							<td>{{student.guid}}
 								-
 								{{student.user.fullname}}</td>
-							<td>{{weightedRiskToTrafficLights(risk.weightedRisks)}},</td>
+							<td>{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
 							<td></td>
 						</tr>
 					{% endfor %}

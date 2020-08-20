@@ -2,9 +2,8 @@
 
 namespace App\Repository;
 
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Entity\Lab;
 use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 interface SurveyQuestionResponseRepositoryInterface
 {

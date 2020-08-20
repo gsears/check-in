@@ -7,44 +7,36 @@ Gareth Sears - 2493194S
 
 namespace App\Controller;
 
-use App\Containers\EnrolmentRisk;
-use App\Entity\CourseInstance;
-use App\Entity\Enrolment;
 use App\Entity\Lab;
+use App\Entity\Student;
 use App\Security\Roles;
+use App\Entity\Enrolment;
 use App\Entity\LabResponse;
-use App\Entity\LabSentimentQuestion;
-use App\Entity\LabSentimentQuestionResponse;
 use App\Entity\LabXYQuestion;
+use App\Entity\CourseInstance;
 use App\Repository\LabRepository;
 use App\Form\Type\LabResponseType;
+use App\Provider\DateTimeProvider;
+use App\Form\Type\RiskSettingsType;
+use App\Entity\LabSentimentQuestion;
 use App\Form\Type\LabDangerZoneType;
 use App\Security\Voter\StudentVoter;
 use App\Entity\LabXYQuestionResponse;
-use App\Entity\Student;
-use App\Repository\StudentRepository;
 use App\Entity\SurveyQuestionInterface;
-use App\Form\Type\LabSentimentQuestionResponseType;
+use App\Repository\EnrolmentRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\LabResponseRepository;
+use Symfony\Component\Form\FormInterface;
 use App\Security\Voter\CourseInstanceVoter;
+use App\Entity\LabSentimentQuestionResponse;
 use App\Form\Type\LabXYQuestionResponseType;
-use App\Form\Type\RiskSettingsType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
-use App\Provider\DateTimeProvider;
-use App\Repository\EnrolmentRepository;
-use App\Repository\LabResponseRepository;
-use App\Task\FlagStudentsTask;
-use Doctrine\ORM\EntityManagerInterface;
-use Monolog\Logger;
-use OutOfBoundsException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
+use App\Form\Type\LabSentimentQuestionResponseType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * @Route("/courses")
@@ -76,6 +68,10 @@ class CourseController extends AbstractController
 
         $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
 
+        $breadcrumbs = [
+            ['name' => 'Course']
+        ];
+
         if ($user->isStudent()) {
             $student = $user->getStudent();
             $courseInstances = $courseInstanceRepo->findByStudent($user->getStudent());
@@ -84,6 +80,7 @@ class CourseController extends AbstractController
                 'courseInstances' => $courseInstances,
                 'studentId' => $student->getGuid(),
                 'recentLabs' => $pendingLabs,
+                'breadcrumbArray' => $breadcrumbs
             ]);
         }
 
@@ -93,7 +90,8 @@ class CourseController extends AbstractController
             $recentLabs = $labRepo->findLatestByInstructor($instructor, 5);
             return $this->render('course/courses_instructor.html.twig', [
                 'courseInstances' => $courseInstances,
-                'recentLabs' => $recentLabs
+                'recentLabs' => $recentLabs,
+                'breadcrumbArray' => $breadcrumbs
             ]);
         }
 
@@ -159,7 +157,11 @@ class CourseController extends AbstractController
             'studentsAtRisk' => $studentsAtRisk,
             'labs' => $labs,
             'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
-            'riskSettingsForm' => $riskSettingsForm->createView()
+            'riskSettingsForm' => $riskSettingsForm->createView(),
+            'breadcrumbArray' => [
+                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+                ['name' => $courseId . ' - ' . $instanceIndex]
+            ]
         ]);
     }
 
@@ -204,19 +206,32 @@ class CourseController extends AbstractController
          */
         $labResponseRepo = $this->entityManager->getRepository(LabResponse::class);
         $completedLabResponses =  $labResponseRepo->findCompletedByCourseInstanceAndStudent($courseInstance, $student);
-        $completedLabsWithRisk = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
-            return [
-                'lab' => $labResponse->getLab(),
-                'weightedRisks' => $labResponseRepo->getLabResponseRisk($labResponse)->getWeightedRiskLevels(),
-            ];
+        $completedLabResponseRisks = array_map(function (LabResponse $labResponse) use ($labResponseRepo) {
+            return $labResponseRepo->getLabResponseRisk($labResponse);
         }, $completedLabResponses);
+
+        $breadcrumbs = $this->getUser()->isStudent() ?
+            [
+                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+                ['name' => $courseId . ' - ' . $instanceIndex],
+                ['name' => $studentId . ' - ' . $student->getUser()->getFullName()]
+            ] :
+            [
+                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+                ['name' => $courseId . ' - ' . $instanceIndex, 'href' => $this->generateUrl('view_course_summary', [
+                    'courseId' => $courseId,
+                    'instanceIndex' => $instanceIndex
+                ])],
+                ['name' => $studentId . ' - ' . $student->getUser()->getFullName()]
+            ];
 
         return $this->render('course/student_summary.html.twig', [
             'user' => $this->getUser(),
             'courseInstance' => $courseInstance,
             'pendingLabs' => $pendingLabs,
-            'completedLabsWithRisk' => $completedLabsWithRisk,
-            'student' => $student
+            'completedLabResponseRisks' => $completedLabResponseRisks,
+            'student' => $student,
+            'breadcrumbArray' => $breadcrumbs
         ]);
     }
 
@@ -265,13 +280,21 @@ class CourseController extends AbstractController
          * @var LabRepository
          */
         $labRepo = $this->entityManager->getRepository(Lab::class);
-        $labResponseRisks = $labRepo->findStudentsAtRiskByLab($lab);
+        $labResponseRisks = $labRepo->getLabResponseRisks($lab);
 
         return $this->render('lab/lab_summary.html.twig', [
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
             'form' => $form->createView(),
             'labResponseRisks' => $labResponseRisks,
+            'breadcrumbArray' =>  [
+                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+                ['name' => $courseId . ' - ' . $instanceIndex, 'href' => $this->generateUrl('view_course_summary', [
+                    'courseId' => $courseId,
+                    'instanceIndex' => $instanceIndex
+                ])],
+                ['name' => $lab->getName()]
+            ]
         ]);
     }
 
@@ -357,7 +380,7 @@ class CourseController extends AbstractController
         // Check if question exists. Out of bounds exception means it doesn't.
         try {
             $question = $lab->getQuestions()->toArray()[$page - 1];
-        } catch (OutOfBoundsException $e) {
+        } catch (\OutOfBoundsException $e) {
             throw $this->createNotFoundException('This lab survey question does not exist');
         }
 

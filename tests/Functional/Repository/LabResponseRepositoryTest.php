@@ -7,12 +7,12 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Functional\Repository;
 
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Containers\XYCoordinates;
+use DateTime;
 use App\Entity\LabResponse;
+use App\Containers\XYCoordinates;
 use App\Entity\SentimentQuestion;
 use App\Tests\Functional\FunctionalTestCase;
-use DateTime;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 class LabResponseRepositoryTest extends FunctionalTestCase
 {

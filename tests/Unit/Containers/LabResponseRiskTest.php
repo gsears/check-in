@@ -7,11 +7,11 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Unit\Containers;
 
-use App\Containers\LabResponseRisk;
-use App\Containers\SurveyQuestionResponseRisk;
 use App\Entity\Lab;
 use App\Entity\LabResponse;
 use PHPUnit\Framework\TestCase;
+use App\Containers\Risk\LabResponseRisk;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 class LabResponseRiskTest extends TestCase
 {

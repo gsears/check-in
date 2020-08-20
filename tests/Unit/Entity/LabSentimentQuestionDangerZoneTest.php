@@ -7,9 +7,9 @@ Gareth Sears - 2493194S
 
 namespace App\Tests\Unit\Entity;
 
-use App\Containers\SurveyQuestionResponseRisk;
-use App\Entity\LabSentimentQuestionDangerZone;
 use PHPUnit\Framework\TestCase;
+use App\Entity\LabSentimentQuestionDangerZone;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 class LabSentimentQuestionDangerZoneTest extends TestCase
 {

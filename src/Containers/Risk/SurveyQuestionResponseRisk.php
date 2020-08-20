@@ -1,14 +1,19 @@
 <?php
 
-namespace App\Containers;
+namespace App\Containers\Risk;
 
+use App\Entity\SurveyQuestionInterface;
 use App\Entity\SurveyQuestionResponseInterface;
 
-class SurveyQuestionResponseRisk
+abstract class SurveyQuestionResponseRisk implements RiskInterface
 {
     const LEVEL_NONE = 0;
     const LEVEL_WARNING = 1;
     const LEVEL_DANGER = 2;
+
+    const TEXT_NONE = 'None';
+    const TEXT_WARNING = "Warning";
+    const TEXT_DANGER = "Danger";
 
     const WEIGHT_NONE = 0.0;
     const WEIGHT_WARNING = 1.0;
@@ -21,6 +26,7 @@ class SurveyQuestionResponseRisk
 
     private $riskLevel;
     private $surveyQuestionResponse;
+    private $html;
 
     public function __construct(int $riskLevel, SurveyQuestionResponseInterface $surveyQuestionResponse)
     {
@@ -36,6 +42,15 @@ class SurveyQuestionResponseRisk
         return $this->riskLevel;
     }
 
+    public function getRiskText(): string
+    {
+        return [
+            self::TEXT_NONE,
+            self::TEXT_WARNING,
+            self::TEXT_DANGER
+        ][$this->riskLevel];
+    }
+
     public function getWeightedRiskLevel(): float
     {
         return [
@@ -49,4 +64,30 @@ class SurveyQuestionResponseRisk
     {
         return $this->surveyQuestionResponse;
     }
+
+    public function getQuestionIndex(): int
+    {
+        return $this->surveyQuestionResponse->getSurveyQuestion()->getIndex();
+    }
+
+    final public function getDefaultContext(): array
+    {
+        $surveyQuestion =  $this->surveyQuestionResponse->getSurveyQuestion();
+        $question = $surveyQuestion->getQuestion();
+        return [
+            "questionIndex" => $surveyQuestion->getIndex(),
+            "questionName" => $question->getName(),
+            "questionText" => $question->getQuestionText(),
+            "riskLevel" => $this->getRiskLevel(),
+            "riskText" => $this->getRiskText(),
+            "weightedRiskLevel" => $this->getWeightedRiskLevel()
+        ];
+    }
+
+    public function getContext(): array
+    {
+        return [];
+    }
+
+    abstract public function getTwigTemplate(): string;
 }

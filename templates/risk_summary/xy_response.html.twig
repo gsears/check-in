@@ -1,0 +1,15 @@
+{% extends "risk_summary/response.html.twig" %}
+
+{% block info %}
+	<h4 class='h6'>XY Response</h4>
+	<ul>
+		<li>
+			<span>{{xFieldName}}:</span>
+			{{xResponseValue}}
+		</li>
+		<li>
+			<span>{{yFieldName}}:</span>
+			{{yResponseValue}}
+		</li>
+	</ul>
+{% endblock %}
