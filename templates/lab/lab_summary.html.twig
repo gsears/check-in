@@ -1,42 +1,59 @@
 {% extends "base.html.twig" %}
 
-{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights %}
+{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights, responseKey %}
 
 {% block body %}
 	<header>
-		<h1>{{labName}}</h1>
-		<p>{{courseName}}</p>
+		<h1>{{lab.name}}</h1>
+		<p>{{courseInstance.name}}</p>
 	</header>
 
-	{{form(form)}}
+	{{form_start(form)}}
+	<h2>XY Question Responses</h2>
 
-		<h2>Student Responses</h2>
+	{{form_widget(form.labXYQuestions)}}
+	<p>{{form_help(form.labXYQuestions)}}</p>
+	{{form_end(form)}}
 
-		{% if labResponseRisks %}
-			<table class="table">
-				<thead>
+	<h2>Student Responses</h2>
+	<p>Click the student name to view a course summary for that student.</p>
+
+	{% if labResponseRisks %}
+		{{responseKey()}}
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">Student</th>
+					<th scope="col">Risk</th>
+					<th scope="col"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for risk in labResponseRisks %}
+					{% set student = risk.labResponse.student %}
+					{% set href = path(
+						constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+						{
+							courseId: courseInstance.course.code,
+							instanceIndex: courseInstance.indexInCourse,
+							studentId: student.guid
+						}
+					) %}
 					<tr>
-						<th scope="col">Student</th>
-						<th scope="col">Risk</th>
-						<th scope="col"></th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for risk in labResponseRisks %}
-						{% set student = risk.labResponse.student %}
-						<tr>
-							<td>{{student.guid}}
+						<td>
+							<a href="{{href}}">{{student.guid}}
 								-
-								{{student.user.fullname}}</td>
-							<td>{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
-							<td></td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% else %}
-			No students in course.
-		{% endif %}
+								{{student.user.fullname}}</a>
+						</td>
+						<td>{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
+						<td></td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		No students in course.
+	{% endif %}
 
 
-	{% endblock %}
+{% endblock %}

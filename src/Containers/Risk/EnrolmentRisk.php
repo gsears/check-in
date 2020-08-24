@@ -7,7 +7,6 @@ CourseInstanceRisk.php
 Gareth Sears - 2493194S
 */
 
-use App\Containers\LabResponseRisk;
 use App\Entity\Enrolment;
 
 class EnrolmentRisk
@@ -18,14 +17,16 @@ class EnrolmentRisk
             $riskFactorA = $a->getAverageRiskFactor();
             $riskFactorB = $b->getAverageRiskFactor();
 
-            if ($riskFactorA > $riskFactorB) {
+            if ($riskFactorA < $riskFactorB) {
                 return 1;
-            } else if ($riskFactorA < $riskFactorB) {
+            } else if ($riskFactorA > $riskFactorB) {
                 return -1;
             } else {
                 return 0;
             }
         });
+
+        return $enrolmentRisks;
     }
 
     private $labResponseRisks;
@@ -58,6 +59,11 @@ class EnrolmentRisk
         }, $this->labResponseRisks);
 
         return array_sum($risks) / (float) count($risks);
+    }
+
+    public function isAtRisk(): bool
+    {
+        return $this->areAllRisksAbove($this->enrolment->getCourseInstance()->getRiskThreshold());
     }
 
     public function areAllRisksAbove(float $riskFactor): bool

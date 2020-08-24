@@ -42,23 +42,11 @@ class LabXYQuestionType extends AbstractType
 
             // Serialize the coordinates of the responses
             $coordinatesArray = [];
-            $student = $options['filter_by_student'];
 
-            if ($student) {
-                $studentResponse = $labXYQuestion
-                    ->getResponses()
-                    ->filter(function (LabXYQuestionResponse $response) use ($student) {
-                        return $response->getLabResponse()->getStudent() === $student;
-                    })->first();
-                if ($studentResponse) {
-                    $coordinatesArray[] = $studentResponse->getCoordinates();
-                }
-            } else {
-                foreach ($labXYQuestion->getResponses()->toArray() as $response) {
-                    $coordinates = $response->getCoordinates();
-                    if ($coordinates) {
-                        $coordinatesArray[] = $coordinates;
-                    }
+            foreach ($labXYQuestion->getResponses()->toArray() as $response) {
+                $coordinates = $response->getCoordinates();
+                if ($coordinates) {
+                    $coordinatesArray[] = $coordinates;
                 }
             }
 
@@ -87,7 +75,6 @@ class LabXYQuestionType extends AbstractType
         // Set that this form is bound to an SurveyQuestionResponseInterface entity
         $resolver->setDefaults([
             'data_class' => LabXYQuestion::class,
-            'filter_by_student' => null,
             'read_only' => false,
         ]);
     }

@@ -1,0 +1,18 @@
+{% extends "base.html.twig" %}
+
+{% block body %}
+
+	<header>
+		{% block header %}{% endblock %}
+	</header>
+
+	<div class="row">
+		<div class="col-lg-6">
+			{% block first_column %}{% endblock %}
+		</div>
+		<div class="col-lg-6">
+			{% block second_column %}{% endblock %}
+		</div>
+	</div>
+
+{% endblock %}

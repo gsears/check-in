@@ -1,5 +1,9 @@
 {% extends "risk_summary/response.html.twig" %}
 
+{% block icon %}
+	<i class="fa {{global_sentiment_icon}}" aria-hidden="true"></i>
+{% endblock %}
+
 {% block info %}
 	<h4 class='h6 mt-2'>Response</h4>
 

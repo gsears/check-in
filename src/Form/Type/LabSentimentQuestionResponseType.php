@@ -33,10 +33,10 @@ class LabSentimentQuestionResponseType extends SurveyQuestionResponseType
         return $builder;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function getOptionDefaults(): array
     {
-        $resolver->setDefaults([
+        return [
             'data_class' => LabSentimentQuestionResponse::class,
-        ]);
+        ];
     }
 }

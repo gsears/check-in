@@ -14,7 +14,9 @@ use App\Entity\Student;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Containers\XYCoordinates;
+use App\Entity\Instructor;
 use App\Entity\SentimentQuestion;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -160,7 +162,7 @@ class AppFixtures extends Fixture
         $courses = $this->loadCourses();
 
         // Create course instances, assign instructors and students
-        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents);
+        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents, $testStudent, $testInstructor);
         $courseInstances = $courseInstancesAndEnrolments['courseInstances'];
 
         $enrolements = $courseInstancesAndEnrolments['enrolments'];
@@ -257,7 +259,7 @@ class AppFixtures extends Fixture
         return $courses;
     }
 
-    private function loadCourseInstances(array $courses, array $instructors, array $students): array
+    private function loadCourseInstances(array $courses, array $instructors, array $students, Student $testStudent, Instructor $testInstructor): array
     {
         $courseInstances = [];
 
@@ -314,10 +316,17 @@ class AppFixtures extends Fixture
             // Each student is enrolled on 4-5 courses
             // Note: at present this may be the same course for 2 terms in a row. Woo!
             for ($i = 0; $i < rand(4, 5); $i++) {
+                $courseInstance = $coursesForStudents[$i];
                 $enrolment = $this->creator->createEnrolment(
                     $student,
-                    $coursesForStudents[$i]
+                    $courseInstance
                 );
+
+                // Ensure the test user is always taught by the test instructor for testing
+                if ($student === $testStudent) {
+                    $courseInstance->addInstructor($testInstructor);
+                }
+
                 $enrolments[] = $enrolment;
             }
         }

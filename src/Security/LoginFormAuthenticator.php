@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Controller\CourseController;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -101,7 +102,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         }
 
         // Otherwise, redirect user to their home screen.
-        return new RedirectResponse($this->urlGenerator->generate('courses'));
+        return new RedirectResponse($this->urlGenerator->generate(CourseController::COURSES_PAGE));
     }
 
     protected function getLoginUrl()

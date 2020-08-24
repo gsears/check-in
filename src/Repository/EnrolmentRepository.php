@@ -114,9 +114,6 @@ class EnrolmentRepository extends ServiceEntityRepository
             );
         }
 
-        // Sort the results by average risk.
-        EnrolmentRisk::sortByAverageRisk($enrolmentRisks);
-
         return $enrolmentRisks;
     }
 }

@@ -15,7 +15,6 @@ use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Entity\CourseInstance;
 use App\Repository\LabRepository;
-use App\Form\Type\LabResponseType;
 use App\Provider\DateTimeProvider;
 use App\Form\Type\RiskSettingsType;
 use App\Entity\LabSentimentQuestion;
@@ -30,11 +29,13 @@ use Symfony\Component\Form\FormInterface;
 use App\Security\Voter\CourseInstanceVoter;
 use App\Entity\LabSentimentQuestionResponse;
 use App\Form\Type\LabXYQuestionResponseType;
+use App\Form\Type\RiskFlagType;
 use App\Repository\CourseInstanceRepository;
 use App\Form\Type\SurveyQuestionResponseType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Form\Type\LabSentimentQuestionResponseType;
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -43,6 +44,13 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 class CourseController extends AbstractController
 {
+    // Route Path Names
+    const COURSES_PAGE = 'course_instances';
+    const COURSE_SUMMARY_PAGE = 'course_instance_summary';
+    const STUDENT_SUMMARY_PAGE = 'view_course_student_summary';
+    const LAB_SUMMARY_PAGE = 'view_lab_summary';
+    const LAB_SURVEY_PAGE = 'lab_survey_response';
+
     // Used for error checking routes
     const COURSE_QUERY = 'course';
     const COURSE_INSTANCE_QUERY = 'course_instance';
@@ -60,7 +68,7 @@ class CourseController extends AbstractController
     /**
      * Symfony injects in the CourseInstanceRepository.
      *
-     * @Route("", name="courses")
+     * @Route("", name=CourseController::COURSES_PAGE)
      */
     public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo)
     {
@@ -69,7 +77,7 @@ class CourseController extends AbstractController
         $this->denyAccessUnlessGranted(Roles::LOGGED_IN);
 
         $breadcrumbs = [
-            ['name' => 'Course']
+            ['name' => 'Courses']
         ];
 
         if ($user->isStudent()) {
@@ -99,7 +107,7 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{courseId}/{instanceIndex}", name="view_course_summary")
+     * @Route("/{courseId}/{instanceIndex}", name=CourseController::COURSE_SUMMARY_PAGE)
      */
     public function viewCourse(
         Request $request,
@@ -150,25 +158,26 @@ class CourseController extends AbstractController
          * @var EnrolmentRepository
          */
         $enrolmentRepo = $this->entityManager->getRepository(Enrolment::class);
-        $studentsAtRisk = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance, true);
+        $enrolmentRisks = $enrolmentRepo->findEnrolmentRisksByCourseInstance($courseInstance, false);
 
         return $this->render('course/course_summary.html.twig', [
             'courseInstance' => $courseInstance,
-            'studentsAtRisk' => $studentsAtRisk,
+            'enrolmentRisks' => $enrolmentRisks,
             'labs' => $labs,
             'currentDate' => (new DateTimeProvider)->getCurrentDateTime(),
             'riskSettingsForm' => $riskSettingsForm->createView(),
             'breadcrumbArray' => [
-                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+                ['name' => 'Courses', 'href' => $this->generateUrl(self::COURSES_PAGE)],
                 ['name' => $courseId . ' - ' . $instanceIndex]
             ]
         ]);
     }
 
     /**
-     * @Route("/{courseId}/{instanceIndex}/{studentId}", name="view_course_student_summary")
+     * @Route("/{courseId}/{instanceIndex}/{studentId}", name=CourseController::STUDENT_SUMMARY_PAGE)
      */
     public function viewCourseStudentSummary(
+        Request $request,
         $courseId,
         $instanceIndex,
         $studentId
@@ -210,20 +219,99 @@ class CourseController extends AbstractController
             return $labResponseRepo->getLabResponseRisk($labResponse);
         }, $completedLabResponses);
 
-        $breadcrumbs = $this->getUser()->isStudent() ?
-            [
-                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
+        /**
+         * Get enrolment for risk flag information for this course
+         * @var EnrolmentRepository
+         */
+        $enrolmentRepo = $this->entityManager->getRepository(Enrolment::class);
+
+        $enrolment = $enrolmentRepo->findOneBy([
+            'student' => $student,
+            'courseInstance' => $courseInstance
+        ]);
+
+        $user = $this->getUser();
+
+        $flagForm = $this->createForm(RiskFlagType::class, $enrolment, [
+            RiskFlagType::USER_ROLES => $user->getRoles()
+        ]);
+
+
+        $flagForm->handleRequest($request);
+
+        if ($flagForm->isSubmitted() && $flagForm->isValid()) {
+
+            try {
+                $manualFlagSubmit = $flagForm->get(RiskFlagType::MANUAL_FLAG_BUTTON);
+            } catch (\OutOfBoundsException $e) {
+                $manualFlagSubmit = null;
+            }
+
+            try {
+                $removeFlagSubmit = $flagForm->get(RiskFlagType::REMOVE_FLAG_BUTTON);
+            } catch (\OutOfBoundsException $e) {
+                $removeFlagSubmit = null;
+            }
+
+            if ($manualFlagSubmit && $manualFlagSubmit->isClicked()) {
+                /**
+                 * @var Enrolment
+                 */
+                $enrolment = $flagForm->getData();
+                if ($user->isStudent()) {
+                    $riskFlag = Enrolment::FLAG_BY_STUDENT;
+                } else if ($user->isInstructor()) {
+                    $riskFlag = Enrolment::FLAG_BY_INSTRUCTOR;
+                } else {
+                    throw new LogicException("Invalid user type setting flag");
+                }
+
+                $enrolment->setRiskFlag($riskFlag, $flagForm->get(RiskFlagType::DESCRIPTION_INPUT)->getData());
+            } else if ($removeFlagSubmit && $removeFlagSubmit->isClicked()) {
+                /**
+                 * @var Enrolment
+                 */
+                $enrolment = $flagForm->getData();
+                $enrolment->removeRiskFlag();
+            } else {
+                // This should be unreachable
+                throw new LogicException("Invalid submission");
+            }
+
+            // Update db
+            $this->entityManager->flush();
+
+            // Redirect to update form
+            return $this->redirectToRoute(self::STUDENT_SUMMARY_PAGE, [
+                'courseId' => $courseId,
+                'instanceIndex' => $instanceIndex,
+                'studentId' => $studentId
+            ]);
+        }
+
+        // Create breadcrumbs
+
+        $coursesPageHref = $this->generateUrl(self::COURSES_PAGE);
+
+        if ($user->isStudent()) {
+            $breadcrumbs = [
+                ['name' => 'Courses', 'href' => $coursesPageHref],
                 ['name' => $courseId . ' - ' . $instanceIndex],
                 ['name' => $studentId . ' - ' . $student->getUser()->getFullName()]
-            ] :
-            [
-                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
-                ['name' => $courseId . ' - ' . $instanceIndex, 'href' => $this->generateUrl('view_course_summary', [
-                    'courseId' => $courseId,
-                    'instanceIndex' => $instanceIndex
-                ])],
+            ];
+        } else {
+            $breadcrumbs = [
+                ['name' => 'Courses', 'href' => $coursesPageHref],
+                [
+                    'name' => $courseId . ' - ' . $instanceIndex,
+                    'href' => $this->generateUrl(self::COURSE_SUMMARY_PAGE, [
+                        'courseId' => $courseId,
+                        'instanceIndex' => $instanceIndex
+                    ])
+                ],
                 ['name' => $studentId . ' - ' . $student->getUser()->getFullName()]
             ];
+        }
 
         return $this->render('course/student_summary.html.twig', [
             'user' => $this->getUser(),
@@ -231,12 +319,14 @@ class CourseController extends AbstractController
             'pendingLabs' => $pendingLabs,
             'completedLabResponseRisks' => $completedLabResponseRisks,
             'student' => $student,
-            'breadcrumbArray' => $breadcrumbs
+            'enrolment' => $enrolment,
+            'breadcrumbArray' => $breadcrumbs,
+            'flagForm' => $flagForm->createView()
         ]);
     }
 
     /**
-     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}", name="view_lab_summary")
+     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}", name=CourseController::LAB_SUMMARY_PAGE)
      */
     public function viewLabSummary(
         Request $request,
@@ -283,13 +373,13 @@ class CourseController extends AbstractController
         $labResponseRisks = $labRepo->getLabResponseRisks($lab);
 
         return $this->render('lab/lab_summary.html.twig', [
-            'courseName' => $courseInstance->getName(),
-            'labName' => $lab->getName(),
+            'courseInstance' => $courseInstance,
+            'lab' => $lab,
             'form' => $form->createView(),
             'labResponseRisks' => $labResponseRisks,
             'breadcrumbArray' =>  [
-                ['name' => 'Courses', 'href' => $this->generateUrl('courses')],
-                ['name' => $courseId . ' - ' . $instanceIndex, 'href' => $this->generateUrl('view_course_summary', [
+                ['name' => 'Courses', 'href' => $this->generateUrl(self::COURSES_PAGE)],
+                ['name' => $courseId . ' - ' . $instanceIndex, 'href' => $this->generateUrl(self::COURSE_SUMMARY_PAGE, [
                     'courseId' => $courseId,
                     'instanceIndex' => $instanceIndex
                 ])],
@@ -299,59 +389,10 @@ class CourseController extends AbstractController
     }
 
     /**
-     * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}", name="lab_survey_view")
-     */
-    public function viewSurveyResponse(
-        $courseId,
-        $instanceIndex,
-        $labSlug,
-        $studentId
-    ) {
-        // DATA
-        $data = $this->fetchData([
-            self::COURSE_INSTANCE_QUERY => [
-                self::COURSE_QUERY => $courseId,
-                self::COURSE_INSTANCE_INDEX => $instanceIndex
-            ],
-            self::LAB_QUERY_BY_SLUG => $labSlug,
-            self::STUDENT_QUERY => $studentId,
-        ]);
-
-        $courseInstance = $data[self::COURSE_INSTANCE_QUERY];
-        $lab = $data[self::LAB_QUERY_BY_SLUG];
-        $student = $data[self::STUDENT_QUERY];
-
-        /**
-         * Response always exists (created when adding lab), so no error checking
-         * @var LabResponseRepository
-         */
-        $labResponseRepo = $this->entityManager->getRepository(LabResponse::class);
-        $labResponse = $labResponseRepo->findOneByLabAndStudent($lab, $student);
-
-        // SECURITY
-        // Check permission to view course instance
-        $this->denyAccessUnlessGranted(CourseInstanceVoter::VIEW, $courseInstance);
-        // Check if the user is the owning student or instructor, otherwise deny
-        $this->denyAccessUnlessGranted(StudentVoter::VIEW, $student);
-
-        // HANDLER
-        // TODO: This should NOT be a form. Need to refactor all of these!
-        $form = $this->createForm(LabResponseType::class, $labResponse, [
-            'read_only' => true
-        ]);
-
-        return $this->render('lab/response.html.twig', [
-            'courseName' => $courseInstance->getName(),
-            'labName' => $lab->getName(),
-            'form' => $form->createView()
-        ]);
-    }
-
-    /**
      * !page always generates the page number in the URL. Checks if page is a number.
      *
      * @Route("/{courseId}/{instanceIndex}/lab/{labSlug}/{studentId}/survey/{!page}",
-     *      name="lab_survey_response",
+     *      name=CourseController::LAB_SURVEY_PAGE,
      *      requirements={"page"="\d+"})
      *
      */
@@ -400,7 +441,14 @@ class CourseController extends AbstractController
         $this->checkValidLabSurveyReferrer($request, $page);
 
         // HANDLER
-        $form = $this->generateLabSurveyForm($question, $labResponse);
+        $questionCount = $lab->getQuestionCount();
+        $isLastQuestion = $page === $questionCount;
+
+        $form = $this->generateLabSurveyForm($question, $labResponse, [
+            'submitText' => $isLastQuestion ? 'Submit' : 'Next Question',
+            'skipText' => $isLastQuestion ? 'Skip and Submit' : 'Skip Question',
+        ]);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -423,25 +471,25 @@ class CourseController extends AbstractController
                 }
 
                 // Redirect accordingly...
-                if ($page < $lab->getQuestionCount()) {
-                    // Get next page in the survey
-                    return $this->redirectToRoute('lab_survey_response', [
-                        'courseId' => $courseId,
-                        'instanceIndex' => $instanceIndex,
-                        'labSlug' => $labSlug,
-                        'studentId' => $studentId,
-                        'page' => $page + 1
-                    ]);
-                } else {
+                if ($isLastQuestion) {
                     // The form is completed. Even if everything was skipped!
                     $labResponse->setSubmitted(true);
                     $this->entityManager->flush();
 
                     // Back to summary
-                    return $this->redirectToRoute('view_course_student_summary', [
+                    return $this->redirectToRoute(self::STUDENT_SUMMARY_PAGE, [
                         'courseId' => $courseId,
                         'instanceIndex' => $instanceIndex,
                         'studentId' => $studentId
+                    ]);
+                } else {
+                    // Get next page in the survey
+                    return $this->redirectToRoute(self::LAB_SURVEY_PAGE, [
+                        'courseId' => $courseId,
+                        'instanceIndex' => $instanceIndex,
+                        'labSlug' => $labSlug,
+                        'studentId' => $studentId,
+                        'page' => $page + 1
                     ]);
                 }
             }
@@ -452,6 +500,21 @@ class CourseController extends AbstractController
             'courseName' => $courseInstance->getName(),
             'labName' => $lab->getName(),
             'form' => $form->createView(),
+            'questionNumber' => $page,
+            'questionCount' => $questionCount,
+            'breadcrumbArray' =>  [
+                ['name' => 'Courses', 'href' => $this->generateUrl(self::COURSES_PAGE)],
+                ['name' => $courseId . ' - ' . $instanceIndex],
+                [
+                    'name' => $studentId . ' - ' . $student->getUser()->getFullName(),
+                    'href' => $this->generateUrl(self::STUDENT_SUMMARY_PAGE, [
+                        'courseId' => $courseId,
+                        'instanceIndex' => $instanceIndex,
+                        'studentId' => $studentId
+                    ])
+                ],
+                ['name' => $lab->getName() . ' - Question ' . $page]
+            ]
         ]);
     }
 
@@ -480,7 +543,7 @@ class CourseController extends AbstractController
         }
     }
 
-    private function generateLabSurveyForm(SurveyQuestionInterface $question, LabResponse $labResponse): FormInterface
+    private function generateLabSurveyForm(SurveyQuestionInterface $question, LabResponse $labResponse, array $formOptions = []): FormInterface
     {
         if ($question instanceof LabXYQuestion) {
 
@@ -499,7 +562,7 @@ class CourseController extends AbstractController
                 $questionResponse->setLabResponse($labResponse);
             }
 
-            $form = $this->createForm(LabXYQuestionResponseType::class,  $questionResponse);
+            $form = $this->createForm(LabXYQuestionResponseType::class,  $questionResponse, $formOptions);
         }
 
         if ($question instanceof LabSentimentQuestion) {
@@ -519,7 +582,7 @@ class CourseController extends AbstractController
                 $questionResponse->setLabResponse($labResponse);
             }
 
-            $form = $this->createForm(LabSentimentQuestionResponseType::class,  $questionResponse);
+            $form = $this->createForm(LabSentimentQuestionResponseType::class,  $questionResponse, $formOptions);
         }
 
         return $form;
@@ -556,7 +619,6 @@ class CourseController extends AbstractController
 
         $this->entityManager->persist($questionResponse);
         $this->entityManager->flush();
-        dump("here");
         return;
     }
 
