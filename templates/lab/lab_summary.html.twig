@@ -16,9 +16,8 @@
 	{{form_end(form)}}
 
 	<h2>Student Responses</h2>
-	<p>Click the student name to view a course summary for that student.</p>
-
 	{% if labResponseRisks %}
+		<p>Click the student name to view a course summary for that student.</p>
 		{{responseKey()}}
 		<table class="table">
 			<thead>
@@ -52,7 +51,7 @@
 			</tbody>
 		</table>
 	{% else %}
-		No students in course.
+		<p>No responses received.</p>
 	{% endif %}
 
 

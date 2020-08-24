@@ -151,7 +151,7 @@ class CourseController extends AbstractController
          * @var LabRepository
          */
         $labRepo = $this->entityManager->getRepository(Lab::class);
-        $labs = $labRepo->findBy(['courseInstance' => $courseInstance]);
+        $labs = $labRepo->findBy(['courseInstance' => $courseInstance], ['startDateTime' => 'DESC']);
 
         /**
          * Get students at risk in course

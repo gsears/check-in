@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block main %}
-	<h2>Students at Risk</h2>
+	<h2>Students</h2>
 	{{_self.studentTable(enrolmentRisks, courseInstance)}}
 	<h2>Labs</h2>
 	{{_self.labTable(labs, currentDate)}}
@@ -30,12 +30,18 @@
 
 {% macro labTable(labs, currentDate) %}
 	{% if labs %}
+		<div class="form-check mb-2">
+			<input type="checkbox" class="form-check-input" id="labs-toggle">
+			<label class="form-check-label" for="labs-toggle">Show only open labs
+			</label>
+		</div>
 		<p>Click the lab name to view a summary of that lab's survey responses.</p>
-		<table id="lab-table" class="table table-sm">
+		<table id="labs-table" class="table table-sm">
 			<thead>
 				<tr>
 					<th>Lab</th>
-					<th>Start Date</th>
+					<th>Date</th>
+					<th>Time</th>
 					<th>Status</th>
 				</tr>
 			</thead>
@@ -54,8 +60,8 @@
 						<td>
 							<a href="{{href}}">{{lab.name}}</a>
 						</td>
-						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
-
+						<td>{{lab.startDateTime | date("d/m/y")}}</td>
+						<td>{{lab.startDateTime | date("h:i")}}</td>
 						<td>
 							{% if lab.startDateTime > currentDate %}
 								<span class="text-secondary">Inactive</span>
@@ -76,8 +82,13 @@
 
 {% macro studentTable(enrolmentRisks, courseInstance) %}
 	{% if enrolmentRisks %}
+		<div class="form-check mb-2">
+			<input type="checkbox" class="form-check-input" id="student-toggle">
+			<label class="form-check-label" for="student-toggle">Show only students needing support
+			</label>
+		</div>
 		<p>Click the student name to view a course summary for that student.</p>
-		<table id="lab-table" class="table table-sm">
+		<table id="student-table" class="table table-sm">
 			<thead>
 				<tr>
 					<th>Student</th>
@@ -197,4 +208,56 @@ riskThresholdNumberBox.oninput = setSliderFromNumberBox;
 
 setSliderFromNumberBox();
 	</script>
+
+	<script>
+		function filterOpenLabs(trs, col) {
+trs.forEach(tr => {
+tr.style.display = tr.children[col].textContent.trim() === 'Open' ? '' : 'none';
+});
+}
+
+function filterStudentsAtRisk(trs, col) {
+trs.forEach(tr => {
+tr.style.display = tr.children[col].innerHTML.trim() ? '' : 'none';
+});
+}
+
+function removeFilter(trs) {
+trs.forEach(tr => {
+tr.style.display = '';
+});
+}
+
+const flagColumn = 1;
+const studentToggle = document.getElementById('student-toggle');
+const studentTrs = document.querySelectorAll('#student-table tbody tr');
+
+
+studentToggle.onchange = function () {
+if (this.checked) {
+filterStudentsAtRisk(studentTrs, flagColumn);
+} else {
+removeFilter(studentTrs);
+}
+}
+
+studentToggle.checked = true;
+filterStudentsAtRisk(studentTrs, flagColumn);
+
+const statusColumn = 3;
+const labsToggle = document.getElementById('labs-toggle');
+const labsTrs = document.querySelectorAll('#labs-table tbody tr');
+
+labsToggle.onchange = function () {
+if (this.checked) {
+filterOpenLabs(labsTrs, statusColumn);
+} else {
+removeFilter(labsTrs);
+}
+}
+
+labsToggle.checked = true;
+filterOpenLabs(labsTrs, statusColumn);
+	</script>
+
 {% endblock %}

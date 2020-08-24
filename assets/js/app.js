@@ -16,6 +16,8 @@ import "@fortawesome/fontawesome-free/js/solid";
 import "@fortawesome/fontawesome-free/js/regular";
 import "@fortawesome/fontawesome-free/js/brands";
 
+import Tablesort from "tablesort";
+
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
 import $ from "jquery";
 
@@ -29,6 +31,11 @@ $(function() {
   $('[data-toggle="popover"]').popover();
 });
 
+// Make all tables sortable
+[...document.querySelectorAll("table")].forEach((table) => {
+  new Tablesort(table);
+});
+
 global.XYQuestionWidgetFactory = (el, props) => {
   return new Vue({
     el,
@@ -40,3 +47,5 @@ global.XYQuestionWidgetFactory = (el, props) => {
       }),
   });
 };
+
+// global.Tablesort = Tablesort;
