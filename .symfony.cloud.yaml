@@ -1,0 +1,52 @@
+name: check-in
+
+type: php:7.4
+
+relationships:
+  database: "mydatabase:postgresql"
+
+runtime:
+  extensions:
+    - apcu
+    - mbstring
+    - sodium
+    - ctype
+    - iconv
+    - pdo_pgsql
+
+build:
+  flavor: none
+
+web:
+  locations:
+    "/":
+      root: "public"
+      expires: 1h
+      passthru: "/index.php"
+
+disk: 512
+
+mounts:
+  "/var": { source: local, source_path: var }
+
+hooks:
+  build: |
+    set -x -e
+
+    curl -s https://get.symfony.com/cloud/configurator | (>&2 bash)
+
+    (>&2 symfony-build)
+
+  deploy: |
+    set -x -e
+
+    (>&2 symfony-deploy)
+
+timezone: Europe/London
+
+crons:
+  ts_task:
+    # every 5 minutes
+    # minimum interval https://symfony.com/doc/current/cloud/cookbooks/crons.html
+    spec: "*/5 * * * *"
+    cmd: croncape bin/console ts:run
