@@ -10,8 +10,8 @@ use Rewieer\TaskSchedulerBundle\Task\Schedule;
 
 class FlagStudentsTask extends AbstractScheduledTask
 {
-    const CRON_EXPRESSION = "*/2 * * * *";
-    const CRON_DESCRIPTION = "every 2 minutes";
+    const CRON_EXPRESSION = "*/5 * * * *";
+    const CRON_DESCRIPTION = "every 5 minutes";
 
     private $entityManager;
 
