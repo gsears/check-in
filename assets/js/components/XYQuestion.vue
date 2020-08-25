@@ -1,3 +1,10 @@
+<!-- XYQuestion.vue  -->
+<!-- Gareth Sears - 2493194S -->
+
+<!-- A javascript component in Vue.js that is used for displaying XY Questions. -->
+<!-- It allows region selecting (danger zones) and point selection, as well as -->
+<!-- displaying multiple points (with counts where points overlap.) -->
+
 <template>
   <div class="d-flex align-items-center">
     <div class>
@@ -44,6 +51,7 @@ export default {
   },
   props: {
     name: String,
+    // An array of point coordinates in the form {x: val, y: val}
     points: {
       type: Object,
       default: function () {
@@ -54,6 +62,7 @@ export default {
         };
       },
     },
+    // An array of regions, in the form {xMin: val, xMax: val, yMin: val, yMax: val}
     regions: {
       type: Object,
       default: function () {
@@ -64,6 +73,7 @@ export default {
         };
       },
     },
+    // Used to choose between read only as well as selecting points or regions
     mode: {
       type: String,
       default: "point",
@@ -74,6 +84,7 @@ export default {
         );
       },
     },
+    // The component is extendable, and can be used for greater / smaller grids
     xRanges: {
       default: 4,
     },
@@ -86,6 +97,7 @@ export default {
     yRangeLength: {
       default: 5,
     },
+    // Axis labels
     xLabelLow: {
       type: String,
       default: "xLow",
@@ -103,6 +115,7 @@ export default {
       default: "yHigh",
     },
   },
+  // Reactive data
   data() {
     return {
       dataPoints: [...this.points.data],
@@ -110,6 +123,7 @@ export default {
     };
   },
   methods: {
+    // Maths for calculating grids
     xMinVal(col) {
       return (
         (this.xRanges / 2) * (this.xRangeLength * -1) + col * this.xRangeLength
@@ -126,6 +140,7 @@ export default {
         (this.yRanges / 2) * this.yRangeLength - row * this.yRangeLength - 1
       );
     },
+    // Update the points in a region
     setPoints(xMin, xMax, yMin, yMax) {
       var points = this.points.filter((coordinates) => {
         return (
@@ -137,6 +152,7 @@ export default {
       });
       return points;
     },
+    // When a point is clicked
     handlePointChange(e) {
       if (this.mode === "point") {
         // If point is checked
@@ -158,6 +174,8 @@ export default {
         this.points.onChange([...this.dataPoints]);
       }
     },
+
+    // When a region is clicked
     handleRegionChange(e) {
       if (this.mode === "region") {
         const region = e.data;

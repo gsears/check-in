@@ -1,3 +1,10 @@
+<!-- XYQuestionRange.vue  -->
+<!-- Gareth Sears - 2493194S -->
+
+<!-- A single 'grid location' containing many cells. This is used to -->
+<!-- set 'danger zones' in the XYQuestion. The risk level cycles through -->
+<!-- 0-2 on click, where 1 is warning and 2 is danger. -->
+
 <template>
   <div class="range">
     <!-- Overlay region selector -->

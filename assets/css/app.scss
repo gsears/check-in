@@ -1,8 +1,12 @@
+/*
+app.scss
+Gareth Sears - 2493194S
+*/
+
+// The application styling, though most styling is done using pure bootstrap and utility classes.
+
 @import "~bootstrap/scss/bootstrap";
 @import "tables";
-// @import "~/bootstrap/scss/functions";
-// @import "~/bootstrap/scss/variables";
-// @import "~/bootstrap/scss/mixins/_breakpoints";
 
 .flex-form-collection {
 

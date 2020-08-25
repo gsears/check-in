@@ -39,7 +39,7 @@
 		<table id="labs-table" class="table table-sm">
 			<thead>
 				<tr>
-					<th>Lab</th>
+					<th data-sort-default>Lab</th>
 					<th>Date</th>
 					<th>Time</th>
 					<th>Status</th>
@@ -93,7 +93,7 @@
 				<tr>
 					<th>Student</th>
 					<th>Flag</th>
-					<th>When</th>
+					<th data-sort-default>When</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -116,14 +116,12 @@
 								{{student.user.fullname}}</a>
 						</td>
 						<td>
-							{% set flaggedAutomatically %}
-							<i class="fa fa-cog" aria-hidden="true"></i>
-							Flagged Automatically
-							{% endset %}
+
 							{% if enrolment.riskFlag %}
 								<span class="text-danger">
 									{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-										{{flaggedAutomatically}}
+										<i class="fa fa-cog" aria-hidden="true"></i>
+										Flagged Automatically
 									{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
 										<i class="fa fa-user" aria-hidden="true"></i>
 										Flagged by Instructor
@@ -135,7 +133,9 @@
 
 							{% else %}
 								{% if atRisk %}
-									<span class="text-secondary">{{flaggedAutomatically}}</span>
+									<span class="text-secondary">
+										<i class="fa fa-cog" aria-hidden="true"></i>
+										Will Be Flagged Automatically</span>
 								{% endif %}
 							{% endif %}
 
@@ -193,71 +193,27 @@
 {% block javascripts %}
 	{{parent()}}
 	<script>
-		const riskThresholdSlider = document.querySelector('#risk-threshold-form-group input[type=range]');
+		// Bind the slider input to the numberbox value
+const riskThresholdSlider = document.querySelector('#risk-threshold-form-group input[type=range]');
 const riskThresholdNumberBox = document.querySelector('#risk-threshold-form-group input[type=number]');
+bindInputs(riskThresholdNumberBox, riskThresholdSlider);
 
-const setSliderFromNumberBox = function () {
-riskThresholdSlider.value = riskThresholdNumberBox.value;
-}
-
-riskThresholdSlider.oninput = function () {
-riskThresholdNumberBox.value = riskThresholdSlider.value;
-};;
-
-riskThresholdNumberBox.oninput = setSliderFromNumberBox;
-
-setSliderFromNumberBox();
-	</script>
-
-	<script>
-		function filterOpenLabs(trs, col) {
-trs.forEach(tr => {
-tr.style.display = tr.children[col].textContent.trim() === 'Open' ? '' : 'none';
-});
-}
-
-function filterStudentsAtRisk(trs, col) {
-trs.forEach(tr => {
-tr.style.display = tr.children[col].innerHTML.trim() ? '' : 'none';
-});
-}
-
-function removeFilter(trs) {
-trs.forEach(tr => {
-tr.style.display = '';
-});
-}
-
+// Add checkbox filter to student table for only those students at risk
+const studentCheckbox = document.getElementById("student-toggle");
+const studentTable = document.getElementById("student-table");
 const flagColumn = 1;
-const studentToggle = document.getElementById('student-toggle');
-const studentTrs = document.querySelectorAll('#student-table tbody tr');
+filterTableWithCheckbox(studentTable, studentCheckbox, (tr) => { // If flag column has any content, display
+return tr.children[flagColumn].textContent.trim() !== '';
+})
 
-
-studentToggle.onchange = function () {
-if (this.checked) {
-filterStudentsAtRisk(studentTrs, flagColumn);
-} else {
-removeFilter(studentTrs);
-}
-}
-
-studentToggle.checked = true;
-filterStudentsAtRisk(studentTrs, flagColumn);
-
+// Add checkbox filter to labs table for only open labs
+const labsCheckbox = document.getElementById("labs-toggle");
+const labsTable = document.getElementById("labs-table");
 const statusColumn = 3;
-const labsToggle = document.getElementById('labs-toggle');
-const labsTrs = document.querySelectorAll('#labs-table tbody tr');
 
-labsToggle.onchange = function () {
-if (this.checked) {
-filterOpenLabs(labsTrs, statusColumn);
-} else {
-removeFilter(labsTrs);
-}
-}
-
-labsToggle.checked = true;
-filterOpenLabs(labsTrs, statusColumn);
+filterTableWithCheckbox(labsTable, labsCheckbox, (tr) => { // If status is open
+return tr.children[statusColumn].textContent.trim() === 'Open';
+})
 	</script>
 
 {% endblock %}

@@ -13,6 +13,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class RiskFlagType extends AbstractType
@@ -35,7 +36,7 @@ class RiskFlagType extends AbstractType
 
         if (is_null($flag)) {
             $builder
-                ->add(self::DESCRIPTION_INPUT, TextType::class, [
+                ->add(self::DESCRIPTION_INPUT, TextareaType::class, [
                     'mapped' => false,
                     'label' => '(Optional) description',
                     'required' => false
