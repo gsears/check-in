@@ -127,7 +127,7 @@ class AppFixtures extends Fixture
     const SENTIMENT_QUESTIONS = [
         "journal" => [
             "index" => 4,
-            "text" => "Reflect on the course so far. Think about:\n- Course Materials\n- Workload / Time Management\n- Communication with faculty\n- Coursework\n- Lectures",
+            "text" => "Reflect on the course so far. Think about Course Materials, Workload, Time Management, Communication with Faculty, Coursework, Lectures and anything else you want to communicate.",
         ]
     ];
 

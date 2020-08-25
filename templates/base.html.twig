@@ -19,20 +19,23 @@
 		<script type="text/javascript" src="{{asset('head.js')}}"></script>
 	</head>
 	<body>
-		<!-- Navigation -->
-		<nav class="navbar navbar-light bg-light shadow">
-			<div class="container">
-				<a class="navbar-brand" href="/">Check In</a>
-				<div class="ml-auto">
-					{% if app.user %}
-						<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
-					{% else %}
-						<a class="nav-link" href="{{path('app_login')}}">Login</a>
-					{% endif %}
+		{% block nav %}
+			<!-- Navigation -->
+			<nav class="navbar navbar-light bg-light shadow">
+				<div class="container">
+					<a class="navbar-brand" href="/">Check In</a>
+					<div class="ml-auto">
+						{% if app.user %}
+							<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
+						{% else %}
+							<a class="nav-link" href="{{path('app_login')}}">Login</a>
+						{% endif %}
 
+					</div>
 				</div>
-			</div>
-		</nav>
+			</nav>
+		{% endblock %}
+
 		<main class="container pt-4">
 			{% if breadcrumbArray is defined %}
 				{{breadcrumbs(breadcrumbArray)}}

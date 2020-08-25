@@ -59,7 +59,7 @@
 				{% for lab in labs %}
 					<tr>
 						<td>{{lab.name}}</td>
-						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+						<td>{{lab.startDateTime | date("d/m/y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						<td>
 							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
@@ -117,20 +117,22 @@
 
 {% macro instructorRiskFlag(enrolment, flagForm) %}
 	{% if enrolment.riskFlag %}
-		<p>
-			<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-			{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-				Automatically flagged
-			{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
-				Flagged by Instructor
-			{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT')  %}
-				Self flagged
-			{% endif %}
-		</p>
-		<p>
-			<i class="fa fa-calendar" aria-hidden="true"></i>
-			{{enrolment.riskFlagDateTime | date("d/m/y h:i")}}
-		</p>
+		<div class="text-danger">
+			<p>
+				<i class="fa fa-exclamation-triangle mr-2" aria-hidden="true"></i>
+				{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
+					Automatically flagged
+				{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
+					Flagged by Instructor
+				{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT')  %}
+					Self flagged
+				{% endif %}
+			</p>
+			<p>
+				<i class="fa fa-calendar mr-2" aria-hidden="true"></i>
+				{{enrolment.riskFlagDateTime | date("d/m/y h:i")}}
+			</p>
+		</div>
 
 		{% if is_granted(constant('App\\Security\\Roles::STUDENT')) %}
 			<p>Your instructors have been notified that you may require extra support for this course.</p>

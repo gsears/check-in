@@ -1,36 +1,63 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+	{{parent()}}
+	<style>
+		body {
+			background-color: var(--light);
+		}
+	</style>
+{% endblock %}
+
+
 {% block title %}Log in!
 {% endblock %}
 
+{% block nav %}
+	{# Remove nav for login #}
+{% endblock %}
+
 {% block body %}
-	<form method="post">
-		{% if error %}
-			<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-		{% endif %}
+	<div class="card mt-4">
 
-		{% if app.user %}
-			<div class="mb-3">
-				You are logged in as
-				{{ app.user.username }},
-				<a href="{{ path('app_logout') }}">Logout</a>
-			</div>
-		{% endif %}
+		<div class="card-body">
+			<h1 class="card-title display-4">Check In</h1>
+			<p class="card-text lead">A feedback tool to monitor progress in labs and assist instructors with providing support to students as fast as possible.</p>
+			<form method="post">
+				{% if error %}
+					<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+				{% endif %}
 
-		<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-		<label for="inputEmail">Email</label>
-		<input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" required autofocus>
-		<label for="inputPassword">Password</label>
-		<input type="password" name="password" id="inputPassword" class="form-control" required>
+				{% if app.user %}
+					<div class="mb-3">
+						You are logged in as
+						{{ app.user.username }},
+						<a href="{{ path('app_logout') }}">Logout</a>
+					</div>
+				{% endif %}
 
-		<input
-		type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+				<h1 class="h3 mb-3 font-weight-normal">Login with your university email</h1>
+				<div class="form-group">
+					<label for="inputEmail">Email</label>
+					<input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" required autofocus>
+				</div>
 
-		{# Redirect to courses on successful login #}
-		<input type="hidden" name="_target_path" value="{{path(constant('App\\Controller\\CourseController::COURSES_PAGE'))}}"/>
+				<div class="form-group">
+					<label for="inputPassword">Password</label>
+					<input type="password" name="password" id="inputPassword" class="form-control" required>
+				</div>
 
-		<button class="btn btn-lg btn-primary" type="submit">
-			Sign in
-		</button>
-	</form>
+				<input
+				type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+				{# Redirect to courses on successful login #}
+				<input type="hidden" name="_target_path" value="{{path(constant('App\\Controller\\CourseController::COURSES_PAGE'))}}"/>
+
+				<button class="btn btn-lg btn-primary" type="submit">
+					Sign in
+				</button>
+			</form>
+		</div>
+	</div>
+
 {% endblock %}

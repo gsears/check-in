@@ -38,7 +38,7 @@ class RiskFlagType extends AbstractType
             $builder
                 ->add(self::DESCRIPTION_INPUT, TextareaType::class, [
                     'mapped' => false,
-                    'label' => '(Optional) description',
+                    'label' => 'Add an optional description',
                     'required' => false
                 ])
                 ->add(self::MANUAL_FLAG_BUTTON, SubmitType::class, [
