@@ -33,7 +33,50 @@ $(function() {
   $('[data-toggle="popover"]').popover();
 });
 
-// Make all tables sortable
+/**
+ * Add custom sort function for tablesort
+ */
+
+const parseDateTime = (dateString) => {
+  dateString = dateString.trim();
+
+  const date = new Date();
+
+  // If a date exists, set it on the date object.
+  const dateMatch = dateString.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if (dateMatch) {
+    date.setDate(parseInt(dateMatch[1]));
+    date.setMonth(parseInt(dateMatch[2] - 1));
+
+    let yearString = dateMatch[3];
+
+    if (yearString.length == 2) {
+      yearString = "20" + yearString;
+    }
+    date.setYear(parseInt(yearString));
+  }
+
+  // If a time exists, set it on the date object.
+  const timeMatch = dateString.match(/(\d{1,2})[\:](\d{2})/);
+  if (timeMatch) {
+    date.setHours(parseInt(timeMatch[1]));
+    date.setMinutes(parseInt(timeMatch[2]));
+  }
+
+  return dateMatch || timeMatch ? date.getTime() : -1;
+};
+
+Tablesort.extend(
+  "datesort",
+  (item) => true,
+  (a, b) => {
+    return parseDateTime(b) - parseDateTime(a);
+  }
+);
+
+/**
+ * Make all tables sortable
+ */
 [...document.querySelectorAll("table")].forEach((table) => {
   new Tablesort(table);
 });

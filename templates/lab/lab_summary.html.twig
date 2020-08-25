@@ -23,7 +23,7 @@
 			<thead>
 				<tr>
 					<th scope="col">Student</th>
-					<th scope="col">Risk</th>
+					<th scope="col" data-sort-default>Risk</th>
 					<th scope="col"></th>
 				</tr>
 			</thead>
@@ -44,7 +44,7 @@
 								-
 								{{student.user.fullname}}</a>
 						</td>
-						<td>{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
+						<td data-sort="{{risk.weightedRiskFactor}}">{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
 						<td></td>
 					</tr>
 				{% endfor %}
