@@ -7,12 +7,16 @@ Gareth Sears - 2493194S
 
 namespace App\DataFixtures;
 
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 use Faker;
 use App\Entity\Lab;
 use App\Entity\Student;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Containers\XYCoordinates;
+use App\Entity\Instructor;
+use App\Entity\SentimentQuestion;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -120,6 +124,13 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const SENTIMENT_QUESTIONS = [
+        "journal" => [
+            "index" => 4,
+            "text" => "Reflect on the course so far. Think about:\n- Course Materials\n- Workload / Time Management\n- Communication with faculty\n- Coursework\n- Lectures",
+        ]
+    ];
+
     private $manager;
     private $faker;
     private $creator;
@@ -151,7 +162,7 @@ class AppFixtures extends Fixture
         $courses = $this->loadCourses();
 
         // Create course instances, assign instructors and students
-        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents);
+        $courseInstancesAndEnrolments = $this->loadCourseInstances($courses, $allInstructors, $allStudents, $testStudent, $testInstructor);
         $courseInstances = $courseInstancesAndEnrolments['courseInstances'];
 
         $enrolements = $courseInstancesAndEnrolments['enrolments'];
@@ -162,8 +173,11 @@ class AppFixtures extends Fixture
         // Create XY questions
         $xyQuestions = $this->loadXYQuestions($affectiveFields);
 
+        // Create Sentiment questions
+        $sentimentQuestions = $this->loadSentimentQuestions();
+
         // Create lab surveys
-        $labs = $this->loadLabs($courseInstances, $xyQuestions);
+        $labs = $this->loadLabs($courseInstances, $xyQuestions, $sentimentQuestions);
 
         // Create lab xy responses
         $completedLabResponses = $this->loadLabResponses($courseInstances);
@@ -245,7 +259,7 @@ class AppFixtures extends Fixture
         return $courses;
     }
 
-    private function loadCourseInstances(array $courses, array $instructors, array $students): array
+    private function loadCourseInstances(array $courses, array $instructors, array $students, Student $testStudent, Instructor $testInstructor): array
     {
         $courseInstances = [];
 
@@ -302,10 +316,17 @@ class AppFixtures extends Fixture
             // Each student is enrolled on 4-5 courses
             // Note: at present this may be the same course for 2 terms in a row. Woo!
             for ($i = 0; $i < rand(4, 5); $i++) {
+                $courseInstance = $coursesForStudents[$i];
                 $enrolment = $this->creator->createEnrolment(
                     $student,
-                    $coursesForStudents[$i]
+                    $courseInstance
                 );
+
+                // Ensure the test user is always taught by the test instructor for testing
+                if ($student === $testStudent) {
+                    $courseInstance->addInstructor($testInstructor);
+                }
+
                 $enrolments[] = $enrolment;
             }
         }
@@ -351,7 +372,23 @@ class AppFixtures extends Fixture
         return $xyQuestions;
     }
 
-    public function loadLabs(array $courseInstances, array $xyQuestions): array
+    public function loadSentimentQuestions(): array
+    {
+        $sentimentQuestions = [];
+
+        foreach (self::SENTIMENT_QUESTIONS as $name => $props) {
+            $sentimentQuestion = $this->creator->createSentimentQuestion(
+                $name,
+                $props['text'],
+            );
+
+            $sentimentQuestions[$name] = $sentimentQuestion;
+        }
+
+        return $sentimentQuestions;
+    }
+
+    public function loadLabs(array $courseInstances, array $xyQuestions, array $sentimentQuestions): array
     {
         $labs = [];
 
@@ -386,7 +423,7 @@ class AppFixtures extends Fixture
 
                     // With one basic danger zone as default
                     $dangerZone = $this->creator->createLabXYQuestionDangerZone(
-                        2,
+                        SurveyQuestionResponseRisk::LEVEL_DANGER,
                         -10,
                         -6,
                         -10,
@@ -396,12 +433,39 @@ class AppFixtures extends Fixture
 
                     // And one warning zone
                     $warningZone = $this->creator->createLabXYQuestionDangerZone(
-                        1,
+                        SurveyQuestionResponseRisk::LEVEL_WARNING,
                         -10,
                         -6,
                         -5,
                         -1,
                         $labXYQuestion
+                    );
+                }
+
+                // Add stock sentiment questions to each lab instance
+                foreach ($sentimentQuestions as $name => $sentimentQuestion) {
+                    $labSentimentQuestion = $this->creator->createLabSentimentQuestion(
+                        self::SENTIMENT_QUESTIONS[$name]['index'],
+                        $sentimentQuestion,
+                        $lab
+                    );
+
+                    // Warning zones as below
+                    $dangerZone = $this->creator->createLabSentimentQuestionDangerZone(
+                        SurveyQuestionResponseRisk::LEVEL_DANGER,
+                        SentimentQuestion::NEGATIVE,
+                        0.5,
+                        1.0,
+                        $labSentimentQuestion
+                    );
+
+                    // Warning zones as below
+                    $warningZone = $this->creator->createLabSentimentQuestionDangerZone(
+                        SurveyQuestionResponseRisk::LEVEL_WARNING,
+                        SentimentQuestion::NEGATIVE,
+                        0.0,
+                        0.5,
+                        $labSentimentQuestion
                     );
                 }
 
@@ -424,6 +488,12 @@ class AppFixtures extends Fixture
         return $labs;
     }
 
+    /**
+     * Note: TODO: sentiment question responses are added.
+     *
+     * @param [type] $courseInstances
+     * @return void
+     */
     public function loadLabResponses($courseInstances)
     {
         $completedResponses = [];

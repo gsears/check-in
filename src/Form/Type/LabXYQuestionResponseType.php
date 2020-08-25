@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabXYQuestionResponseType extends SurveyQuestionResponseType
 {
-    public function buildFormBody(FormBuilderInterface $builder): FormBuilderInterface
+    public function buildFormBody(FormBuilderInterface $builder, array $options): FormBuilderInterface
     {
         // Get the data so we can query it for its XY Question
         $xyQuestionResponse = $builder->getData();
@@ -38,8 +38,8 @@ class LabXYQuestionResponseType extends SurveyQuestionResponseType
                 'label' => $xyQuestion->getQuestionText(),
                 'help' => sprintf(
                     'Click on the grid to select a response. The x axis represents %s. The y axis represents %s.',
-                    $xyQuestion->getXField()->getName(),
-                    $xyQuestion->getYField()->getName()
+                    $xField->getName(),
+                    $yField->getName()
                 ),
                 'x_label_low' => $xField->getLowLabel(),
                 'x_label_high' => $xField->getHighLabel(),
@@ -49,5 +49,12 @@ class LabXYQuestionResponseType extends SurveyQuestionResponseType
             ]);
 
         return $builder;
+    }
+
+    public function getOptionDefaults(): array
+    {
+        return [
+            'data_class' => LabXYQuestionResponse::class,
+        ];
     }
 }

@@ -3,13 +3,14 @@
 namespace App\Entity;
 
 use App\Containers\Bound;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 use App\Repository\LabXYQuestionDangerZoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=LabXYQuestionDangerZoneRepository::class)
  */
-class LabXYQuestionDangerZone
+class LabXYQuestionDangerZone implements SurveyQuestionDangerZoneInterface
 {
     /**
      * @ORM\Id()
@@ -76,6 +77,10 @@ class LabXYQuestionDangerZone
 
     public function setRiskLevel(int $riskLevel): self
     {
+        if (!SurveyQuestionResponseRisk::isValidRiskLevel($riskLevel)) {
+            throw new \InvalidArgumentException($riskLevel . " is not a valid risk level. See SurveyQuestionResponseRisk constants.", 1);
+        }
+
         $this->riskLevel = $riskLevel;
 
         return $this;

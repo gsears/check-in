@@ -1,35 +1,61 @@
-{% extends "course/courses_base.html.twig" %}
+{% extends "column_template.html.twig" %}
 
-{% block course_list %}
-	<table id="course-list" class="table table-sm">
-		<thead>
-			<tr>
-				<th>Start</th>
-				<th>End</th>
-				<th>Name</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for courseInstance in courseInstances %}
-				{% set href = path('view_course_student_summary', {
-        courseId: courseInstance.course.code,
-        instanceIndex: courseInstance.indexInCourse,
-        studentId: studentId
-    }) %}
-				<tr>
-					<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
-					<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
-					<td>
-						<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
-					</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+{% block header %}
+	<h1>My Courses</h1>
+	<p class="lead">These are the courses that you are enrolled on.</p>
 {% endblock %}
 
-{% block recent_labs_list %}
+{% block first_column %}
+	<h2>My Courses</h2>
+	{{_self.studentCoursesTable(courseInstances, studentId)}}
+{% endblock %}
+
+{% block second_column %}
+	<h2>Recent Pending Lab Surveys</h2>
+	{{_self.recentPendingLabSurveys(recentLabs, studentId)}}
+{% endblock %}
+
+{% macro studentCoursesTable(courseInstances, studentId) %}
+	{% if courseInstances %}
+		<p class="text-secondary">Click the links under 'name' to view your summary for that course.</p>
+		<table id="course-list" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Start</th>
+					<th>End</th>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for courseInstance in courseInstances %}
+
+					{% set href = path(
+					constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+					{
+						courseId: courseInstance.course.code,
+						instanceIndex: courseInstance.indexInCourse,
+						studentId: studentId
+					}
+				) %}
+
+					<tr>
+						<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
+						<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
+						<td>
+							<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>You are not enrolled in any courses.</p>
+	{% endif %}
+{% endmacro %}
+
+{% macro recentPendingLabSurveys(recentLabs, studentId) %}
 	{% if recentLabs %}
+		<p class="text-secondary">Click the links under 'lab' to complete your progress survey for that lab.</p>
 		<table id="recent-pending-lab-list" class="table table-sm">
 			<thead>
 				<tr>
@@ -58,6 +84,6 @@
 			</tbody>
 		</table>
 	{% else %}
-		No recent labs...
+		<p>No pending lab surveys to complete.</p>
 	{% endif %}
-{% endblock %}
+{% endmacro %}

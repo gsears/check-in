@@ -1,0 +1,47 @@
+{% set isWarning = riskLevel == constant('App\\Containers\\Risk\\SurveyQuestionResponseRisk::LEVEL_WARNING') %}
+{% set isDanger = riskLevel == constant('App\\Containers\\Risk\\SurveyQuestionResponseRisk::LEVEL_DANGER') %}
+
+{% set badgeClass %}
+{% if isWarning %}
+	badge-warning
+{% elseif isDanger %}
+	badge-danger
+{% endif %}
+{% endset %}
+
+{% set buttonClass %}
+{% if isWarning %}
+	btn-warning
+{% elseif isDanger %}
+	btn-danger
+{% else %}
+	btn-light
+{% endif %}
+{% endset %}
+
+{% set title %}
+Question
+{{questionIndex}}
+{% if isWarning or isDanger %}
+	<span class='ml-2 badge badge-pill {{badgeClass}}'>
+		Risk Weight:
+		{{weightedRiskLevel}}
+	</span>
+{% endif %}
+{% endset %}
+
+{% set content %}
+<h4 class='h6'>{{questionName}}</h4>
+<p>
+	<small>{{questionText}}</small>
+</p>
+{% block info %}{% endblock %}
+{% endset %}
+
+<a tabindex="0" class="btn btn-sm {{buttonClass}}" role="button" data-toggle="popover" data-html="true" data-trigger="focus hover" title="{{title}}" data-content="{{content}}">
+	{% block icon %}
+		&nbsp;
+	{% endblock %}
+
+	<span class="ml-2">{{questionIndex}}</span>
+</a>

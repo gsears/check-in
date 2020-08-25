@@ -1,12 +1,8 @@
-{% macro weightedRiskToTrafficLights(weightedRisks) %}
-	{% if weightedRisks %}
-		{% for risk in weightedRisks %}
-			{% if risk == constant('App\\Containers\\LabResponseRisk::WEIGHT_WARNING') %}
-				<span class="badge badge-pill badge-warning">&nbsp;</span>
-			{% endif %}
-			{% if risk == constant('App\\Containers\\LabResponseRisk::WEIGHT_DANGER') %}
-				<span class="badge badge-pill badge-danger">&nbsp;</span>
-			{% endif %}
+{% macro surveyQuestionResponseRisksToTrafficLights(surveyQuestionResponseRisks) %}
+	{% if surveyQuestionResponseRisks %}
+		{% for risk in surveyQuestionResponseRisks %}
+			{# See  \twig\AppExtension #}
+			{{risk(risk)}}
 		{% endfor %}
 	{% else %}
 		<span class="text-success">
@@ -16,7 +12,7 @@
 {% endmacro %}
 
 {% macro instructorCardList(instructors) %}
-	<div id="instructor-card-list" class="card">
+	<div id="instructor-card-list" class="card mb-4">
 		<h2 class="card-header h5">
 			Course Instructors
 		</h2>
@@ -37,5 +33,33 @@
 				No instructors teach on this course.
 			</p>
 		{% endif %}
+	</div>
+{% endmacro %}
+
+{% macro breadcrumbs(breadcrumbs) %}
+	<nav class="breadcrumb bg-white	border-bottom">
+		{% for breadcrumb in breadcrumbs %}
+			{% if breadcrumb.href is defined %}
+				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
+			{% else %}
+				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
+			{% endif %}
+		{% endfor %}
+	</nav>
+{% endmacro %}
+
+{% macro responseKey() %}
+	<div class="card my-4 border-left-0 border-right-0">
+		<div class="card-body p-1">
+			<h4 class="h6 d-inline-block mb-0 ml-2">Response Key:</h4>
+			<ul class="list-inline d-inline-block ml-4 mb-0">
+				<li class="list-inline-item">
+					<i class="fa {{global_xy_icon}}" aria-hidden="true"></i>
+					- XY Question</li>
+				<li class="list-inline-item">
+					<i class="fa {{global_sentiment_icon}}" aria-hidden="true"></i>
+					- Sentiment Question</li>
+			</ul>
+		</div>
 	</div>
 {% endmacro %}

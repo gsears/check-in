@@ -1,0 +1,19 @@
+{% extends "risk_summary/response.html.twig" %}
+
+{% block icon %}
+	<i class="fa {{global_xy_icon}}" aria-hidden="true"></i>
+{% endblock %}
+
+{% block info %}
+	<h4 class='h6'>XY Response</h4>
+	<ul>
+		<li>
+			<span>{{xFieldName}}:</span>
+			{{xResponseValue}}
+		</li>
+		<li>
+			<span>{{yFieldName}}:</span>
+			{{yResponseValue}}
+		</li>
+	</ul>
+{% endblock %}

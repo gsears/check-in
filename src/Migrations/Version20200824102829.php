@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200803170430 extends AbstractMigration
+final class Version20200824102829 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,8 +22,7 @@ final class Version20200803170430 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('ALTER TABLE enrolment ADD risk_flag INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE enrolment ADD risk_flag_date_time TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL');
+        $this->addSql('ALTER TABLE enrolment ADD risk_reason TEXT DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -32,7 +31,6 @@ final class Version20200803170430 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('ALTER TABLE enrolment DROP risk_flag');
-        $this->addSql('ALTER TABLE enrolment DROP risk_flag_date_time');
+        $this->addSql('ALTER TABLE enrolment DROP risk_reason');
     }
 }

@@ -3,26 +3,37 @@
 namespace App\Repository;
 
 use App\Entity\LabXYQuestionResponse;
-use App\Containers\LabResponseRisk;
-use App\Entity\SurveyQuestionResponseInterface;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Config\Definition\Exception\InvalidTypeException;
+use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\LabXYQuestionResponseRisk;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+
 
 /**
  * @method LabXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabXYQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
- * @method LabXYQuestionResponse[]    findAll()
+ * @method LabXYQuestionRespons e[]    findAll()
  * @method LabXYQuestionResponse[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class LabXYQuestionResponseRepository extends ServiceEntityRepository implements SurveyQuestionResponseRepositoryInterface
 {
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, LabXYQuestionResponse::class);
     }
 
-    public function getRiskLevel(SurveyQuestionResponseInterface $xyQuestionResponse): int
+    /**
+     * Returns the SurveyQuestionResponseRisk object for this type of question.
+     *
+     * It essentially checks if the responses are within the danger zones associated with
+     * the XYQuestion, and gives them the appropriate risk level if they are.
+     *
+     * @param SurveyQuestionResponseInterface $questionResponse
+     * @return SurveyQuestionResponseRisk
+     */
+    public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $questionResponse): SurveyQuestionResponseRisk
     {
         $entityManager = $this->getEntityManager();
 
@@ -31,24 +42,26 @@ class LabXYQuestionResponseRepository extends ServiceEntityRepository implements
             FROM App\Entity\LabXyQuestionResponse xyr
             JOIN xyr.labXYQuestion xyq
             JOIN xyq.dangerZones dz
-            WHERE xyr = :xyResponse AND
+            WHERE xyr = :questionResponse AND
                 dz.xMin <= xyr.xValue AND
                 dz.xMax >= xyr.xValue AND
                 dz.yMin <= xyr.yValue AND
                 dz.yMax >= xyr.yValue'
-        )->setParameter('xyResponse', $xyQuestionResponse);
+        )->setParameter('questionResponse', $questionResponse);
 
         try {
-            $riskLevel = $query->getSingleScalarResult();
+            $labXYQuestionResponseRisk = new LabXYQuestionResponseRisk(
+                $query->getSingleScalarResult(),
+                $questionResponse
+            );
         } catch (\Doctrine\ORM\NoResultException $e) {
             //  No result, so we know there is no risk.
-            return LabResponseRisk::WEIGHT_NONE;
+            $labXYQuestionResponseRisk = new LabXYQuestionResponseRisk(
+                SurveyQuestionResponseRisk::LEVEL_NONE,
+                $questionResponse
+            );
         }
 
-        if (!in_array($riskLevel, LabResponseRisk::getRiskLevels())) {
-            throw new InvalidTypeException("Invalid risk level fetched: " . $riskLevel, 1);
-        }
-
-        return $riskLevel;
+        return $labXYQuestionResponseRisk;
     }
 }

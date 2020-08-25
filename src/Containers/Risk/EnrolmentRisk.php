@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Containers;
+namespace App\Containers\Risk;
 
 /*
 CourseInstanceRisk.php
 Gareth Sears - 2493194S
 */
 
-use App\Containers\LabResponseRisk;
 use App\Entity\Enrolment;
 
 class EnrolmentRisk
@@ -18,14 +17,16 @@ class EnrolmentRisk
             $riskFactorA = $a->getAverageRiskFactor();
             $riskFactorB = $b->getAverageRiskFactor();
 
-            if ($riskFactorA > $riskFactorB) {
+            if ($riskFactorA < $riskFactorB) {
                 return 1;
-            } else if ($riskFactorA < $riskFactorB) {
+            } else if ($riskFactorA > $riskFactorB) {
                 return -1;
             } else {
                 return 0;
             }
         });
+
+        return $enrolmentRisks;
     }
 
     private $labResponseRisks;
@@ -47,32 +48,32 @@ class EnrolmentRisk
         return $this->labResponseRisks;
     }
 
-    public function getAverageRiskFactor(): int
+    public function getAverageRiskFactor(): float
     {
-        $risks = array_map(function (LabResponseRisk $labResponseRisk) {
-            return $labResponseRisk->getRiskFactor();
-        }, $this->labResponseRisks);
-
-        if (count($risks) === 0) {
-            return 0;
+        if (count($this->labResponseRisks) === 0) {
+            return 0.0;
         }
 
-        return array_sum($risks) / count($risks);
+        $risks = array_map(function (LabResponseRisk $labResponseRisk) {
+            return $labResponseRisk->getWeightedRiskFactor();
+        }, $this->labResponseRisks);
+
+        return array_sum($risks) / (float) count($risks);
     }
 
-    public function areAllRisksAbove(int $riskFactor): bool
+    public function isAtRisk(): bool
+    {
+        return $this->areAllRisksAbove($this->enrolment->getCourseInstance()->getRiskThreshold());
+    }
+
+    public function areAllRisksAbove(float $riskFactor): bool
     {
         foreach ($this->labResponseRisks as $labResponseRisk) {
-            if ($labResponseRisk->getRiskFactor() < $riskFactor) {
+            if ($labResponseRisk->getWeightedRiskFactor() < $riskFactor) {
                 return false;
             }
         }
 
         return true;
-    }
-
-    public function flagStudent()
-    {
-        $this->enrolment->setRiskFlag(Enrolment::FLAG_AUTOMATIC);
     }
 }

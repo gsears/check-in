@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\CourseInstance;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -13,16 +14,24 @@ class RiskSettingsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $name = $builder->getName();
         $builder
-            ->add('riskThreshold', RangeType::class, [
-                'label' => 'Risk Threshold %',
+            ->add('riskThreshold', NumberType::class, [
+                'label' => 'Set risk threshold %',
+                'html5' => true,
                 'attr' => [
                     'min' => 0,
                     'max' => 100
                 ],
-                'help' => 'Slide to adjust the risk threshold for automatically detecting students at risk.',
             ])
-            ->add('riskConsecutiveLabCount')
+            ->add('riskConsecutiveLabCount', NumberType::class, [
+                'label' => 'For how many consecutive labs?',
+                'html5' => true,
+                'attr' => [
+                    'min' => 0,
+                    'max' => 100
+                ],
+            ])
             ->add('submit', SubmitType::class);
     }
 

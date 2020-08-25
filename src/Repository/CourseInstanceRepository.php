@@ -1,11 +1,16 @@
 <?php
 
-namespace App\Repository;
+/*
+CourseInstanceRepository.php
+Gareth Sears - 2493194S
+*/
 
-use App\Containers\EnrolmentRisk;
+namespace App\Repository;;
+
 use App\Entity\Course;
 use App\Entity\CourseInstance;
 use App\Provider\DateTimeProvider;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,17 +22,17 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CourseInstanceRepository extends ServiceEntityRepository
 {
-    private $labResponseRepo;
-
-    public function __construct(ManagerRegistry $registry, LabResponseRepository $labResponseRepo)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CourseInstance::class);
-        $this->labResponseRepo = $labResponseRepo;
     }
 
-    public function findAllActive()
+    public function findAllActive(?DateTime $currentDate = null)
     {
-        $currentDate = (new DateTimeProvider)->getCurrentDateTime();
+        if (!$currentDate) {
+            $currentDate = (new DateTimeProvider)->getCurrentDateTime();
+        }
+
         return $this->createQueryBuilder('ci')
             ->andWhere('ci.startDate <= :currentDate')
             ->andWhere('ci.endDate >= :currentDate')
@@ -69,29 +74,30 @@ class CourseInstanceRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findIfMatchesCourse($id, $courseId)
-    {
-        return $this->createQueryBuilder('ci')
-            ->join('ci.course', 'c')
-            ->andWhere('ci = :id')
-            ->setParameter('id', $id)
-            ->andWhere('c = :courseId')
-            ->setParameter('courseId', $courseId)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
-
-    public function findByIndexAndCourse($instanceIndex, $courseId): CourseInstance
+    /**
+     * Find a course instance by its course and its instance index number
+     *
+     * @param integer $instanceIndex
+     * @param integer $courseCode
+     * @return CourseInstance
+     */
+    public function findByIndexAndCourseCode(int $instanceIndex, string $courseCode): ?CourseInstance
     {
         return $this->createQueryBuilder('ci')
             ->andWhere('ci.indexInCourse = :instanceIndex')
             ->setParameter('instanceIndex', $instanceIndex)
             ->andWhere('ci.course = :courseId')
-            ->setParameter('courseId', $courseId)
+            ->setParameter('courseId', $courseCode)
             ->getQuery()
             ->getOneOrNullResult();
     }
 
+    /**
+     * Find the next available index for a course instance in a course.
+     *
+     * @param Course $course
+     * @return integer
+     */
     public function getNextIndexInCourse(Course $course): int
     {
         $max = $this->createQueryBuilder('ci')
@@ -104,6 +110,13 @@ class CourseInstanceRepository extends ServiceEntityRepository
         return $max + 1;
     }
 
+    /**
+     * Check if a course instance exists in a course with the matching index.
+     *
+     * @param integer $index
+     * @param Course $course
+     * @return boolean
+     */
     public function indexExistsInCourse(int $index, Course $course): bool
     {
         return $index < $this->getNextIndexInCourse($course);

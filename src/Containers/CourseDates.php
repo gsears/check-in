@@ -18,8 +18,9 @@ class CourseDates
     public function __construct(DateTime $startDate, DateTime $endDate)
     {
 
-        if ($startDate > $endDate) {
-            throw new InvalidArgumentException("Start date must be before end date", 1);
+        // == because we don't want to check for object equality, just value.
+        if ($startDate > $endDate || $startDate == $endDate) {
+            throw new InvalidArgumentException("Start date must be at least 1 day before end date", 1);
         }
 
         $this->startDate = $startDate;

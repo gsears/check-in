@@ -1,14 +1,17 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# services.yaml
+# Gareth Sears - 2493194S
+# Adapted from symfony default
 
-# Put parameters here that don't need to change on each machine where the app is deployed
+# Parameters are here which don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+# Specifically, the monkeylearn API key
 parameters:
+  app.monkeylearn_api_key: "%env(MONKEYLEARN_API_KEY)%"
+  app.monkeylearn_model_id: "%env(MONKEYLEARN_MODEL_ID)%"
 
 services:
-  # default configuration for services in *this* file
   _defaults:
-    autowire: true # Automatically injects dependencies in your services.
+    autowire: true # Automatically injects dependencies into services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
   # makes classes in src/ available to be used as services
@@ -23,8 +26,8 @@ services:
     resource: "../src/Controller"
     tags: ["controller.service_arguments"]
 
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
+  # EXPLICIT SERVICE DEFINITIONS
 
+  # Sets FlagStudentsTask as a cron job
   App\Task\FlagStudentsTask:
     tags: ["ts.task"]

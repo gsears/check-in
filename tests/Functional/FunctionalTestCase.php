@@ -1,5 +1,10 @@
 <?php
 
+/*
+FunctionalTestCase.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Tests\Functional;
 
 use App\DataFixtures\EntityCreator;

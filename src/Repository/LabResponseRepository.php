@@ -8,9 +8,9 @@ Gareth Sears - 2493194S
 namespace App\Repository;
 
 use App\Entity\LabResponse;
-use App\Containers\LabResponseRisk;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Containers\Risk\LabResponseRisk;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method LabResponse|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,10 +26,11 @@ class LabResponseRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return LabResponse Returns a single lab response object.
+     * Gets the lab response for a given student and lab.
+     *
+     * @return LabResponse
      */
-
-    public function findOneByLabAndStudent($lab, $student)
+    public function findOneByLabAndStudent($lab, $student): ?LabResponse
     {
         return $this->createQueryBuilder('l')
             ->andWhere('l.student = :student')
@@ -41,7 +42,12 @@ class LabResponseRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findCompletedByCourseInstanceAndStudent($courseInstance, $student)
+    /**
+     * Gets all completed surveys for a student in a given course instance.
+     *
+     * @return LabResponse[]
+     */
+    public function findCompletedByCourseInstanceAndStudent($courseInstance, $student): array
     {
         return $this->createQueryBuilder('r')
             ->join('r.lab', 'l')
@@ -55,15 +61,29 @@ class LabResponseRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getRiskForResponse(LabResponse $labResponse)
+    /**
+     * Returns a LabResponseRisk container object for a given lab response. This contains
+     * all the SurveyQuestionResponse risks and other helper functions for working with
+     * student risks.
+     *
+     * @param LabResponse The lab response for which to calculate risks.
+     * @return LabResponseRisk
+     */
+    public function getLabResponseRisk(LabResponse $labResponse)
     {
-        $riskLevels = $labResponse->getQuestionResponses()->map(
+        $surveyQuestionResponseRisks = $labResponse->getQuestionResponses()->map(
             function ($question) {
+                /**
+                 * Dynamically get the correct respository for the question response. The shared
+                 * interface guarantees a method which returns the response risk object for that
+                 * question.
+                 * @var SurveyQuestionResponseRepository
+                 */
                 $surveyQuestionRepo = $this->getEntityManager()->getRepository(get_class($question));
-                return $surveyQuestionRepo->getRiskLevel($question);
+                return $surveyQuestionRepo->getSurveyQuestionResponseRisk($question);
             }
         )->toArray();
 
-        return new LabResponseRisk($riskLevels, $labResponse);
+        return new LabResponseRisk($surveyQuestionResponseRisks, $labResponse);
     }
 }

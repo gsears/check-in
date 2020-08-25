@@ -2,8 +2,8 @@
 
 namespace App\Repository;
 
-use App\Entity\Lab;
 use App\Entity\SurveyQuestionResponseInterface;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
 
 interface SurveyQuestionResponseRepositoryInterface
 {
@@ -12,8 +12,7 @@ interface SurveyQuestionResponseRepositoryInterface
      * assigned to the response.
      *
      * @param SurveyQuestionResponseInterface $question
-     * @param Lab $lab
      * @return int The risk weight assigned to the response
      */
-    public function getRiskLevel(SurveyQuestionResponseInterface $question): int;
+    public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $question): SurveyQuestionResponseRisk;
 }

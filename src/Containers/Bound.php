@@ -17,7 +17,12 @@ class Bound
     private $lowBound;
     private $highBound;
 
-    public function __construct(int $low, int $high)
+    /**
+     *
+     * @param int|float $low
+     * @param int|float $high
+     */
+    public function __construct($low, $high)
     {
         if ($low > $high) {
             throw new InvalidArgumentException("Low bound must be < High bound", 1);

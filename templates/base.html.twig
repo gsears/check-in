@@ -1,3 +1,5 @@
+{% from 'macros.html.twig' import breadcrumbs %}
+
 {% set _title = block('title') %}
 
 <!DOCTYPE html>
@@ -20,7 +22,7 @@
 		<!-- Navigation -->
 		<nav class="navbar navbar-light bg-light shadow">
 			<div class="container">
-				<a class="navbar-brand" href="#">Check In</a>
+				<a class="navbar-brand" href="/">Check In</a>
 				<div class="ml-auto">
 					{% if app.user %}
 						<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
@@ -31,10 +33,15 @@
 				</div>
 			</div>
 		</nav>
-		<main class="container pt-4"> {% block body %}{% endblock %}
-			</main>
-			{% block javascripts %}
-				{{ encore_entry_script_tags('app') }}
-			{% endblock %}
-		</body>
-	</html>
+		<main class="container pt-4">
+			{% if breadcrumbArray is defined %}
+				{{breadcrumbs(breadcrumbArray)}}
+			{% endif %}
+
+			{% block body %}{% endblock %}
+		</main>
+		{% block javascripts %}
+			{{ encore_entry_script_tags('app') }}
+		{% endblock %}
+	</body>
+</html>

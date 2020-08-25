@@ -1,34 +1,60 @@
-{% extends "course/courses_base.html.twig" %}
+{% extends "column_template.html.twig" %}
 
-{% block course_list %}
-	<table id="course-list" class="table table-sm">
-		<thead>
-			<tr>
-				<th>Start</th>
-				<th>End</th>
-				<th>Name</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for courseInstance in courseInstances %}
-				{% set href = path('view_course_summary', {
-        courseId: courseInstance.course.code,
-        instanceIndex: courseInstance.indexInCourse
-    }) %}
-				<tr>
-					<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
-					<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
-					<td>
-						<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
-					</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+{% block header %}
+	<h1>My Courses</h1>
+	<p class="lead">These are the courses that you instruct.</p>
 {% endblock %}
 
-{% block recent_labs_list %}
+{% block first_column %}
+	<h2>My Courses</h2>
+	{{_self.instructorCoursesTable(courseInstances)}}
+{% endblock %}
+
+{% block second_column %}
+	<h2>Recent Labs</h2>
+	{{_self.recentLabsTable(recentLabs)}}
+{% endblock %}
+
+{% macro instructorCoursesTable(courseInstances) %}
+	{% if courseInstances %}
+		<p class="text-secondary">Click the links under 'name' to view summaries for that course.</p>
+		<table id="course-list" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Start</th>
+					<th>End</th>
+					<th>Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for courseInstance in courseInstances %}
+
+					{% set href = path(
+					constant('App\\Controller\\CourseController::COURSE_SUMMARY_PAGE'),
+					{
+						courseId: courseInstance.course.code,
+						instanceIndex: courseInstance.indexInCourse
+					}
+				) %}
+
+					<tr>
+						<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
+						<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
+						<td>
+							<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No courses to display.</p>
+	{% endif %}
+{% endmacro %}
+
+{% macro recentLabsTable(recentLabs) %}
 	{% if recentLabs %}
+		<p class="text-secondary">Click the links under 'lab' to view summaries for that lab.</p>
 		<table id="recent-lab-list" class="table table-sm">
 			<thead>
 				<tr>
@@ -39,11 +65,14 @@
 			</thead>
 			<tbody>
 				{% for lab in recentLabs %}
-					{% set href = path('view_lab_summary', {
-        courseId: lab.courseInstance.course.code,
-        instanceIndex: lab.courseInstance.indexInCourse,
-        labSlug: lab.slug
-    }) %}
+					{% set href = path(
+						constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+						{
+							courseId: lab.courseInstance.course.code,
+							instanceIndex: lab.courseInstance.indexInCourse,
+							labSlug: lab.slug
+    					}
+					) %}
 					<tr>
 						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
 						<td>{{lab.courseInstance.course.name}}</td>
@@ -55,6 +84,6 @@
 			</tbody>
 		</table>
 	{% else %}
-		No recent labs...
+		<p>No recent labs to display.</p>
 	{% endif %}
-{% endblock %}
+{% endmacro %}

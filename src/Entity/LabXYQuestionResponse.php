@@ -42,7 +42,7 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
     private $labXYQuestion;
 
     /**
-     * @ORM\ManyToOne(targetEntity=LabResponse::class, inversedBy="xyQuestionResponses")
+     * @ORM\ManyToOne(targetEntity=LabResponse::class, inversedBy="labXYQuestionResponses")
      */
     private $labResponse;
 
@@ -110,5 +110,10 @@ class LabXYQuestionResponse implements SurveyQuestionResponseInterface
         $this->labResponse = $labResponse;
 
         return $this;
+    }
+
+    public function getSurveyQuestion(): SurveyQuestionInterface
+    {
+        return $this->labXYQuestion;
     }
 }

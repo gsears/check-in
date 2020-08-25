@@ -1,3 +1,10 @@
+<!-- XYQuestionCell.vue  -->
+<!-- Gareth Sears - 2493194S -->
+
+<!-- A checkbox 'cell', which is used to display whether the box is checked -->
+<!-- as well as a 'count' if the box contains many 'checks' (for displaying -->
+<!-- class results). -->
+
 <template>
   <div class="wrapper">
     <input

@@ -27,8 +27,12 @@ use App\Entity\AffectiveField;
 use App\Entity\CourseInstance;
 use App\Containers\CourseDates;
 use App\Containers\XYCoordinates;
+use App\Entity\LabSentimentQuestion;
+use App\Entity\LabSentimentQuestionResponse;
 use App\Entity\LabXYQuestionResponse;
 use App\Entity\LabXYQuestionDangerZone;
+use App\Entity\SentimentQuestion;
+use App\Entity\LabSentimentQuestionDangerZone;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -185,6 +189,25 @@ final class EntityCreator
         return $this->save($labXYQuestion);
     }
 
+    public function createSentimentQuestion(string $name, string $questionText): SentimentQuestion
+    {
+        $sentimentQuestion = (new SentimentQuestion())
+            ->setName($name)
+            ->setQuestionText($questionText);
+
+        return $this->save($sentimentQuestion);
+    }
+
+    public function createLabSentimentQuestion(int $index, SentimentQuestion $sentimentQuestion, Lab $lab): LabSentimentQuestion
+    {
+        $labSentimentQuestion = (new LabSentimentQuestion())
+            ->setIndex($index)
+            ->setSentimentQuestion($sentimentQuestion)
+            ->setLab($lab);
+
+        return $this->save($labSentimentQuestion);
+    }
+
     public function createLabResponse(bool $submitted, Student $student, Lab $lab): LabResponse
     {
         $labResponse = (new LabResponse())
@@ -214,5 +237,28 @@ final class EntityCreator
             ->setLabXYQuestion($question);
 
         return $this->save($labXYQuestionDangerZone);
+    }
+
+    public function createLabSentimentQuestionResponse(string $text, string $classification, float $confidence, LabSentimentQuestion $question, LabResponse $response): LabSentimentQuestionResponse
+    {
+        $sentimentResponse = (new LabSentimentQuestionResponse())
+            ->setText($text)
+            ->setClassification($classification)
+            ->setConfidence($confidence)
+            ->setLabSentimentQuestion($question)
+            ->setLabResponse($response);
+
+        return  $this->save($sentimentResponse);
+    }
+
+    public function createLabSentimentQuestionDangerZone(int $riskLevel, string $classification, float $confidenceMin, float $confidenceMax, LabSentimentQuestion $question): LabSentimentQuestionDangerZone
+    {
+        $labSentimentQuestionDangerZone = (new LabSentimentQuestionDangerZone)
+            ->setRiskLevel($riskLevel)
+            ->setConfidenceBound(new Bound($confidenceMin, $confidenceMax))
+            ->setClassification($classification)
+            ->setLabSentimentQuestion($question);
+
+        return $this->save($labSentimentQuestionDangerZone);
     }
 }

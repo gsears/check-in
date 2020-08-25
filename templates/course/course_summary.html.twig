@@ -1,4 +1,4 @@
-{% extends "base.html.twig" %}
+{% extends "sidebar_template.html.twig" %}
 
 {% from 'macros.html.twig' import instructorCardList %}
 
@@ -7,140 +7,213 @@
 	{{courseInstance.course.code}}
 {% endblock %}
 
-{% block body %}
-	<header class="mb-4">
-		<h1>{{courseInstance.course.code}}
-			-
-			{{courseInstance.course.name}}</h1>
-		<p>{{courseInstance.startDate | date('d/m/Y')}}
-			-
-			{{courseInstance.endDate | date('d/m/Y')}}</p>
-	</header>
+{% block header %}
+	<h1>{{courseInstance.course.code}}
+		-
+		{{courseInstance.course.name}}</h1>
+	<p>{{courseInstance.startDate | date('d/m/Y')}}
+		-
+		{{courseInstance.endDate | date('d/m/Y')}}</p>
+{% endblock %}
 
-	<div class="row mb-4">
-		<div class="col-md-8 order-2 order-md-1 mt-4">
-			<h2>Students at Risk</h2>
-			{{_self.studentsAtRiskTable(studentsAtRisk)}}
-		</div>
-		<div class="col-md-4 order-1 order-md-2 mt-4">
-			<div class="card">
-				<h2 class="card-header h5">Risk Settings</h4>
-				<div class="card-body">
-					<p class="card-text">Set the risk here</p>
-					{{form(riskSettingsForm)}}
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row mb-4">
-			<div class="col-md-8 mt-4">
-				<h2>Labs</h2>
-				{{_self.labTable(labs, currentDate)}}
-			</div>
-			<div class="col-md-4 mt-4">
-				{{instructorCardList(courseInstance.instructors)}}
-			</div>
-		</div>
+{% block main %}
+	<h2>Students</h2>
+	{{_self.studentTable(enrolmentRisks, courseInstance)}}
+	<h2>Labs</h2>
+	{{_self.labTable(labs, currentDate)}}
+{% endblock %}
 
-	{% endblock %}
+{% block sidebar %}
+	{{_self.riskSettings(riskSettingsForm)}}
+	{{instructorCardList(courseInstance.instructors)}}
+{% endblock %}
 
-	{% macro labTable(labs, currentDate) %}
-		{% if labs %}
-			<table id="lab-table" class="table table-sm">
-				<thead>
+{% macro labTable(labs, currentDate) %}
+	{% if labs %}
+		<div class="form-check mb-2">
+			<input type="checkbox" class="form-check-input" id="labs-toggle">
+			<label class="form-check-label" for="labs-toggle">Show only open labs
+			</label>
+		</div>
+		<p>Click the lab name to view a summary of that lab's survey responses.</p>
+		<table id="labs-table" class="table table-sm">
+			<thead>
+				<tr>
+					<th data-sort-default>Lab</th>
+					<th>Date</th>
+					<th>Time</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for lab in labs %}
+					{% set courseInstance = lab.courseInstance %}
+					{% set href = path(
+						constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+						{
+							courseId: courseInstance.course.code,
+							instanceIndex: courseInstance.indexInCourse,
+							labSlug: lab.slug
+						}
+					) %}
 					<tr>
-						<th>Start Date</th>
-						<th>Name</th>
-						<th>Status</th>
-						<th></th>
+						<td>
+							<a href="{{href}}">{{lab.name}}</a>
+						</td>
+						<td>{{lab.startDateTime | date("d/m/y")}}</td>
+						<td>{{lab.startDateTime | date("h:i")}}</td>
+						<td>
+							{% if lab.startDateTime > currentDate %}
+								<span class="text-secondary">Inactive</span>
+							{% else %}
+								<span class="text-success">Open</span>
+							{% endif %}
+						</td>
+
 					</tr>
-				</thead>
-				<tbody>
-					{% for lab in labs %}
-						{% set courseInstance = lab.courseInstance %}
-						{% set href = path('view_lab_summary', {
-        courseId: courseInstance.course.code,
-        instanceIndex: courseInstance.indexInCourse,
-        labSlug: lab.slug
-    }) %}
-						<tr>
-							<td>{{lab.startDateTime | date("d/m/Y")}}</td>
-							<td>
-								{{lab.name}}
-							</td>
-							<td>
-								{% if lab.startDateTime > currentDate %}
-									<span class="text-secondary">Inactive</span>
-								{% else %}
-									<span class="text-success">Open</span>
-								{% endif %}
-							</td>
-							<td class="text-right">
-								<a class="btn btn-info btn-sm" href="{{href}}">View</a>
-							</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% else %}
-			No labs in course.
-		{% endif %}
-	{% endmacro %}
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No labs in course.</p>
+	{% endif %}
+{% endmacro %}
 
 
-	{% macro studentsAtRiskTable(enrolmentRisks) %}
-		{% if enrolmentRisks %}
-			<table id="lab-table" class="table table-sm">
-				<thead>
+{% macro studentTable(enrolmentRisks, courseInstance) %}
+	{% if enrolmentRisks %}
+		<div class="form-check mb-2">
+			<input type="checkbox" class="form-check-input" id="student-toggle">
+			<label class="form-check-label" for="student-toggle">Show only students needing support
+			</label>
+		</div>
+		<p>Click the student name to view a course summary for that student.</p>
+		<table id="student-table" class="table table-sm">
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Flag</th>
+					<th data-sort-default>When</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for enrolmentRisk in enrolmentRisks %}
+					{% set enrolment = enrolmentRisk.enrolment %}
+					{% set student = enrolment.student %}
+					{% set href = path(
+						constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+						{
+							courseId: courseInstance.course.code,
+							instanceIndex: courseInstance.indexInCourse,
+							studentId: student.guid
+						}
+					) %}
+					{% set atRisk =  enrolmentRisk.isAtRisk %}
 					<tr>
-						<th>Student</th>
-						<th>Average Risk Factor</th>
-						<th>Flag</th>
-						<th>When</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for enrolmentRisk in enrolmentRisks %}
-						{% set enrolment = enrolmentRisk.enrolment %}
-						{% set student = enrolment.student %}
-						{% set courseInstance = enrolment.courseInstance %}
-						{% set href = path('view_course_student_summary', {
-        courseId: courseInstance.course.code,
-        instanceIndex: courseInstance.indexInCourse,
-        studentId: student.guid
-    }) %}
-						<tr>
-							<td>
-								<a href="{{href}}">{{student.guid}}
-									-
-									{{student.user.fullname}}</a>
-							</td>
-							<td>
-								<span class="text-danger">{{enrolmentRisk.averageRiskFactor}}%</span>
-							</td>
-							<td>
-								{% if enrolment.riskFlag %}
+						<td>
+							<a href="{{href}}">{{student.guid}}
+								-
+								{{student.user.fullname}}</a>
+						</td>
+						<td>
+
+							{% if enrolment.riskFlag %}
+								<span class="text-danger">
 									{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-										<span class="text-danger">Flagged Automatically</span>
+										<i class="fa fa-cog" aria-hidden="true"></i>
+										Flagged Automatically
+									{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
+										<i class="fa fa-user" aria-hidden="true"></i>
+										Flagged by Instructor
+									{% elseif enrolment.riskFlag ==  constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT') %}
+										<i class="fa fa-user" aria-hidden="true"></i>
+										Self flagged
 									{% endif %}
-								{% else %}
-									<span class="text-secondary">-</span>
-								{% endif %}
+								</span>
 
-							</td>
-							<td>
-								{% if enrolment.riskFlagDateTime %}
-									{{enrolment.riskFlagDateTime | date('d/m/Y H:i')}}
-								{% else %}
+							{% else %}
+								{% if atRisk %}
+									<span class="text-secondary">
+										<i class="fa fa-cog" aria-hidden="true"></i>
+										Will Be Flagged Automatically</span>
+								{% endif %}
+							{% endif %}
+
+						</td>
+						<td>
+							{% if enrolment.riskFlagDateTime %}
+								{{enrolment.riskFlagDateTime | date('d/m/Y H:i')}}
+							{% else %}
+								{% if atRisk %}
 									<span class="text-secondary">Scheduled</span>
 								{% endif %}
-							</td>
+							{% endif %}
+						</td>
 
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% else %}
-			No students found to be at risk.
-		{% endif %}
-	{% endmacro %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<p>No students enrolled.</p>
+	{% endif %}
+{% endmacro %}
+
+{% macro riskSettings(riskSettingsForm) %}
+
+	{% set riskFactorTooltip %}
+	<a href="#" data-trigger="focus hover" data-toggle="popover" title="Risk factor" data-content="Each affective survey question can have one or more 'danger zones'. If a student's response falls into the 'warning' or 'danger zone' bounds for that question, it is assigned that zone's risk value. A student's risk factor is the sum of the student's response risks for a lab survey, divided by the maximum possible risk value for that lab as a percentage.">risk factor</a>
+	{% endset %}
+
+	<div class="card mb-4">
+		<h2 class="card-header h5">Risk Settings</h4>
+		<div class="card-body">
+			<p class="card-text">
+				<small>Students at risk are those with a
+					{{riskFactorTooltip}}
+					above the threshold % for X consecutive labs.</small>
+			</p>
+
+			{{ form_start(riskSettingsForm) }}
+			<div id="risk-threshold-form-group" class="form-group">
+				<label class="my-1 mr-2" for="riskThresholdSlider">Set risk threshold %</label>
+				<input class="form-control" type="range" name="riskThresholdSlider" id="riskThresholdSlider">
+				{{ form_widget(riskSettingsForm.riskThreshold) }}
+			</div>
+
+			{{ form_row(riskSettingsForm.riskConsecutiveLabCount)}}
+			{{form_row(riskSettingsForm.submit)}}
+
+			{{ form_end(riskSettingsForm)}}
+
+		</div>
+	</div>
+{% endmacro %}
+
+{% block javascripts %}
+	{{parent()}}
+	<script>
+		// Bind the slider input to the numberbox value
+const riskThresholdSlider = document.querySelector('#risk-threshold-form-group input[type=range]');
+const riskThresholdNumberBox = document.querySelector('#risk-threshold-form-group input[type=number]');
+bindInputs(riskThresholdNumberBox, riskThresholdSlider);
+
+// Add checkbox filter to student table for only those students at risk
+const studentCheckbox = document.getElementById("student-toggle");
+const studentTable = document.getElementById("student-table");
+const flagColumn = 1;
+filterTableWithCheckbox(studentTable, studentCheckbox, (tr) => { // If flag column has any content, display
+return tr.children[flagColumn].textContent.trim() !== '';
+})
+
+// Add checkbox filter to labs table for only open labs
+const labsCheckbox = document.getElementById("labs-toggle");
+const labsTable = document.getElementById("labs-table");
+const statusColumn = 3;
+
+filterTableWithCheckbox(labsTable, labsCheckbox, (tr) => { // If status is open
+return tr.children[statusColumn].textContent.trim() === 'Open';
+})
+	</script>
+
+{% endblock %}

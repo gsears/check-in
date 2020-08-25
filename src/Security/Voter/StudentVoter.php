@@ -1,26 +1,36 @@
 <?php
 
+/*
+StudentVoter.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Security\Voter;
 
 use App\Entity\Instructor;
 use App\Entity\Student;
 use App\Entity\User;
+use App\Repository\InstructorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * A voter class which controls access to Student specific pages / information based on the user
+ * and their roles.
+ */
 class StudentVoter extends Voter
 {
     const VIEW = "STUDENT_VIEW";
     const EDIT = "STUDENT_EDIT";
 
-    private $entityManager;
+    private $instructorRepository;
 
     // Inject instructor repo as a dependency
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(InstructorRepository $instructorRepository)
     {
-        $this->entityManager = $entityManager;
+        $this->instructorRepository = $instructorRepository;
     }
 
     protected function supports($attribute, $subject)
@@ -52,15 +62,14 @@ class StudentVoter extends Voter
 
     private function canView(Student $student, User $user)
     {
-         // If they can edit, they can view
-         if ($this->canEdit($student, $user)) {
+        // If they can edit, they can view
+        if ($this->canEdit($student, $user)) {
             return true;
         }
 
         // Instructors of that student can view
-        if($instructor = $user->getInstructor()) {
-            $instructors = $this->entityManager
-                ->getRepository(Instructor::class)
+        if ($instructor = $user->getInstructor()) {
+            $instructors = $this->instructorRepository
                 ->findByStudent($student);
 
             return in_array($instructor, $instructors);

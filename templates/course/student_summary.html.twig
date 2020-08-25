@@ -1,23 +1,47 @@
-{% extends "course/course_instance_base.html.twig" %}
+{% extends "sidebar_template.html.twig" %}
 
-{% from 'macros.html.twig' import weightedRiskToTrafficLights %}
+{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights, instructorCardList, responseKey %}
 
-{% block content %}
-	<h2>{{student.guid}}-{{student.user.fullname}}</h2>
-	{{_self.instructorList(courseInstance.instructors)}}
-	{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student)}}
-	{{_self.completedLabTable("completed labs", completedLabsWithRisk, courseInstance, student)}}
+{% block header %}
+	{% set courseHeaderText %}
+	{{courseInstance.course.code}}
+	-
+	{{courseInstance.course.name}}
+	{% endset %}
+
+	{% set courseDates %}
+	{{courseInstance.startDate | date('d/m/Y')}}
+	-
+	{{courseInstance.endDate | date('d/m/Y')}}
+	{% endset %}
+
+	{% if is_granted(constant('App\\Security\\Roles::INSTRUCTOR')) %}
+		<h1>{{student.guid}}-{{student.user.fullname}}</h1>
+		<p class="h4">{{courseHeaderText}}</p>
+		<p>{{courseDates}}</p>
+	{% else %}
+		<h1>{{courseHeaderText}}</h1>
+		<p>{{courseDates}}</p>
+	{% endif %}
+
 {% endblock %}
 
+{% block main %}
+	{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student)}}
+	{{_self.completedLabTable("completed labs", completedLabResponseRisks, courseInstance, student)}}
+{% endblock %}
 
-{% macro instructorList(instructors) %}
-	<h2>Instructors</h2>
-	<ul>
-		{% for instructor in instructors %}
-			<li>{{instructor.user.fullname}}</li>
-		{% endfor %}
-	</ul>
-{% endmacro %}
+{% block sidebar %}
+	<div class="card  mb-4">
+		<h2 class="card-header h5">
+			Support Status
+		</h2>
+		<div class="card-body">
+			{{_self.instructorRiskFlag(enrolment, flagForm)}}
+		</div>
+	</div>
+	{{instructorCardList(courseInstance.instructors)}}
+{% endblock %}
 
 {% macro pendingLabTable(title, labs, courseInstance, student) %}
 	<h2>Pending Lab Surveys</h2>
@@ -51,34 +75,37 @@
 	{% endif %}
 {% endmacro %}
 
-{% macro completedLabTable(title, labsWithRisk, courseInstance, student) %}
+{% macro completedLabTable(title, completedLabResponseRisks, courseInstance, student) %}
 	<h2>Completed Lab Surveys</h2>
-	{% if labsWithRisk %}
+
+	{% if completedLabResponseRisks %}
+		{{responseKey()}}
 		<table class="table">
 			<thead>
 				<tr>
 					<th scope="col">Lab Name</th>
 					<th scope="col">Date</th>
 					<th scope="col">Start Time</th>
-					<th scope="col">Risk</th>
-					<th scope="col"></th>
+					<th scope="col">Responses</th>
+					<th scope="col">Risk Factor</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for labWithRisk in labsWithRisk %}
-					{% set lab = labWithRisk.lab %}
+				{% for labResponseRisk in completedLabResponseRisks %}
+					{% set lab = labResponseRisk.labResponse.lab %}
 					<tr>
 						<td>{{lab.name}}</td>
-						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
+						<td>{{lab.startDateTime | date("d/m/y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						{# From Macros #}
-						<td>{{weightedRiskToTrafficLights(labWithRisk.weightedRisks)}}</td>
+						<td>{{surveyQuestionResponseRisksToTrafficLights(labResponseRisk.surveyQuestionResponseRisks)}}</td>
 						<td>
-							{# TODO: CHANGE LINK #}
-							<a class="btn btn-secondary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
-								View Response
-							</a>
+							{% if labResponseRisk.weightedRiskFactor > 0 %}
+								{{labResponseRisk.weightedRiskFactor | number_format(0, '.', ',')}}%
+							{% endif %}
 						</td>
+
+						<td></td>
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -87,3 +114,47 @@
 		No pending labs to complete.
 	{% endif %}
 {% endmacro %}
+
+{% macro instructorRiskFlag(enrolment, flagForm) %}
+	{% if enrolment.riskFlag %}
+		<p>
+			<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+			{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
+				Automatically flagged
+			{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
+				Flagged by Instructor
+			{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT')  %}
+				Self flagged
+			{% endif %}
+		</p>
+		<p>
+			<i class="fa fa-calendar" aria-hidden="true"></i>
+			{{enrolment.riskFlagDateTime | date("d/m/y h:i")}}
+		</p>
+
+		{% if is_granted(constant('App\\Security\\Roles::STUDENT')) %}
+			<p>Your instructors have been notified that you may require extra support for this course.</p>
+		{% else %}
+			<p>This student may require extra support.</p>
+		{% endif %}
+
+
+		<h3 class="h5">Reason:</h3>
+
+		{% if enrolment.riskReason %}
+			<p>{{enrolment.riskReason}}</p>
+		{% else %}
+			<p class="text-secondary">No reason given.</p>
+		{% endif %}
+
+		{{form(flagForm)}}
+			{% else %}
+				<h2 class="h4">
+					{% if is_granted(constant('App\\Security\\Roles::STUDENT')) %}
+						Do you need extra support in this course?
+					{% else %}
+						Manually Flag For Support
+					{% endif %}
+				</h2>
+				{{form(flagForm)}}{% endif %}
+		{% endmacro %}

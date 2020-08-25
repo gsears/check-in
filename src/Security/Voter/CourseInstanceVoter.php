@@ -1,5 +1,10 @@
 <?php
 
+/*
+CourseInstanceVoter.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Security\Voter;
 
 use App\Entity\CourseInstance;
@@ -9,6 +14,10 @@ use App\Security\Roles;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
+/**
+ * A voter class which controls access to Course Instance pages / information based on the user
+ * and their roles.
+ */
 class CourseInstanceVoter extends Voter
 {
     const VIEW = 'COURSEINSTANCE_VIEW';

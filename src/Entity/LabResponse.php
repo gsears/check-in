@@ -45,7 +45,12 @@ class LabResponse
     /**
      * @ORM\OneToMany(targetEntity=LabXYQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true, cascade={"persist"})
      */
-    private $xyQuestionResponses;
+    private $labXYQuestionResponses;
+
+    /**
+     * @ORM\OneToMany(targetEntity=LabSentimentQuestionResponse::class, mappedBy="labResponse", orphanRemoval=true)
+     */
+    private $labSentimentQuestionResponses;
 
     /**
      * @ORM\Column(type="boolean")
@@ -54,7 +59,8 @@ class LabResponse
 
     public function __construct()
     {
-        $this->xyQuestionResponses = new ArrayCollection();
+        $this->labXYQuestionResponses = new ArrayCollection();
+        $this->labSentimentQuestionResponses = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -63,7 +69,7 @@ class LabResponse
             "%s's response for %s ():\n%s\n",
             $this->getStudent()->getGuid(),
             $this->getLab()->getName(),
-            join("", $this->getXYQuestionResponses()->toArray())
+            join("", $this->getLabXYQuestionResponses()->toArray())
         );
     }
 
@@ -123,28 +129,59 @@ class LabResponse
     /**
      * @return Collection|LabXYQuestionResponse[]
      */
-    public function getXYQuestionResponses(): Collection
+    public function getLabXYQuestionResponses(): Collection
     {
-        return $this->xyQuestionResponses;
+        return $this->labXYQuestionResponses;
     }
 
-    public function addXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
+    public function addLabXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
-        if (!$this->xyQuestionResponses->contains($xyQuestionResponse)) {
-            $this->xyQuestionResponses[] = $xyQuestionResponse;
+        if (!$this->labXYQuestionResponses->contains($xyQuestionResponse)) {
+            $this->labXYQuestionResponses[] = $xyQuestionResponse;
             $xyQuestionResponse->setLabResponse($this);
         }
 
         return $this;
     }
 
-    public function removeXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
+    public function removeLabXYQuestionResponse(LabXYQuestionResponse $xyQuestionResponse): self
     {
-        if ($this->xyQuestionResponses->contains($xyQuestionResponse)) {
-            $this->xyQuestionResponses->removeElement($xyQuestionResponse);
+        if ($this->labXYQuestionResponses->contains($xyQuestionResponse)) {
+            $this->labXYQuestionResponses->removeElement($xyQuestionResponse);
             // set the owning side to null (unless already changed)
             if ($xyQuestionResponse->getLabResponse() === $this) {
                 $xyQuestionResponse->setLabResponse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|LabSentimentQuestionResponse[]
+     */
+    public function getLabSentimentQuestionResponses(): Collection
+    {
+        return $this->labSentimentQuestionResponses;
+    }
+
+    public function addLabSentimentQuestionResponse(LabSentimentQuestionResponse $labSentimentQuestionResponse): self
+    {
+        if (!$this->labSentimentQuestionResponses->contains($labSentimentQuestionResponse)) {
+            $this->labSentimentQuestionResponses[] = $labSentimentQuestionResponse;
+            $labSentimentQuestionResponse->setLabResponse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabSentimentQuestionResponse(LabSentimentQuestionResponse $labSentimentQuestionResponse): self
+    {
+        if ($this->labSentimentQuestionResponses->contains($labSentimentQuestionResponse)) {
+            $this->labSentimentQuestionResponses->removeElement($labSentimentQuestionResponse);
+            // set the owning side to null (unless already changed)
+            if ($labSentimentQuestionResponse->getLabResponse() === $this) {
+                $labSentimentQuestionResponse->setLabResponse(null);
             }
         }
 
@@ -180,6 +217,10 @@ class LabResponse
      */
     public function getQuestionResponses(): Collection
     {
-        return $this->getXYQuestionResponses();
+        // Merge question responses
+        return new ArrayCollection(array_merge(
+            $this->labXYQuestionResponses->toArray(),
+            $this->labSentimentQuestionResponses->toArray()
+        ));
     }
 }

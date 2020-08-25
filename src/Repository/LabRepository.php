@@ -2,16 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Course;
-use App\Entity\CourseInstance;
-use App\Entity\Instructor;
-use App\Entity\Lab;
-use App\Entity\LabResponse;
-use App\Entity\Student;
-use App\Provider\DateTimeProvider;
 use DateTime;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\Lab;
+use App\Entity\Course;
+use App\Entity\Student;
+use App\Entity\Instructor;
+use App\Entity\LabResponse;
+use App\Entity\CourseInstance;
+use App\Provider\DateTimeProvider;
+use App\Containers\Risk\LabResponseRisk;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Lab|null find($id, $lockMode = null, $lockVersion = null)
@@ -131,36 +132,28 @@ class LabRepository extends ServiceEntityRepository
      * Returns risk for students who have completed lab surveys.
      *
      * @param Lab $lab
-     * @return void
+     * @return LabResponseRisk[]
      */
-    public function findStudentsAtRiskByLab(Lab $lab)
+    public function getLabResponseRisks(Lab $lab)
     {
+        /**
+         * @var LabResponseRepository
+         */
         $responseRepo = $this->getEntityManager()->getRepository(LabResponse::class);
 
-        $riskCollection = $lab->getResponses()
+        // Get the labResponseRisks for each submitted survey response
+        // array_values resets numbering after filter for sorting
+        $labResponseRisks = array_values($lab->getResponses()
             ->filter(function (LabResponse $response) {
                 return $response->getSubmitted();
             })
             ->map(function ($response) use ($responseRepo) {
-                return $responseRepo->getRiskForResponse($response);
-            });
+                return $responseRepo->getLabResponseRisk($response);
+            })
+            ->toArray());
 
-        $riskArray = $riskCollection->toArray();
 
         // Order by highest risk
-        uasort($riskArray, function ($a, $b) {
-            $riskFactorA = $a->getRiskFactor();
-            $riskFactorB = $b->getRiskFactor();
-
-            if ($riskFactorA > $riskFactorB) {
-                return -1;
-            } else if ($riskFactorA < $riskFactorB) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-
-        return $riskArray;
+        return LabResponseRisk::sortByWeightedRiskFactor($labResponseRisks);
     }
 }

@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
 class Enrolment
 {
     const FLAG_AUTOMATIC = 1;
+    const FLAG_BY_INSTRUCTOR = 2;
+    const FLAG_BY_STUDENT = 3;
+
 
     /**
      * @ORM\Id()
@@ -41,6 +44,11 @@ class Enrolment
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $riskFlagDateTime;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $riskReason;
 
     public function __toString(): string
     {
@@ -85,15 +93,20 @@ class Enrolment
         return $this->riskFlag;
     }
 
-    public function setRiskFlag(?int $riskFlag): self
+    public function setRiskFlag(int $riskFlag, ?string $riskReason = null): self
     {
         $this->riskFlag = $riskFlag;
+        $this->riskFlagDateTime = new DateTime();
+        $this->riskReason = $riskReason;
 
-        if (is_null($riskFlag)) {
-            $this->riskFlagDateTime = null;
-        } else {
-            $this->riskFlagDateTime = new DateTime();
-        }
+        return $this;
+    }
+
+    public function removeRiskFlag(): self
+    {
+        $this->riskFlag = null;
+        $this->riskFlagDateTime = null;
+        $this->riskReason = null;
 
         return $this;
     }
@@ -101,5 +114,10 @@ class Enrolment
     public function getRiskFlagDateTime(): ?\DateTime
     {
         return $this->riskFlagDateTime;
+    }
+
+    public function getRiskReason(): ?string
+    {
+        return $this->riskReason;
     }
 }
