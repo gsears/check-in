@@ -1,5 +1,10 @@
+$background-color: $white;
+$border-color: $gray-800;
+$border-width: 1px;
+
 .shepherd-element {
-    background: #fff;
+    background: $background-color;
+    border: $border-width solid $border-color;
     border-radius: 5px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
     max-width: 400px;
@@ -40,23 +45,43 @@
 .shepherd-arrow:before {
     content: "";
     transform: rotate(45deg);
-    background: #fff
+    background: $background-color;
 }
 
 .shepherd-element[data-popper-placement^=top]>.shepherd-arrow {
-    bottom: -8px
+    bottom: -8px;
+
+    &::before {
+        border-bottom: $border-width solid $border-color;
+        border-right: $border-width solid $border-color;
+    }
 }
 
 .shepherd-element[data-popper-placement^=bottom]>.shepherd-arrow {
-    top: -8px
+    top: -8px;
+
+    &::before {
+        border-top: $border-width solid $border-color;
+        border-left: $border-width solid $border-color;
+    }
 }
 
 .shepherd-element[data-popper-placement^=left]>.shepherd-arrow {
-    right: -8px
+    right: -8px;
+
+    &::before {
+        border-top: $border-width solid $border-color;
+        border-right: $border-width solid $border-color;
+    }
 }
 
 .shepherd-element[data-popper-placement^=right]>.shepherd-arrow {
-    left: -8px
+    left: -8px;
+
+    &::before {
+        border-bottom: $border-width solid $border-color;
+        border-left: $border-width solid $border-color;
+    }
 }
 
 .shepherd-element.shepherd-centered>.shepherd-arrow {
@@ -111,6 +136,10 @@
     padding: 0 .75rem .75rem
 }
 
+.shepherd-button {
+    margin-right: 1rem;
+}
+
 .shepherd-footer .shepherd-button:last-child {
     margin-right: 0
 }
@@ -143,36 +172,6 @@
 
 .shepherd-text p:last-child {
     margin-bottom: 0
-}
-
-.shepherd-button {
-    background: #3288e6;
-    border: 0;
-    border-radius: 3px;
-    color: hsla(0, 0%, 100%, .75);
-    cursor: pointer;
-    margin-right: .5rem;
-    padding: .5rem 1.5rem;
-    transition: all .5s ease
-}
-
-.shepherd-button:not(:disabled):hover {
-    background: #196fcc;
-    color: hsla(0, 0%, 100%, .75)
-}
-
-.shepherd-button.shepherd-button-secondary {
-    background: #f1f2f3;
-    color: rgba(0, 0, 0, .75)
-}
-
-.shepherd-button.shepherd-button-secondary:not(:disabled):hover {
-    background: #d6d9db;
-    color: rgba(0, 0, 0, .75)
-}
-
-.shepherd-button:disabled {
-    cursor: not-allowed
 }
 
 .shepherd-cancel-icon {
@@ -208,3 +207,4 @@
     margin: 0;
     padding: 0
 }
+
