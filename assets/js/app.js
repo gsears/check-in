@@ -25,6 +25,49 @@ import "@fortawesome/fontawesome-free/js/brands";
 import Shepherd from "shepherd.js";
 // Make global for use in templates that need it (most of them!)
 global.Shepherd = Shepherd;
+// Mixin functions to create tour step buttons
+global.firstTourStep = (tour, opts) => {
+  tour.addStep({
+    buttons: [{
+      text: 'Next',
+      action: tour.next,
+      classes: 'btn btn-small btn-primary',
+    }],
+    ...opts, 
+  })
+}
+
+global.tourStep = (tour, opts) => {
+  tour.addStep({
+    buttons: [{
+      text: 'Previous',
+      action: tour.back,
+      classes: 'btn btn-small btn-secondary',
+    },
+    {
+      text: 'Next',
+      action: tour.next,
+      classes: 'btn btn-small btn-primary',
+    }],
+    ...opts, 
+  })
+}
+
+global.finalTourStep = (tour, opts) => {
+  tour.addStep({
+    buttons: [{
+      text: 'Previous',
+      action: tour.back,
+      classes: 'btn btn-small btn-secondary',
+    },
+    {
+      text: 'Finish',
+      action: tour.next,
+      classes: 'btn btn-small btn-success',
+    }],
+    ...opts, 
+  })
+}
 
 // Tablesort library
 // https://github.com/tristen/tablesort
@@ -110,36 +153,3 @@ global.XYQuestionWidgetFactory = (el, props) => {
   });
 };
 
-/**
- * Used to allow a checkbox to filter table rows using a particular predicate function.
- * @param {HTMLElement} tableElement
- * @param {HTMLElement} checkboxElement
- * @param {function} filterPredicate, in the form (tr) => {} where tr is the table row
- */
-global.filterTableWithCheckbox = (
-  tableElement,
-  checkboxElement,
-  filterPredicate
-) => {
-  const trs = tableElement.querySelectorAll("tbody tr");
-
-  const filterFunction = () => {
-    trs.forEach((tr) => {
-      tr.style.display = filterPredicate(tr) ? "" : "none";
-    });
-  };
-
-  checkboxElement.onchange = function() {
-    if (this.checked) {
-      filterFunction();
-    } else {
-      trs.forEach((tr) => {
-        tr.style.display = "";
-      });
-    }
-  };
-
-  // Initialise
-  filterFunction();
-  checkboxElement.checked = true;
-};
