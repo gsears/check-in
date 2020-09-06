@@ -27,8 +27,12 @@ class LabXYQuestionResponseRisk extends SurveyQuestionResponseRisk
 
         return [
             'xFieldName' => $xAffectiveField->getName(),
+            'xLowLabel' => $xAffectiveField->getLowLabel(),
+            'xHighLabel' => $xAffectiveField->getHighLabel(),
             'xResponseValue' => $surveyQuestionResponse->getXValue(),
             'yFieldName' => $yAffectiveField->getName(),
+            'yLowLabel' => $yAffectiveField->getLowLabel(),
+            'yHighLabel' => $yAffectiveField->getHighLabel(),
             'yResponseValue' =>  $surveyQuestionResponse->getYValue(),
         ];
     }

@@ -9,11 +9,21 @@
 	<ul>
 		<li>
 			<span>{{xFieldName}}:</span>
-			{{xResponseValue}}
+			{{_self.convertToAffectivePercent(xResponseValue, xLowLabel, xHighLabel)}}
 		</li>
 		<li>
 			<span>{{yFieldName}}:</span>
-			{{yResponseValue}}
+			{{_self.convertToAffectivePercent(yResponseValue, yLowLabel, yHighLabel)}}
 		</li>
 	</ul>
 {% endblock %}
+
+{% macro convertToAffectivePercent(responseValue, lowLabel, highLabel) %}
+	{% if responseValue < 0 %}
+		{% set val = responseValue | abs %}
+		<span {% if  val >= 5 %} class='text-danger'{% endif %}>{{val  * 10}}% {{lowLabel}}</span>
+	{% else %}
+		{% set val = responseValue + 1 %}
+			<span {% if  val >= 5 %} class='text-success'{% endif %}>{{val  * 10}}% {{highLabel}}</span>
+	{% endif %}
+{% endmacro %}
