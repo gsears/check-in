@@ -105,36 +105,6 @@ global.XYQuestionWidgetFactory = (el, props) => {
 };
 
 /**
- * Binds two form inputs together so that their values are always equal.
- * Used to combine sliders and numberboxes.
- *
- * @param {HTMLElement} The first form input
- * @param {HTMLElement} The second form input
- * @param {HTMLElement} Optional: The element whose value is the initial value for both elements.
- */
-global.bindInputs = (inputOne, inputTwo, primaryNode) => {
-  primaryNode = primaryNode || inputOne;
-
-  const copyFirstInputToSecond = function() {
-    inputTwo.value = inputOne.value;
-  };
-
-  const copySecondInputToFirst = function() {
-    inputOne.value = inputTwo.value;
-  };
-
-  inputOne.oninput = copyFirstInputToSecond;
-  inputTwo.oninput = copySecondInputToFirst;
-
-  // Initialise
-  if (primaryNode === inputOne) {
-    copyFirstInputToSecond();
-  } else {
-    copySecondInputToFirst();
-  }
-};
-
-/**
  * Used to allow a checkbox to filter table rows using a particular predicate function.
  * @param {HTMLElement} tableElement
  * @param {HTMLElement} checkboxElement
