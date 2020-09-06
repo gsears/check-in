@@ -45,7 +45,7 @@
 
 		<main class="container pt-4">
 			{% if breadcrumbArray is defined %}
-				{{breadcrumbs(breadcrumbArray)}}
+				{{_self.breadcrumbs(breadcrumbArray)}}
 			{% endif %}
 
 			{% block body %}{% endblock %}
@@ -66,13 +66,22 @@
 					}
 				}
 			});
+
+			firstTourStep(tour, {
+				attachTo: {
+					element: '.breadcrumb',
+					on: 'bottom',
+				},
+				title: 'Breadcrumb navigation',
+				text: 'Breadcrumbs show where you are. The final \'crumb\' is the page you are currently on. Click on any additional links to jump back to that page.'
+			})
 		</script>
 
 		{% block tour_script %}
 		<script>
-			tour.addStep({
-				text: 'Sorry, no help exists for this page...yet!'
-			});
+			finalTourStep(tour, {
+				text: 'Sorry, no additional help exists for this page yet.'
+			})
 		</script>
 		{% endblock %}
 		
@@ -83,3 +92,15 @@
 		</script>
 	</body>
 </html>
+
+{% macro breadcrumbs(breadcrumbs) %}
+	<nav class="breadcrumb bg-white	border-bottom">
+		{% for breadcrumb in breadcrumbs %}
+			{% if breadcrumb.href is defined %}
+				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
+			{% else %}
+				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
+			{% endif %}
+		{% endfor %}
+	</nav>
+{% endmacro %}
