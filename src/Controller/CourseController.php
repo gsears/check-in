@@ -70,7 +70,7 @@ class CourseController extends AbstractController
      *
      * @Route("", name=CourseController::COURSES_PAGE)
      */
-    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo)
+    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo, EnrolmentRepository $enrolmentRepo)
     {
         $user = $this->getUser();
 
@@ -82,10 +82,13 @@ class CourseController extends AbstractController
 
         if ($user->isStudent()) {
             $student = $user->getStudent();
-            $courseInstances = $courseInstanceRepo->findByStudent($user->getStudent());
+            $enrolments = $enrolmentRepo->findBy([
+                'student' => $student
+            ]);
+
             $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
-                'courseInstances' => $courseInstances,
+                'enrolments' => $enrolments,
                 'studentId' => $student->getGuid(),
                 'recentLabs' => $pendingLabs,
                 'breadcrumbArray' => $breadcrumbs

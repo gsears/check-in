@@ -1,6 +1,6 @@
 {% extends "sidebar_template.html.twig" %}
 
-{% from 'macros.html.twig' import instructorCardList %}
+{% from 'macros.html.twig' import instructorCardList, riskStatus %}
 
 {% block title %}
 	Course Summary for
@@ -118,19 +118,7 @@
 						<td>
 
 							{% if enrolment.riskFlag %}
-								<span class="text-danger">
-									{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-										<i class="fa fa-cog" aria-hidden="true"></i>
-										Flagged Automatically
-									{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
-										<i class="fa fa-user" aria-hidden="true"></i>
-										Flagged by Instructor
-									{% elseif enrolment.riskFlag ==  constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT') %}
-										<i class="fa fa-user" aria-hidden="true"></i>
-										Self flagged
-									{% endif %}
-								</span>
-
+								{{riskStatus(enrolment.riskFlag)}}
 							{% else %}
 								{% if atRisk %}
 									<span class="text-secondary">

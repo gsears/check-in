@@ -66,16 +66,20 @@
 					}
 				}
 			});
+		</script>
 
 		{% block tour_script %}
+		<script>
 			tour.addStep({
 				text: 'Sorry, no help exists for this page...yet!'
 			});
+		</script>
 		{% endblock %}
 		
-		document.getElementById('tour-button').onclick = () => {
-			tour.start();
-		}
+		<script>
+			document.getElementById('tour-button').onclick = () => {
+				tour.start();
+			}
 		</script>
 	</body>
 </html>
