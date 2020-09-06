@@ -17,6 +17,8 @@
 			Course Instructors
 		</h2>
 
+		<p class="card-body small">Click the links to quickly email an instructor. <span class="text-danger">DO NOT SEND MESSAGES TO THESE ADDRESSES IN THE PROTOTYPE!</span></p>
+
 		{% if instructors %}
 			<ul class="list-group list-group-flush">
 				{% for instructor in instructors %}
@@ -34,18 +36,6 @@
 			</p>
 		{% endif %}
 	</div>
-{% endmacro %}
-
-{% macro breadcrumbs(breadcrumbs) %}
-	<nav class="breadcrumb bg-white	border-bottom">
-		{% for breadcrumb in breadcrumbs %}
-			{% if breadcrumb.href is defined %}
-				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
-			{% else %}
-				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
-			{% endif %}
-		{% endfor %}
-	</nav>
 {% endmacro %}
 
 {% macro responseKey() %}
