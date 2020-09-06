@@ -29,3 +29,15 @@ Gareth Sears - 2493194S
         font-size: 0.8rem;
     }
 }
+
+.progress-bar-vertical {
+    width: 20px;
+    min-height: 60px;
+
+    // Overwrite bootstrap progress bar if it's set to be vertical
+    .progress-bar {
+        width: 100%;
+        height: 0;
+        transition: height 0.5s ease;
+    }
+}

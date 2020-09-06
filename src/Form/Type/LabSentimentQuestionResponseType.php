@@ -3,14 +3,13 @@
 namespace App\Form\Type;
 
 use App\Entity\LabSentimentQuestionResponse;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LabSentimentQuestionResponseType extends SurveyQuestionResponseType
 {
+
     public function buildFormBody(FormBuilderInterface $builder, array $options): FormBuilderInterface
     {
 
@@ -20,7 +19,7 @@ class LabSentimentQuestionResponseType extends SurveyQuestionResponseType
             ->getSentimentQuestion();
 
         $builder
-            ->add('text', TextareaType::class, [
+            ->add('text', SentimentAnalysisTextType::class, [
                 'label' => $sentimentQuestion->getQuestionText(),
                 'required' => false,
                 'constraints' => [

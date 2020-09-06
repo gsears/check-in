@@ -10,25 +10,7 @@
 		<p>{{courseName}}</p>
 	</header>
 
-	{# Render skip button and submit button seperately so we can keep them inline #}
-	{% set skipButton = constant('App\\Form\\Type\\SurveyQuestionResponseType::SKIP_BUTTON_NAME') %}
-	{% set submitButton = constant('App\\Form\\Type\\SurveyQuestionResponseType::SUBMIT_BUTTON_NAME') %}
-
-	{{form_start(form)}}
-
-	{{form_errors(form)}}
-
-	{% for child in form.children %}
-		{% if child.vars.name not in [skipButton, submitButton] %}
-			{{ form_row(child) }}
-		{% endif %}
-	{% endfor %}
-
-	<div class="form-group">
-		{{form_widget(form[skipButton])}}
-		{{form_widget(form[submitButton])}}
-	</div>
-
-	{{form_end(form)}}
-
+	{# Render the form. This will be the appropriate survey question #}
+	{{form(form)}}
+	
 {% endblock %}

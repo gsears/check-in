@@ -19,7 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;;
 abstract class AbstractXYComponentType extends AbstractType implements DataMapperInterface
 {
     const EMPTY_ERROR_MESSAGE = "You must select a point on the graph.";
-
+    const JSON_FIELD = 'jsonContent';
     /**
      * Dynamically builds the form. In this case, we use symfony's form builder to create
      * a hidden form field to which we map the json provided by our Vue.js xy component in
@@ -48,7 +48,7 @@ abstract class AbstractXYComponentType extends AbstractType implements DataMappe
         }
         // Hidden forms to store the XY values and bind them.
         $builder
-            ->add('jsonContent', HiddenType::class, $opts)
+            ->add(self::JSON_FIELD, HiddenType::class, $opts)
             // Configure to create coordinates on submit
             ->setDataMapper($this);
     }
