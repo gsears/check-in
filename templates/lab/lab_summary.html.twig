@@ -8,13 +8,17 @@
 		<p>{{courseInstance.name}}</p>
 	</header>
 
+	<div id="danger-zone-form">
 	{{form_start(form)}}
 	<h2>XY Question Responses</h2>
+	<p class="h4">{{form_help(form.labXYQuestions)}}</p>
 
 	{{form_widget(form.labXYQuestions)}}
-	<p>{{form_help(form.labXYQuestions)}}</p>
+	
 	{{form_end(form)}}
+	</div>
 
+	<div id="responses">
 	<h2>Student Responses</h2>
 	{% if labResponseRisks %}
 		<p>Click the student name to view a course summary for that student.</p>
@@ -44,15 +48,102 @@
 								-
 								{{student.user.fullname}}</a>
 						</td>
-						<td data-sort="{{risk.weightedRiskFactor}}">{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
+						<td class="risk-cell" data-sort="{{risk.weightedRiskFactor}}">{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
 						<td></td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</table>
+		
 	{% else %}
 		<p>No responses received.</p>
 	{% endif %}
+	</div>
 
+{% endblock %}
 
+{% block tour_script %}
+<script>
+tourStep(tour, {
+	attachTo: {
+		element: '#danger-zone-form',
+
+	},
+	title: 'XY Responses',
+	text: 'These grids show a summary of all student responses to the XY questions. Dots indicate a student response. Numbered dots indicate multiple student responses at that location.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#danger-zone-form',
+
+	},
+	title: 'Danger Zones',
+	text: 'Danger zones are coloured regions where responses are undesirable. A student responding in these areas gets a risk weight for their response. Yellow indicates a warning risk weight of 1. Red indicates a danger risk weight of 3.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#danger-zone-form .range',
+		on: 'right'
+	},	
+	title: 'Setting Danger Zones',
+	text: 'Danger zones can be set by clicking a region. Multiple clicks on the same region cycle through the danger zones (NONE, WARNING, DANGER)...',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#danger-zone-form button[type="submit"]',
+		on: 'top'
+	},	
+	title: 'Setting Danger Zones',
+	text: '...any changes are then applied by clicking the update button.',
+});
+
+const potentialFinalStep = {
+	attachTo: {
+		element: '#responses',
+		on: 'top'
+	},	
+	title: 'Student Response Summaries',
+	text: 'This table shows all student responses received for this lab.',
+};
+
+{% if labResponseRisks %}
+
+tourStep(tour, potentialFinalStep);
+
+tourStep(tour, {
+	attachTo: {
+		element: '#responses a',
+		on: 'right'
+	},	
+	title: 'Student Summaries',
+	text: 'Clicking a student name goes to a course summary for that student.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#responses .risk-cell',
+		on: 'right'
+	},	
+	title: 'Question responses',
+	text: 'Responses to questions are given here. The icon indicates the question type the student answered (see key above table). The number indicates the question index. If a number is absent, the student skipped that question. Red and yellow indicators show questions that have fallen in danger and warning danger zones, respectively.',
+});
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#responses .risk-cell a',
+		on: 'right'
+	},	
+	title: 'Question response',
+	text: 'Hovering above a question or clicking it will display a popup with question information. This includes the original question and the student\'s response.',
+});
+
+{% else %}
+	finalTourStep(tour, potentialFinalStep)
+
+{% endif %}
+
+</script>
 {% endblock %}
