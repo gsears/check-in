@@ -20,6 +20,12 @@ import "@fortawesome/fontawesome-free/js/solid";
 import "@fortawesome/fontawesome-free/js/regular";
 import "@fortawesome/fontawesome-free/js/brands";
 
+// Shepherd 'tour' library
+// https://shepherdjs.dev/
+import Shepherd from "shepherd.js";
+// Make global for use in templates that need it (most of them!)
+global.Shepherd = Shepherd;
+
 // Tablesort library
 // https://github.com/tristen/tablesort
 import Tablesort from "tablesort";
