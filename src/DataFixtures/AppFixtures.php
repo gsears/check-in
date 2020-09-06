@@ -81,8 +81,8 @@ class AppFixtures extends Fixture
 
     const AFFECTIVE_FIELDS = [
         self::AFFECTIVE_FIELD_DIFFICULTY => [
-            'high' => 'hard',
-            'low' => 'easy'
+            'high' => 'easy',
+            'low' => 'hard'
         ],
         self::AFFECTIVE_FIELD_INTEREST => [
             'high' => 'interesting',
