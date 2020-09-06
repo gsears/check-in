@@ -41,7 +41,7 @@
 						<td>{{courseInstance.startDate | date("d/m/Y")}}</td>
 						<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
 						<td>
-							<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
+							<a class="lab-link" href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
 						</td>
 					</tr>
 				{% endfor %}
@@ -87,3 +87,53 @@
 		<p>No recent labs to display.</p>
 	{% endif %}
 {% endmacro %}
+
+{% block tour_script %}
+<script>
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list',
+		on: 'top'
+	},
+	title: 'Your course list',
+	text: 'Here are all the courses your instruct.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list th',
+		on: 'right'
+	},
+	title: 'Sort tables',
+	text: 'Clicking the table headers will sort the items in the table by that column. Click once to sort in ascending order and again to sort in descending order.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list a',
+		on: 'bottom'
+	},
+	title: 'Course links',
+	text: 'Click a course link to view a summary of that course. Here you will see the labs, be able to configure automatic risk detection, and view the students enrolled.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#recent-lab-list',
+		on: 'top'
+	},
+	title: 'Most recent labs',
+	text: 'These are the most recent labs surveys which have opened to students to collect responses.'
+});
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#recent-lab-list a',
+		on: 'left'
+	},
+	title: 'Lab summary links',
+	text: 'Click the link to view a summary of student responses for that lab, including student risk factors.'
+});
+
+</script>
+{% endblock %}
