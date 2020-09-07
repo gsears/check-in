@@ -1,6 +1,8 @@
 {% extends "sidebar_template.html.twig" %}
 
-{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights, instructorCardList, responseKey %}
+{% from 'macros.html.twig' import surveyQuestionResponseRisksToTrafficLights, instructorCardList, responseKey, riskStatus %}
+
+{% set isInstructor = is_granted(constant('App\\Security\\Roles::INSTRUCTOR'))  %}
 
 {% block header %}
 	{% set courseHeaderText %}
@@ -15,7 +17,7 @@
 	{{courseInstance.endDate | date('d/m/Y')}}
 	{% endset %}
 
-	{% if is_granted(constant('App\\Security\\Roles::INSTRUCTOR')) %}
+	{% if isInstructor %}
 		<h1>{{student.guid}}-{{student.user.fullname}}</h1>
 		<p class="h4">{{courseHeaderText}}</p>
 		<p>{{courseDates}}</p>
@@ -27,23 +29,24 @@
 {% endblock %}
 
 {% block main %}
-	{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student)}}
-	{{_self.completedLabTable("completed labs", completedLabResponseRisks, courseInstance, student)}}
+	<div id="pending-labs">
+		{{_self.pendingLabTable("pending labs", pendingLabs, courseInstance, student, isInstructor)}}
+	</div>
+	<div id="completed-labs">
+		{{_self.completedLabTable("completed labs", completedLabResponseRisks, courseInstance, student, isInstructor)}}
+	</div>
+
+
 {% endblock %}
 
 {% block sidebar %}
-	<div class="card  mb-4">
-		<h2 class="card-header h5">
-			Support Status
-		</h2>
-		<div class="card-body">
-			{{_self.instructorRiskFlag(enrolment, flagForm)}}
-		</div>
+	<div id="risk-flag-form" class="card mb-4">
+		{{_self.instructorRiskFlag(enrolment, flagForm)}}
 	</div>
 	{{instructorCardList(courseInstance.instructors)}}
 {% endblock %}
 
-{% macro pendingLabTable(title, labs, courseInstance, student) %}
+{% macro pendingLabTable(title, labs, courseInstance, student, isInstructor) %}
 	<h2>Pending Lab Surveys</h2>
 	{% if labs %}
 		<table class="table">
@@ -52,20 +55,24 @@
 					<th scope="col">Lab Name</th>
 					<th scope="col" data-sort-default data-sort-method='datesort'>Date</th>
 					<th scope="col" data-sort-method='datesort'>Start Time</th>
-					<th scope="col"></th>
+					{% if not isInstructor %}
+						<th scope="col"></th>
+					{% endif %}
 				</tr>
 			</thead>
 			<tbody>
 				{% for lab in labs %}
 					<tr>
-						<td>{{lab.name}}</td>
+						<td>{{_self.lab(isInstructor, lab)}}</td>
 						<td>{{lab.startDateTime | date("d/m/y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
-						<td>
+						{% if not isInstructor %}
+							<td>
 							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
 								Complete Survey
 							</a>
 						</td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -75,7 +82,7 @@
 	{% endif %}
 {% endmacro %}
 
-{% macro completedLabTable(title, completedLabResponseRisks, courseInstance, student) %}
+{% macro completedLabTable(title, completedLabResponseRisks, courseInstance, student, isInstructor) %}
 	<h2>Completed Lab Surveys</h2>
 
 	{% if completedLabResponseRisks %}
@@ -87,18 +94,18 @@
 					<th scope="col" data-sort-default data-sort-method='datesort'>Date</th>
 					<th scope="col" data-sort-method='datesort'>Start Time</th>
 					<th scope="col">Responses</th>
-					<th scope="col">Risk Factor</th>
+					<th id="risk-factor-column" scope="col">Risk Factor</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for labResponseRisk in completedLabResponseRisks %}
 					{% set lab = labResponseRisk.labResponse.lab %}
 					<tr>
-						<td>{{lab.name}}</td>
+						<td>{{_self.lab(isInstructor, lab)}}</td>
 						<td>{{lab.startDateTime | date("d/m/y")}}</td>
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						{# From Macros #}
-						<td>{{surveyQuestionResponseRisksToTrafficLights(labResponseRisk.surveyQuestionResponseRisks)}}</td>
+						<td class="risk-cell">{{surveyQuestionResponseRisksToTrafficLights(labResponseRisk.surveyQuestionResponseRisks)}}</td>
 						<td>
 							{% if labResponseRisk.weightedRiskFactor > 0 %}
 								{{labResponseRisk.weightedRiskFactor | number_format(0, '.', ',')}}%
@@ -116,17 +123,17 @@
 {% endmacro %}
 
 {% macro instructorRiskFlag(enrolment, flagForm) %}
+<h2 class="card-header h5">
+{% if enrolment.riskFlag %}
+	<i class="fa fa-exclamation-triangle mr-2" aria-hidden="true"></i>
+{% endif %}
+Support Status
+</h2>
+<div class="card-body">
 	{% if enrolment.riskFlag %}
 		<div class="text-danger">
 			<p>
-				<i class="fa fa-exclamation-triangle mr-2" aria-hidden="true"></i>
-				{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-					Automatically flagged
-				{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
-					Flagged by Instructor
-				{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT')  %}
-					Self flagged
-				{% endif %}
+				{{riskStatus(enrolment.riskFlag)}}
 			</p>
 			<p>
 				<i class="fa fa-calendar mr-2" aria-hidden="true"></i>
@@ -140,7 +147,6 @@
 			<p>This student may require extra support.</p>
 		{% endif %}
 
-
 		<h3 class="h5">Reason:</h3>
 
 		{% if enrolment.riskReason %}
@@ -149,14 +155,114 @@
 			<p class="text-secondary">No reason given.</p>
 		{% endif %}
 
-		{{form(flagForm)}}
+	{% else %}
+		<h2 class="h4">
+			{% if is_granted(constant('App\\Security\\Roles::STUDENT')) %}
+				Do you need extra support in this course?
 			{% else %}
-				<h2 class="h4">
-					{% if is_granted(constant('App\\Security\\Roles::STUDENT')) %}
-						Do you need extra support in this course?
-					{% else %}
-						Manually Flag For Support
-					{% endif %}
-				</h2>
-				{{form(flagForm)}}{% endif %}
-		{% endmacro %}
+				Manually Flag For Support
+			{% endif %}
+		</h2>
+		
+	{% endif %}
+	{{form(flagForm)}}
+</div>
+{% endmacro %}
+
+{% macro lab(isInstructor, lab) %}
+	{% if isInstructor %}
+		{% set courseInstance = lab.courseInstance %}
+		{% set href = path(
+			constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+			{
+				courseId: courseInstance.course.code,
+				instanceIndex: courseInstance.indexInCourse,
+				labSlug: lab.slug
+			}
+		) %}
+		<a href="{{href}}">{{lab.name}}</a>
+	{% else %}
+		{{lab.name}}
+	{% endif %}
+{% endmacro %}
+
+{% block tour_script %}
+<script>
+
+tourStep(tour, {
+	attachTo: {
+		element: '#pending-labs',
+	},
+	title: 'Pending lab surveys',
+	text: 'These are the lab surveys {{isInstructor ? "the student has" : "you have"}} yet to complete for this course.'
+});
+
+{% if isInstructor %}
+tourStep(tour, {
+	attachTo: {
+		element: 'table a',
+		on: 'right',
+	},
+	title: 'View lab',
+	text: 'Click on the lab name to go to a summary of that lab.'
+});
+{% endif %}
+
+tourStep(tour, {
+	attachTo: {
+		element: '#completed-labs',
+	},
+	title: 'Completed lab surveys',
+	text: 'These are the lab surveys {{isInstructor ? "the student has" : "you have"}} completed.'
+});
+
+{% if completedLabResponseRisks %}
+tourStep(tour, {
+	attachTo: {
+		element: '#completed-labs .risk-cell',
+		on: 'right'
+	},	
+	title: 'Question responses',
+	text: 'Responses to questions are given here. The icon indicates the question type the student answered (see key above table). The number indicates the question index. If a number is absent, the student skipped that question. Red and yellow indicators show questions that have fallen in danger and warning danger zones, respectively.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#completed-labs .risk-cell a',
+		on: 'right'
+	},	
+	title: 'Question response',
+	text: 'Hovering above a question or clicking it will display a popup with question information. This includes the original question and the student\'s response.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#risk-factor-column',
+		on: 'top'
+	},	
+	title: 'What is a risk factor?',
+	text: "Each affective survey question can have one or more 'danger zones'. If a student's response falls into the 'warning' or 'danger zone' bounds for that question, it is assigned that zone's risk value. A student's risk factor is the sum of the student's response risks for a lab survey, divided by the maximum possible risk value for that lab as a percentage."
+
+});
+{% endif %}
+
+tourStep(tour, {
+	attachTo: {
+		element: '#risk-flag-form',
+		on: 'left',
+	},
+	title: 'Support status',
+	text: 'This area shows the support status of a student. If no status exists and you feel {{isInstructor ? "the student needs" : "you need"}} extra support on this course, you can manually flag {{isInstructor ? "the student" : "yourself"}}. These flags help instructors to accelerate giving support to students who need it the most. If you feel {{isInstructor ? "the student no longer needs" : "you no longer need"}} support, you can remove the flag here too. Note: students can only remove flags that they have created themeselves.'
+})
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#instructor-card-list',
+		on: 'left'
+	},
+	title: 'Instructors',
+	text: "These are the instructors that teach on this course. Click 'message' to quickly open up an email link."
+}) 
+
+</script>
+{% endblock %}

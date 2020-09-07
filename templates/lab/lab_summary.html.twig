@@ -27,8 +27,8 @@
 			<thead>
 				<tr>
 					<th scope="col">Student</th>
-					<th scope="col" data-sort-default>Risk</th>
-					<th scope="col"></th>
+					<th scope="col" >Responses</th>
+					<th id="risk-factor-column" scope="col" data-sort-default>Risk factor</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -49,7 +49,11 @@
 								{{student.user.fullname}}</a>
 						</td>
 						<td class="risk-cell" data-sort="{{risk.weightedRiskFactor}}">{{surveyQuestionResponseRisksToTrafficLights(risk.surveyQuestionResponseRisks)}}</td>
-						<td></td>
+						<td>
+						{% if risk.weightedRiskFactor > 0 %}
+								{{risk.weightedRiskFactor | number_format(0, '.', ',')}}%
+							{% endif %}
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -131,13 +135,23 @@ tourStep(tour, {
 	text: 'Responses to questions are given here. The icon indicates the question type the student answered (see key above table). The number indicates the question index. If a number is absent, the student skipped that question. Red and yellow indicators show questions that have fallen in danger and warning danger zones, respectively.',
 });
 
-finalTourStep(tour, {
+tourStep(tour, {
 	attachTo: {
 		element: '#responses .risk-cell a',
 		on: 'right'
 	},	
 	title: 'Question response',
 	text: 'Hovering above a question or clicking it will display a popup with question information. This includes the original question and the student\'s response.',
+});
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#risk-factor-column',
+		on: 'top'
+	},	
+	title: 'What is a risk factor?',
+	text: "Each affective survey question can have one or more 'danger zones'. If a student's response falls into the 'warning' or 'danger zone' bounds for that question, it is assigned that zone's risk value. A student's risk factor is the sum of the student's response risks for a lab survey, divided by the maximum possible risk value for that lab as a percentage."
+
 });
 
 {% else %}
