@@ -596,19 +596,14 @@ class CourseController extends AbstractController
         $questionResponse = $form->getData();
 
         if ($questionResponse instanceof LabSentimentQuestionResponse) {
-            dump("Here");
+
             // Make an API call
             $monkeyLearnApiKey = $this->getParameter('app.monkeylearn_api_key');
             $monkeyLearnModel = $this->getParameter("app.monkeylearn_model_id");
-            dump($monkeyLearnApiKey);
-            dump($monkeyLearnModel);
             $ml = new \MonkeyLearn\Client($monkeyLearnApiKey);
             $res = $ml->classifiers->classify($monkeyLearnModel, [$questionResponse->getText()]);
             // Parse the response
             $data = $res->result[0];
-            // $data = json_decode($json);
-
-            dump($data);
 
             if ($data['error']) {
                 throw new \MonkeyLearn\MonkeyLearnException("Bad request from monkeylearn.\n", 1);
