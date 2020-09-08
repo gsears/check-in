@@ -2,8 +2,8 @@ name: app
 
 type: php:7.4
 
-relationships:
-  database: "mydatabase:postgresql"
+# relationships:
+# database: "mydatabase:postgresql"
 
 runtime:
   extensions:
