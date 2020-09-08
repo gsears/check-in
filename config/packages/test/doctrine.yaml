@@ -1,5 +1,5 @@
 doctrine:
   dbal:
-    # Use sqlite for testing
+    # Use sqlite for testing for pure speed at this stage!
     driver: pdo_sqlite
     url: "sqlite:///%kernel.project_dir%/var/test.db"
