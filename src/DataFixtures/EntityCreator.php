@@ -66,18 +66,18 @@ final class EntityCreator
         return $entity;
     }
 
-    public function createUser(string $forename, string $surname, string $email): User
+    public function createUser(string $forename, string $surname, string $email, string $password): User
     {
         $user = (new User())
             ->setForename($forename)
             ->setSurname($surname)
-            ->setPassword(self::PASSWORD)
+            ->setPassword($password)
             ->setEmail($email);
 
         return $this->save($user);
     }
 
-    public function createStudent(string $forename, string $surname, string $guid, string $email = null): Student
+    public function createStudent(string $forename, string $surname, string $guid, string $email = null, string $password = self::PASSWORD): Student
     {
         if (!$email) {
             $firstSurnameLetter = strtolower($surname[0]);
@@ -87,7 +87,8 @@ final class EntityCreator
         $user = $this->createUser(
             $forename,
             $surname,
-            $email
+            $email,
+            $password
         );
 
         $student = (new Student())
@@ -98,7 +99,7 @@ final class EntityCreator
         return $this->save($student);
     }
 
-    public function createInstructor(string $forename, string $surname, string $email = null): Instructor
+    public function createInstructor(string $forename, string $surname, string $email = null,  string $password = self::PASSWORD): Instructor
     {
         if (!$email) {
             $email = strtolower($forename . '.' . $surname . '@glasgow.ac.uk');
@@ -107,7 +108,8 @@ final class EntityCreator
         $user = $this->createUser(
             $forename,
             $surname,
-            $email
+            $email,
+            $password
         );
 
         $instructor = new Instructor();
