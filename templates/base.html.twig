@@ -20,31 +20,87 @@
 	</head>
 	<body>
 		{% block nav %}
+
 			<!-- Navigation -->
-			<nav class="navbar navbar-light bg-light shadow">
+			<nav class="navbar navbar-light bg-white shadow navbar-expand-lg">
 				<div class="container">
 					<a class="navbar-brand" href="/">Check In</a>
-					<div class="ml-auto">
-						{% if app.user %}
-							<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
-						{% else %}
-							<a class="nav-link" href="{{path('app_login')}}">Login</a>
-						{% endif %}
-
-					</div>
+					<ul class="navbar-nav list-group list-group-horizontal">
+						<li class="nav-item list-group-item border-0">
+							<button id="tour-button" class="btn btn-primary">
+								<i class="fa fa-info-circle mr-1" aria-hidden="true"></i>
+								Explain this page</button>
+						</li>
+						<li class="nav-item list-group-item border-0">
+							{% if app.user %}
+								<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
+							{% else %}
+								<a class="nav-link" href="{{path('app_login')}}">Login</a>
+							{% endif %}
+						</li>
+					</ul>
 				</div>
 			</nav>
 		{% endblock %}
 
 		<main class="container pt-4">
 			{% if breadcrumbArray is defined %}
-				{{breadcrumbs(breadcrumbArray)}}
+				{{_self.breadcrumbs(breadcrumbArray)}}
 			{% endif %}
 
 			{% block body %}{% endblock %}
 		</main>
+
 		{% block javascripts %}
 			{{ encore_entry_script_tags('app') }}
 		{% endblock %}
+
+		<script>
+			const tour = new Shepherd.Tour({
+				useModalOverlay: true,
+				defaultStepOptions: {
+					scrollTo: true,
+					cancelIcon: {
+						enabled: true,
+						label: 'close help'
+					}
+				}
+			});
+
+			firstTourStep(tour, {
+				attachTo: {
+					element: '.breadcrumb',
+					on: 'bottom',
+				},
+				title: 'Breadcrumb navigation',
+				text: 'Breadcrumbs show where you are. The final \'crumb\' is the page you are currently on. Click on any additional links to jump back to that page.'
+			})
+		</script>
+
+		{% block tour_script %}
+		<script>
+			finalTourStep(tour, {
+				text: 'Sorry, no additional help exists for this page yet.'
+			})
+		</script>
+		{% endblock %}
+		
+		<script>
+			document.getElementById('tour-button').onclick = () => {
+				tour.start();
+			}
+		</script>
 	</body>
 </html>
+
+{% macro breadcrumbs(breadcrumbs) %}
+	<nav class="breadcrumb bg-white	border-bottom">
+		{% for breadcrumb in breadcrumbs %}
+			{% if breadcrumb.href is defined %}
+				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
+			{% else %}
+				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
+			{% endif %}
+		{% endfor %}
+	</nav>
+{% endmacro %}

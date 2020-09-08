@@ -1,7 +1,7 @@
 {% extends "base.html.twig" %}
 
 {% block body %}
-	<div class="progress mb-4">
+	<div id="survey-progress" class="progress mb-4">
 		<div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{(questionNumber / questionCount) * 100}}%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
 	</div>
 
@@ -11,6 +11,43 @@
 	</header>
 
 	{# Render the form. This will be the appropriate survey question #}
-	{{form(form)}}
+	<div id="survey-question">
+		{{form(form)}}
+	</div>
 	
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}
+	<script>
+	// Add loading to any submit buttons. Especially useful for long backend tasks (sentiment analysis).
+	const submitButtons = Array.from(document.querySelectorAll('button[type="submit"]'));
+	submitButtons.forEach(b => {
+		b.onclick = function() {
+			submitButtons.forEach(b => b.classList.add('disabled'));
+			this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+		}
+	})
+	</script>
+{% endblock %}
+
+{% block tour_script %}
+<script>
+tourStep(tour, {
+	attachTo: {
+		element: '#survey-progress',
+		on: 'bottom'
+	},
+	title: 'Survey progress',
+	text: "This bar shows your progress through the survey"
+})
+
+tourStep(tour, {
+	attachTo: {
+		element: '#survey-question',
+	},
+	title: 'Survey question',
+	text: "This is the survey question. If you do not wish to answer this particular question, click the 'skip' button."
+})
+</script>
 {% endblock %}

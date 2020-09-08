@@ -19,7 +19,7 @@ class LabDangerZoneType extends AbstractType
         // from the
         $builder->add('labXYQuestions', CollectionType::class, [
             'label' => 'XY Question Danger Zones',
-            'help' => 'Click on the regions to set the warning level, then click update.',
+            'help' => 'Click a region to cycle through danger zones, then click update to set.',
             'entry_type' => LabXYQuestionType::class,
             'entry_options' => [
                 'label' => false

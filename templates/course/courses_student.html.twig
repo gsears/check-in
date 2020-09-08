@@ -1,5 +1,7 @@
 {% extends "column_template.html.twig" %}
 
+{% from 'macros.html.twig' import riskStatus %}
+
 {% block header %}
 	<h1>My Courses</h1>
 	<p class="lead">These are the courses that you are enrolled on.</p>
@@ -7,7 +9,7 @@
 
 {% block first_column %}
 	<h2>My Courses</h2>
-	{{_self.studentCoursesTable(courseInstances, studentId)}}
+	{{_self.studentCoursesTable(enrolments, studentId)}}
 {% endblock %}
 
 {% block second_column %}
@@ -15,8 +17,8 @@
 	{{_self.recentPendingLabSurveys(recentLabs, studentId)}}
 {% endblock %}
 
-{% macro studentCoursesTable(courseInstances, studentId) %}
-	{% if courseInstances %}
+{% macro studentCoursesTable(enrolments, studentId) %}
+	{% if enrolments %}
 		<p class="text-secondary">Click the links under 'name' to view your summary for that course.</p>
 		<table id="course-list" class="table table-sm">
 			<thead>
@@ -24,10 +26,12 @@
 					<th data-sort-default data-sort-method='datesort'>Start</th>
 					<th data-sort-method='datesort'>End</th>
 					<th>Name</th>
+					<th>Support Status</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for courseInstance in courseInstances %}
+				{% for enrolment in enrolments %}
+					{% set courseInstance = enrolment.courseInstance %}
 
 					{% set href = path(
 					constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
@@ -43,6 +47,13 @@
 						<td>{{courseInstance.endDate | date("d/m/Y")}}</td>
 						<td>
 							<a href="{{href}}">{{courseInstance.course.code}}-{{courseInstance.course.name}}</a>
+						</td>
+						<td class="risk-status">
+							{% if enrolment.riskFlag %}
+								{{riskStatus(enrolment.riskFlag)}}
+							{% else %}
+								<span class="text-success">None</span>
+							{% endif %}
 						</td>
 					</tr>
 				{% endfor %}
@@ -67,12 +78,12 @@
 			<tbody>
 				{% for lab in recentLabs %}
 					{% set href = path('lab_survey_response', {
-        courseId: lab.courseInstance.course.code,
-        instanceIndex: lab.courseInstance.indexInCourse,
-        labSlug: lab.slug,
-        studentId: studentId,
-        page: 1
-    }) %}
+						courseId: lab.courseInstance.course.code,
+						instanceIndex: lab.courseInstance.indexInCourse,
+						labSlug: lab.slug,
+						studentId: studentId,
+						page: 1
+					}) %}
 					<tr>
 						<td>{{lab.startDateTime | date("d/m/Y")}}</td>
 						<td>{{lab.courseInstance.course.name}}</td>
@@ -87,3 +98,62 @@
 		<p>No pending lab surveys to complete.</p>
 	{% endif %}
 {% endmacro %}
+
+{% block tour_script %}
+<script>
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list',
+		on: 'top'
+	},
+	title: 'Your course list',
+	text: 'Here are all the courses your are enrolled on.',
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list th',
+		on: 'right'
+	},
+	title: 'Sort tables',
+	text: 'Clicking the table headers will sort the items in the table by that column. Click once to sort in ascending order and again to sort in descending order.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list a',
+		on: 'bottom'
+	},
+	title: 'Course links',
+	text: 'Click a course link to view a summary of your survey responses for that course and additional information such as instructors. You can view your support status and request support for the courses there.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#course-list .risk-status span',
+		on: 'left'
+	},
+	title: 'Support Status',
+	text: 'This will tell you if you have been flagged for support on the course, either manually by an instructor or yourself. It will also state if you were automatically based on the content of your survey responses. To see more details about the flag, go to that course\'s page.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#recent-pending-lab-list',
+		on: 'top'
+	},
+	title: 'Your pending lab surveys',
+	text: 'These are the most recent labs you have which require completion.'
+});
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#recent-pending-lab-list a',
+		on: 'left'
+	},
+	title: 'Pending lab survey links',
+	text: 'Click the link to start the survey.'
+});
+
+</script>
+{% endblock %}

@@ -70,7 +70,7 @@ class CourseController extends AbstractController
      *
      * @Route("", name=CourseController::COURSES_PAGE)
      */
-    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo)
+    public function index(CourseInstanceRepository $courseInstanceRepo, LabRepository $labRepo, EnrolmentRepository $enrolmentRepo)
     {
         $user = $this->getUser();
 
@@ -82,10 +82,13 @@ class CourseController extends AbstractController
 
         if ($user->isStudent()) {
             $student = $user->getStudent();
-            $courseInstances = $courseInstanceRepo->findByStudent($user->getStudent());
+            $enrolments = $enrolmentRepo->findBy([
+                'student' => $student
+            ]);
+
             $pendingLabs = $labRepo->findLatestPendingByStudent($student, 5);
             return $this->render('course/courses_student.html.twig', [
-                'courseInstances' => $courseInstances,
+                'enrolments' => $enrolments,
                 'studentId' => $student->getGuid(),
                 'recentLabs' => $pendingLabs,
                 'breadcrumbArray' => $breadcrumbs
@@ -593,19 +596,14 @@ class CourseController extends AbstractController
         $questionResponse = $form->getData();
 
         if ($questionResponse instanceof LabSentimentQuestionResponse) {
-            dump("Here");
+
             // Make an API call
             $monkeyLearnApiKey = $this->getParameter('app.monkeylearn_api_key');
             $monkeyLearnModel = $this->getParameter("app.monkeylearn_model_id");
-            dump($monkeyLearnApiKey);
-            dump($monkeyLearnModel);
             $ml = new \MonkeyLearn\Client($monkeyLearnApiKey);
             $res = $ml->classifiers->classify($monkeyLearnModel, [$questionResponse->getText()]);
             // Parse the response
             $data = $res->result[0];
-            // $data = json_decode($json);
-
-            dump($data);
 
             if ($data['error']) {
                 throw new \MonkeyLearn\MonkeyLearnException("Bad request from monkeylearn.\n", 1);

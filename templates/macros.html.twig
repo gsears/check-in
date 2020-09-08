@@ -17,6 +17,8 @@
 			Course Instructors
 		</h2>
 
+		<p class="card-body small">Click the links to quickly email an instructor. <span class="text-danger">DO NOT SEND MESSAGES TO THESE ADDRESSES IN THE PROTOTYPE! For evaluation purposes, more instructors than usual may be assigned to this course.</span></p>
+
 		{% if instructors %}
 			<ul class="list-group list-group-flush">
 				{% for instructor in instructors %}
@@ -36,18 +38,6 @@
 	</div>
 {% endmacro %}
 
-{% macro breadcrumbs(breadcrumbs) %}
-	<nav class="breadcrumb bg-white	border-bottom">
-		{% for breadcrumb in breadcrumbs %}
-			{% if breadcrumb.href is defined %}
-				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
-			{% else %}
-				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
-			{% endif %}
-		{% endfor %}
-	</nav>
-{% endmacro %}
-
 {% macro responseKey() %}
 	<div class="card my-4 border-left-0 border-right-0">
 		<div class="card-body p-1">
@@ -62,4 +52,21 @@
 			</ul>
 		</div>
 	</div>
+{% endmacro %}
+
+{% macro riskStatus(riskFlag) %}
+	{% if riskFlag %}
+		<span class="text-danger">
+			{% if riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
+				<i class="fa fa-cog" aria-hidden="true"></i>
+				Flagged Automatically
+			{% elseif riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
+				<i class="fa fa-user" aria-hidden="true"></i>
+				Flagged by Instructor
+			{% elseif riskFlag ==  constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT') %}
+				<i class="fa fa-user" aria-hidden="true"></i>
+				Self flagged
+			{% endif %}
+		</span>
+	{% endif %}
 {% endmacro %}

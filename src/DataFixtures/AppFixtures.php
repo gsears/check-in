@@ -7,18 +7,19 @@ Gareth Sears - 2493194S
 
 namespace App\DataFixtures;
 
-use App\Containers\Risk\SurveyQuestionResponseRisk;
 use Faker;
 use App\Entity\Lab;
 use App\Entity\Student;
+use App\Entity\Instructor;
 use App\Entity\LabResponse;
 use App\Entity\LabXYQuestion;
 use App\Containers\XYCoordinates;
-use App\Entity\Instructor;
 use App\Entity\SentimentQuestion;
-use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
+use App\Containers\Risk\SurveyQuestionResponseRisk;
+use App\Entity\LabSentimentQuestion;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * Populates the database with dummy data for testing and evaluation.
@@ -27,11 +28,14 @@ use Doctrine\Common\Persistence\ObjectManager;
  */
 class AppFixtures extends Fixture
 {
-    // 'password', pre-hashed for speed
-    const PASSWORD = '$2y$13$M5wzRvyIISgDAjtGJEna5.mnz5QAgsoExUOPEwacu/cOFSz861fjC';
-
     const TEST_STUDENT_USERNAME = 'test@student.gla.ac.uk';
     const TEST_INSTUCTOR_USERNAME = 'test@glasgow.ac.uk';
+
+    const STUDENT_COUNT = 30;
+    const INSTRUCTOR_COUNT = 30;
+    const COURSE_COUNT = 5;
+    const MIN_COURSE_MEMBERSHIP = 5;
+    const MAX_COURSE_MEMBERSHIP = 5;
 
     const COURSE_TITLE_TEMPLATES = [
         '%s Theory and Applications',
@@ -81,8 +85,8 @@ class AppFixtures extends Fixture
 
     const AFFECTIVE_FIELDS = [
         self::AFFECTIVE_FIELD_DIFFICULTY => [
-            'high' => 'hard',
-            'low' => 'easy'
+            'high' => 'easy',
+            'low' => 'hard'
         ],
         self::AFFECTIVE_FIELD_INTEREST => [
             'high' => 'interesting',
@@ -131,9 +135,48 @@ class AppFixtures extends Fixture
         ]
     ];
 
+    const MOCK_SENTIMENT_RESPONSES = [
+        [
+            "text" => "So far things have been going ok. I've had a little difficulty with coursework, but mostly I am on top of things and generally happy. Lectures are really fun!",
+            "classification" => "Positive",
+            "confidence" => 0.96
+        ],
+        [
+            "text" => "I think I'm falling behind. It's really hard and I get errors that I don't understand. The lectures are not useful at all.",
+            "classification" => "Negative",
+            "confidence" => 0.998
+        ],
+        [
+            "text" => "It's OK. I expected that I'd be learning more but there have been some interesting things.",
+            "classification" => "Positive",
+            "confidence" => 0.535
+        ],
+        [
+            "text" => "I've been a bit swamped with my part time job and am really stressed right now. The tutors are not supporting me at all, they're always talking to the same students who ask questions all the time. I feel left out.",
+            "classification" => "Negative",
+            "confidence" => 0.985
+        ],
+        [
+            "text" => "It's fine I guess.",
+            "classification" => "Neutral",
+            "confidence" => 0.466
+        ],
+    ];
+
     private $manager;
     private $faker;
     private $creator;
+    private $passwordEncoder;
+    private $projectDirectory;
+
+    /**
+     * Dependency inject the root directory via services.yaml config
+     */
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder, string $projectDirectory)
+    {
+        $this->passwordEncoder = $passwordEncoder;
+        $this->projectDirectory = $projectDirectory;
+    }
 
     public function load(ObjectManager $manager)
     {
@@ -151,12 +194,24 @@ class AppFixtures extends Fixture
         $testInstructor = $testUsers['instructor'];
 
         // Create students
-        $students = $this->loadStudents();
+        $studentWrappers = $this->loadStudents();
+        // Wrappers are used to get passwords
+        $students = array_map(function ($wrapper) {
+            return $wrapper['user'];
+        }, $studentWrappers);
         $allStudents = array_merge($students, [$testStudent]);
+        // For evaluation testing
+        $this->outputUsernamePasswordCSV($studentWrappers, 'students.csv');
 
         // Create instructors
-        $instructors = $this->loadInstructors();
+        $instructorWrappers = $this->loadInstructors();
+        // Wrappers are used to get passwords
+        $instructors = array_map(function ($wrapper) {
+            return $wrapper['user'];
+        }, $instructorWrappers);
         $allInstructors = array_merge($instructors, [$testInstructor]);
+        // For evaluation testing
+        $this->outputUsernamePasswordCSV($instructorWrappers, 'instructors.csv');
 
         // Create courses
         $courses = $this->loadCourses();
@@ -187,20 +242,22 @@ class AppFixtures extends Fixture
 
     private function loadFunctionalTestUsers(): array
     {
+        // Passwords default to 'password'
+
         $testStudentGuid = $this->faker->unique()->passthrough(1234567);
         $testStudentEmail = self::TEST_STUDENT_USERNAME;
         $testStudent = $this->creator->createStudent(
             "Gareth",
             "Sears",
             $testStudentGuid,
-            $testStudentEmail
+            $testStudentEmail,
         );
 
         $testInstructorEmail = self::TEST_INSTUCTOR_USERNAME;
         $testInstructor = $this->creator->createInstructor(
             $this->faker->firstName(),
             $this->faker->lastName(),
-            $testInstructorEmail
+            $testInstructorEmail,
         );
 
         return [
@@ -209,33 +266,51 @@ class AppFixtures extends Fixture
         ];
     }
 
+    private function createPassword($userType)
+    {
+        // Create passwords for evaluation
+        $password = $this->faker->unique()->password();
+        $user = $userType->getUser();
+        // Encode password appropriately
+        $newPassword = $this->passwordEncoder->encodePassword($user, $password);
+        $user->setPassword($newPassword);
+        // Wrap password for CSV output as it's hashed otherwise!
+        return [
+            'user' => $userType,
+            'password' => $password,
+        ];
+    }
+
     private function loadStudents(): array
     {
-        $students = [];
+        $studentWrappers = [];
 
-        for ($i = 0; $i < 20; $i++) {
-            $students[] = $this->creator->createStudent(
+        for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
+            $student = $this->creator->createStudent(
                 $this->faker->firstName(),
                 $this->faker->lastName(),
-                $this->faker->unique()->randomNumber(7)
+                $this->faker->unique()->randomNumber(7),
             );
+
+            $studentWrappers[] = $this->createPassword($student);
         }
 
-        return $students;
+        return $studentWrappers;
     }
 
     private function loadInstructors(): array
     {
-        $instructors = [];
+        $instructorWrappers = [];
 
-        for ($i = 0; $i < 5; $i++) {
-            $instructors[] = $this->creator->createInstructor(
+        for ($i = 0; $i < self::INSTRUCTOR_COUNT; $i++) {
+            $instructor = $this->creator->createInstructor(
                 $this->faker->firstName(),
-                $this->faker->lastName()
+                $this->faker->lastName(),
             );
+            $instructorWrappers[] = $this->createPassword($instructor);
         }
 
-        return $instructors;
+        return $instructorWrappers;
     }
 
 
@@ -301,7 +376,7 @@ class AppFixtures extends Fixture
             // Randomise course assignment order
             $coursesForInstructors = $this->faker->shuffle($courseInstances);
             // Assign courses to instructors (between 3-4 for each instructor):
-            for ($i = 0; $i < rand(3, 4); $i++) {
+            for ($i = 0; $i < rand(self::MIN_COURSE_MEMBERSHIP, self::MAX_COURSE_MEMBERSHIP); $i++) {
                 $instructor->addCourseInstance($coursesForInstructors[$i]);
             }
         }
@@ -315,7 +390,7 @@ class AppFixtures extends Fixture
 
             // Each student is enrolled on 4-5 courses
             // Note: at present this may be the same course for 2 terms in a row. Woo!
-            for ($i = 0; $i < rand(4, 5); $i++) {
+            for ($i = 0; $i < rand(self::MIN_COURSE_MEMBERSHIP, self::MAX_COURSE_MEMBERSHIP); $i++) {
                 $courseInstance = $coursesForStudents[$i];
                 $enrolment = $this->creator->createEnrolment(
                     $student,
@@ -431,13 +506,22 @@ class AppFixtures extends Fixture
                         $labXYQuestion
                     );
 
-                    // And one warning zone
+                    // And initial warning zones
                     $warningZone = $this->creator->createLabXYQuestionDangerZone(
                         SurveyQuestionResponseRisk::LEVEL_WARNING,
                         -10,
                         -6,
                         -5,
                         -1,
+                        $labXYQuestion
+                    );
+
+                    $warningZone = $this->creator->createLabXYQuestionDangerZone(
+                        SurveyQuestionResponseRisk::LEVEL_WARNING,
+                        -5,
+                        -1,
+                        -10,
+                        -6,
                         $labXYQuestion
                     );
                 }
@@ -511,41 +595,15 @@ class AppFixtures extends Fixture
 
             foreach ($labs as $lab) {
                 // each student...
-                $counter = 0;
                 foreach ($studentsInCourse as $student) {
-                    // First student is always in danger zones.
-                    if ($counter === 0) {
+                    // 70% probability of completing survey
+                    if (rand(0, 10) < 7) {
                         $completedResponses[] =  $this->createLabResponse(
                             $lab,
                             $student,
-                            100,
-                            -10,
-                            -10
+                            90,  // 90% chance of completing an XY question
                         );
                     }
-                    // Second student is always in warning zones.
-                    else if ($counter === 1) {
-                        $completedResponses[] =  $this->createLabResponse(
-                            $lab,
-                            $student,
-                            100,
-                            -10,
-                            -1
-                        );
-                    }
-                    // Otherwise 80% chance of completing survey with random results
-                    else {
-                        if (rand(0, 10) < 8) {
-                            $completedResponses[] =  $this->createLabResponse(
-                                $lab,
-                                $student,
-                                90,  // 90% chance of completing an XY question
-                                null, // Random X
-                                null // Random Y
-                            );
-                        }
-                    }
-                    $counter++;
                 }
             }
         }
@@ -577,6 +635,24 @@ class AppFixtures extends Fixture
             }
         }
 
+        $labSentimentQuestions = $this->manager->getRepository(LabSentimentQuestion::class)
+            ->findBy(['lab' => $lab]);
+
+        foreach ($labSentimentQuestions as $labSentimentQuestion) {
+            if (rand(0, 100) < $probabilityCompleteQuestion) {
+
+                $mock = self::MOCK_SENTIMENT_RESPONSES[array_rand(self::MOCK_SENTIMENT_RESPONSES, 1)];
+
+                $sentimentResponse = $this->creator->createLabSentimentQuestionResponse(
+                    $mock['text'],
+                    $mock['classification'],
+                    $mock['confidence'],
+                    $labSentimentQuestion,
+                    $labResponse
+                );
+            }
+        }
+
         return $labResponse;
     }
     // HELPER FUNCTIONS
@@ -595,5 +671,17 @@ class AppFixtures extends Fixture
             printf($str);
         }
         printf("\n");
+    }
+
+    private function outputUsernamePasswordCSV(array $userWrappers, string $filename)
+    {
+        $newCSV = fopen($this->projectDirectory . '/' . $filename, 'w');
+
+        foreach ($userWrappers as $userWrapper) {
+            $user = $userWrapper['user']->getUser();
+            fputcsv($newCSV, [$user->getEmail(), $userWrapper['password']]);
+        }
+
+        fclose($newCSV);
     }
 }

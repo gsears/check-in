@@ -39,13 +39,10 @@ security:
                 # where to redirect after logout
                 target: app_login
 
-    # Easy way to control access for large sections of your site
+    # Easy way to control access for large sections of the site
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        # TODO: User profiles and admin page
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/courses, roles: ROLE_USER }
         # Homepage (may not be used)
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }

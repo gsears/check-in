@@ -1,6 +1,6 @@
 {% extends "sidebar_template.html.twig" %}
 
-{% from 'macros.html.twig' import instructorCardList %}
+{% from 'macros.html.twig' import instructorCardList, riskStatus %}
 
 {% block title %}
 	Course Summary for
@@ -17,10 +17,14 @@
 {% endblock %}
 
 {% block main %}
-	<h2>Students</h2>
-	{{_self.studentTable(enrolmentRisks, courseInstance)}}
-	<h2>Labs</h2>
-	{{_self.labTable(labs, currentDate)}}
+	<div id="students">
+		<h2>Students</h2>
+		{{_self.studentTable(enrolmentRisks, courseInstance)}}
+	</div>
+	<div id="labs">
+		<h2>Labs</h2>
+		{{_self.labTable(labs, currentDate)}}
+	</div>
 {% endblock %}
 
 {% block sidebar %}
@@ -39,7 +43,7 @@
 		<table id="labs-table" class="table table-sm">
 			<thead>
 				<tr>
-					<th>Lab</th>
+					<th id="labs-header">Lab</th>
 					<th data-sort-default data-sort-method='datesort'>Date</th>
 					<th data-sort-method='datesort'>Time</th>
 					<th>Status</th>
@@ -91,9 +95,9 @@
 		<table id="student-table" class="table table-sm">
 			<thead>
 				<tr>
-					<th>Student</th>
-					<th>Flag</th>
-					<th data-sort-default data-sort-method='datesort'>When</th>
+					<th id="student-column-header">Student</th>
+					<th id="flag-column-header">Flag</th>
+					<th id="flag-date-column-header" data-sort-default data-sort-method='datesort'>When</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -118,19 +122,7 @@
 						<td>
 
 							{% if enrolment.riskFlag %}
-								<span class="text-danger">
-									{% if enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_AUTOMATIC') %}
-										<i class="fa fa-cog" aria-hidden="true"></i>
-										Flagged Automatically
-									{% elseif enrolment.riskFlag == constant('App\\Entity\\Enrolment::FLAG_BY_INSTRUCTOR') %}
-										<i class="fa fa-user" aria-hidden="true"></i>
-										Flagged by Instructor
-									{% elseif enrolment.riskFlag ==  constant('App\\Entity\\Enrolment::FLAG_BY_STUDENT') %}
-										<i class="fa fa-user" aria-hidden="true"></i>
-										Self flagged
-									{% endif %}
-								</span>
-
+								{{riskStatus(enrolment.riskFlag)}}
 							{% else %}
 								{% if atRisk %}
 									<span class="text-secondary">
@@ -160,18 +152,16 @@
 {% endmacro %}
 
 {% macro riskSettings(riskSettingsForm) %}
-
-	{% set riskFactorTooltip %}
-	<a href="#" data-trigger="focus hover" data-toggle="popover" title="Risk factor" data-content="Each affective survey question can have one or more 'danger zones'. If a student's response falls into the 'warning' or 'danger zone' bounds for that question, it is assigned that zone's risk value. A student's risk factor is the sum of the student's response risks for a lab survey, divided by the maximum possible risk value for that lab as a percentage.">risk factor</a>
-	{% endset %}
-
-	<div class="card mb-4">
+	<div id="risk-settings" class="card mb-4">
 		<h2 class="card-header h5">Risk Settings</h4>
 		<div class="card-body">
 			<p class="card-text">
-				<small>Students at risk are those with a
-					{{riskFactorTooltip}}
-					above the threshold % for X consecutive labs.</small>
+				<small>Students at risk are those with a risk factor above the threshold % for X consecutive labs.</small>
+			</p>
+			<p>
+				<small>Changing these settings will add pending flags to previously unflagged students above the new threshold. This allows for instructor experimentation without notifying students. Scheduled flags will be applied
+					{{constant('App\\Task\\FlagStudentsTask::CRON_DESCRIPTION')}}, notifying those students.
+				</small>
 			</p>
 
 			{{ form_start(riskSettingsForm) }}
@@ -191,8 +181,39 @@
 {% endmacro %}
 
 {% block javascripts %}
-	{{parent()}}
-	<script>
+{{parent()}}
+<script>
+
+/**
+ * Used to allow a checkbox to filter table rows using a particular predicate function.
+ * @param {HTMLElement} tableElement
+ * @param {HTMLElement} checkboxElement
+ * @param {function} filterPredicate, in the form (tr) => {} where tr is the table row
+ */
+const filterTableWithCheckbox = (tableElement, checkboxElement, filterPredicate, setOnInit) => {
+const trs = tableElement.querySelectorAll("tbody tr");
+
+const filterFunction = () => {
+	trs.forEach((tr) => {
+	tr.style.display = filterPredicate(tr) ? "" : "none";
+	});
+};
+
+checkboxElement.onchange = function () {
+	if (this.checked) {
+		filterFunction();
+	} else {
+		trs.forEach((tr) => {
+			tr.style.display = "";
+		});
+	}
+};
+
+if (setOnInit) { // Initialise
+	filterFunction();
+	checkboxElement.checked = true;
+}
+};
 
 /**
  * Binds two form inputs together so that their values are always equal.
@@ -203,27 +224,27 @@
  * @param {HTMLElement} Optional: The element whose value is the initial value for both elements.
  */
 const bindInputs = (inputOne, inputTwo, primaryNode) => {
-  primaryNode = primaryNode || inputOne;
+	primaryNode = primaryNode || inputOne;
 
-  const copyFirstInputToSecond = function() {
-    inputTwo.value = inputOne.value;
-  };
+	const copyFirstInputToSecond = function () {
+		inputTwo.value = inputOne.value;
+	};
 
-  const copySecondInputToFirst = function() {
-    inputOne.value = inputTwo.value;
-  };
+	const copySecondInputToFirst = function () {
+		inputOne.value = inputTwo.value;
+	};
 
-  inputOne.oninput = copyFirstInputToSecond;
-  inputTwo.oninput = copySecondInputToFirst;
+	inputOne.oninput = copyFirstInputToSecond;
+	inputTwo.oninput = copySecondInputToFirst;
 
-  // Initialise
-  if (primaryNode === inputOne) {
-    copyFirstInputToSecond();
-  } else {
-    copySecondInputToFirst();
-  }
+	// Initialise
+	if (primaryNode === inputOne) {
+		copyFirstInputToSecond();
+	} else {
+		copySecondInputToFirst();
+	}
 };
-		// Bind the slider input to the numberbox value
+// Bind the slider input to the numberbox value
 const riskThresholdSlider = document.querySelector('#risk-threshold-form-group input[type=range]');
 const riskThresholdNumberBox = document.querySelector('#risk-threshold-form-group input[type=number]');
 bindInputs(riskThresholdNumberBox, riskThresholdSlider);
@@ -232,9 +253,10 @@ bindInputs(riskThresholdNumberBox, riskThresholdSlider);
 const studentCheckbox = document.getElementById("student-toggle");
 const studentTable = document.getElementById("student-table");
 const flagColumn = 1;
+
 filterTableWithCheckbox(studentTable, studentCheckbox, (tr) => { // If flag column has any content, display
-return tr.children[flagColumn].textContent.trim() !== '';
-})
+	return tr.children[flagColumn].textContent.trim() !== '';
+}, true);
 
 // Add checkbox filter to labs table for only open labs
 const labsCheckbox = document.getElementById("labs-toggle");
@@ -242,8 +264,115 @@ const labsTable = document.getElementById("labs-table");
 const statusColumn = 3;
 
 filterTableWithCheckbox(labsTable, labsCheckbox, (tr) => { // If status is open
-return tr.children[statusColumn].textContent.trim() === 'Open';
-})
-	</script>
+	return tr.children[statusColumn].textContent.trim() === 'Open';
+}, false);
+</script>
 
+{% endblock %}
+
+{% block tour_script %}
+<script>
+tourStep(tour, {
+	attachTo: {
+		element: '#students',
+		on: 'right'
+	},
+	title: 'Students',
+	text: 'This table shows all the students in this course...'
+});
+
+{% if enrolmentRisks %}
+tourStep(tour, {
+	attachTo: {
+		element: '#student-toggle',
+		on: 'top'
+	},
+	title: 'Students needing support toggle',
+	text: 'Click here to toggle between the full list of students and only those flagged for extra support.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#student-column-header',
+		on: 'right'
+	},
+	title: 'Student summary',
+	text: 'Click on the student link in this column to view a summary of their lab surveys this course.'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#flag-column-header',
+		on: 'right'
+	},
+	title: 'Flag column',
+	text: 'This column shows the type of support flag a student has. No flag means the student is not at risk. There are two types of manual flag. "Flagged by Instructor" means an instructor flagged the student. "Flagged by student" means the student flagged themselves. "Flagged automatically" means the student was flagged based on the risk settings for this course. "Will Be Flagged Automatically" is a special case...'
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#flag-column-header',
+		on: 'right'
+	},
+	title: 'Automatic flagging',
+	text: "Student flags are not applied instantly. They are applied     {{ constant('App\\Task\\FlagStudentsTask::CRON_DESCRIPTION') }}. This allows instructors time to experiment with configurations without alerting all students (which would cause headaches!). If a student will be flagged at the next interval, they are marked as \"Will Be Flagged Automatically\"."
+});
+{% endif %}
+
+tourStep(tour, {
+	attachTo: {
+		element: '#risk-settings',
+		on: 'left'
+	},
+	title: 'Risk settings',
+	text: "Here you can adjust the course thresholds for automatically flagging students needing support..."
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#risk-settings',
+		on: 'left'
+	},
+	title: 'What is a risk factor?',
+	text: "...each affective survey question can have one or more 'danger zones'. If a student's response falls into the 'warning' or 'danger zone' bounds for that question, it is assigned that zone's risk value. A student's risk factor is the sum of the student's response risks for a lab survey, divided by the maximum possible risk value for that lab as a percentage."
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#labs',
+		on: 'left'
+	},
+	title: 'Lab surveys',
+	text: "This table shows the lab surveys for this course."
+});
+
+{% if labs %}
+tourStep(tour, {
+	attachTo: {
+		element: '#labs-toggle',
+		on: 'top'
+	},
+	title: 'Open labs toggle',
+	text: "This toggles the 'open' labs. An 'Open' status indicates the lab has started and students can respond to that lab's survey."
+});
+
+tourStep(tour, {
+	attachTo: {
+		element: '#labs-header',
+		on: 'left'
+	},
+	title: 'Lab survey summary',
+	text: "Click the lab link to see a summary of all student survey responses for that lab."
+});
+{% endif %}
+
+finalTourStep(tour, {
+	attachTo: {
+		element: '#instructor-card-list',
+		on: 'left'
+	},
+	title: 'Instructors',
+	text: "These are the instructors that teach on this course. Click 'message' to quickly open up an email link."
+})
+</script>
 {% endblock %}
