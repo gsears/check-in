@@ -195,24 +195,16 @@ class AppFixtures extends Fixture
         $testInstructor = $testUsers['instructor'];
 
         // Create students
-        $studentWrappers = $this->loadStudents();
-        // Wrappers are used to get passwords
-        $students = array_map(function ($wrapper) {
-            return $wrapper['user'];
-        }, $studentWrappers);
+        $students = $this->loadStudents();
         $allStudents = array_merge($students, [$testStudent]);
         // For evaluation testing
-        $this->outputUsernamePasswordCSV($studentWrappers, 'students.csv');
+        $this->outputUsernamesCSV($students, 'students.csv');
 
         // Create instructors
-        $instructorWrappers = $this->loadInstructors();
-        // Wrappers are used to get passwords
-        $instructors = array_map(function ($wrapper) {
-            return $wrapper['user'];
-        }, $instructorWrappers);
+        $instructors = $this->loadInstructors();
         $allInstructors = array_merge($instructors, [$testInstructor]);
         // For evaluation testing
-        $this->outputUsernamePasswordCSV($instructorWrappers, 'instructors.csv');
+        $this->outputUsernamesCSV($instructors, 'instructors.csv');
 
         // Create courses
         $courses = $this->loadCourses();
@@ -267,24 +259,9 @@ class AppFixtures extends Fixture
         ];
     }
 
-    private function createPassword($userType)
-    {
-        $user = $userType->getUser();
-        // Create passwords for evaluation
-        $password = $user->getEmail();
-        // Encode password appropriately
-        $newPassword = $this->passwordEncoder->encodePassword($user, $password);
-        $user->setPassword($newPassword);
-        // Wrap password for CSV output as it's hashed otherwise!
-        return [
-            'user' => $userType,
-            'password' => $password,
-        ];
-    }
-
     private function loadStudents(): array
     {
-        $studentWrappers = [];
+        $students = [];
 
         for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
             $student = $this->creator->createStudent(
@@ -293,27 +270,26 @@ class AppFixtures extends Fixture
                 $this->faker->unique()->randomNumber(7),
             );
 
-            $studentWrappers[] = $this->createPassword($student);
+            $students[] = $student;
         }
 
-        return $studentWrappers;
+        return $students;
     }
 
     private function loadInstructors(): array
     {
-        $instructorWrappers = [];
+        $instructors = [];
 
         for ($i = 0; $i < self::INSTRUCTOR_COUNT; $i++) {
             $instructor = $this->creator->createInstructor(
                 $this->faker->firstName(),
                 $this->faker->lastName(),
             );
-            $instructorWrappers[] = $this->createPassword($instructor);
+            $instructors[] = $instructor;
         }
 
-        return $instructorWrappers;
+        return $instructors;
     }
-
 
     private function loadCourses(): array
     {
@@ -674,13 +650,13 @@ class AppFixtures extends Fixture
         printf("\n");
     }
 
-    private function outputUsernamePasswordCSV(array $userWrappers, string $filename)
+    private function outputUsernamesCSV(array $userTypes, string $filename)
     {
         $newCSV = fopen($this->projectDirectory . '/' . $filename, 'w');
 
-        foreach ($userWrappers as $userWrapper) {
-            $user = $userWrapper['user']->getUser();
-            fputcsv($newCSV, [$user->getEmail(), $userWrapper['password']]);
+        foreach ($userTypes as $userType) {
+            $user = $userType->getUser();
+            fputcsv($newCSV, [$user->getEmail()]);
         }
 
         fclose($newCSV);
