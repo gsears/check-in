@@ -19,6 +19,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 use App\Entity\LabSentimentQuestion;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
@@ -268,9 +269,9 @@ class AppFixtures extends Fixture
 
     private function createPassword($userType)
     {
-        // Create passwords for evaluation
-        $password = $this->faker->unique()->password();
         $user = $userType->getUser();
+        // Create passwords for evaluation
+        $password = $user->getEmail();
         // Encode password appropriately
         $newPassword = $this->passwordEncoder->encodePassword($user, $password);
         $user->setPassword($newPassword);
