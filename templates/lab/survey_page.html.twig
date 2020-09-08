@@ -15,7 +15,20 @@
 		{{form(form)}}
 	</div>
 	
-	
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}
+	<script>
+	// Add loading to any submit buttons. Especially useful for long backend tasks (sentiment analysis).
+	const submitButtons = Array.from(document.querySelectorAll('button[type="submit"]'));
+	submitButtons.forEach(b => {
+		b.onclick = function() {
+			submitButtons.forEach(b => b.classList.add('disabled'));
+			this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+		}
+	})
+	</script>
 {% endblock %}
 
 {% block tour_script %}
@@ -37,4 +50,4 @@ tourStep(tour, {
 	text: "This is the survey question. If you do not wish to answer this particular question, click the 'skip' button."
 })
 </script>
-{% endblock %
+{% endblock %}
