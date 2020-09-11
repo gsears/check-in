@@ -7,10 +7,9 @@ Gareth Sears - 2493194S
 
 namespace App\Containers;
 
-use InvalidArgumentException;
-
 /**
- * A wrapper class for XY Coordinates
+ * A container class for storing XY coordinates for better type safety than
+ * a dictionary.
  */
 class XYCoordinates
 {
@@ -24,12 +23,12 @@ class XYCoordinates
         $this->y = $y;
     }
 
-    public function getX()
+    public function getX(): int
     {
         return $this->x;
     }
 
-    public function getY()
+    public function getY(): int
     {
         return $this->y;
     }
