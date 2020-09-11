@@ -10,6 +10,9 @@ namespace App\Containers;
 use DateTime;
 use InvalidArgumentException;
 
+/**
+ * A container class for storing and validating course dates
+ */
 class CourseDates
 {
     private $startDate;
@@ -27,12 +30,12 @@ class CourseDates
         $this->endDate = $endDate;
     }
 
-    public function getStartDate()
+    public function getStartDate(): DateTime
     {
         return $this->startDate;
     }
 
-    public function getEndDate()
+    public function getEndDate(): DateTime
     {
         return $this->endDate;
     }
