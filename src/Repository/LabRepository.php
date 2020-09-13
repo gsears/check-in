@@ -152,8 +152,6 @@ class LabRepository extends ServiceEntityRepository
             })
             ->toArray());
 
-
-        // Order by highest risk
-        return LabResponseRisk::sortByWeightedRiskFactor($labResponseRisks);
+        return $labResponseRisks;
     }
 }
