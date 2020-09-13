@@ -96,7 +96,7 @@
 {% macro breadcrumbs(breadcrumbs) %}
 	<nav class="breadcrumb bg-white	border-bottom">
 		{% for breadcrumb in breadcrumbs %}
-			{% if breadcrumb.href is defined %}
+			{% if breadcrumb.href %}
 				<a class="breadcrumb-item" href="{{breadcrumb.href}}">{{breadcrumb.name}}</a>
 			{% else %}
 				<span class="breadcrumb-item active">{{breadcrumb.name}}</span>
