@@ -87,19 +87,6 @@ class LabResponseRisk
     }
 
     /**
-     * Returns the weighted risks of each question response in the lab survey in an array.
-     *
-     * @param boolean $excludeWithRiskLevelNone - If true, any objects with a risk level of 0 will not be returned.
-     * @return float[]
-     */
-    public function getWeightedRiskLevels(bool $excludeWithRiskLevelNone = false): array
-    {
-        return array_map(function (SurveyQuestionResponseRisk $sqrr) {
-            return $sqrr->getWeightedRiskLevel();
-        }, $this->getSurveyQuestionResponseRisks($excludeWithRiskLevelNone));
-    }
-
-    /**
      * Returns the lab response associated with this risk wrapper.
      *
      * @return LabResponse
@@ -107,5 +94,12 @@ class LabResponseRisk
     public function getLabResponse(): LabResponse
     {
         return $this->labResponse;
+    }
+
+    private function getWeightedRiskLevels(): array
+    {
+        return array_map(function (SurveyQuestionResponseRisk $sqrr) {
+            return $sqrr->getWeightedRiskLevel();
+        }, $this->getSurveyQuestionResponseRisks(false));
     }
 }
