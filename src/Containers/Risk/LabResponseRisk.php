@@ -14,6 +14,14 @@ use App\Entity\LabResponse;
  */
 class LabResponseRisk
 {
+    /**
+     * @deprecated In favour of client sorting.
+     *
+     * Sorts an array of labResponseRisks in order of weighted risk.
+     *
+     * @param LabResponseRisk[] $labResponseRisks
+     * @return LabResponseRisk[] An array of lab response risks sorted, highest risk first.
+     */
     public static function sortByWeightedRiskFactor(array $labResponseRisks): array
     {
         // Sorts in place, but array is not pass by reference so need to return local variable.
