@@ -5,7 +5,7 @@ EnrolmentRiskTest.php
 Gareth Sears - 2493194S
 */
 
-namespace App\Tests\Unit\Containers;
+namespace App\Tests\Unit\Containers\Risk;
 
 use App\Entity\Enrolment;
 use PHPUnit\Framework\TestCase;
