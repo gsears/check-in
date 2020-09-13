@@ -45,7 +45,7 @@ class Student
 
     public function __toString(): string
     {
-        return "STUDENT - " . $this->getUser();
+        return $this->guid . ' - ' . $this->appuser->getFullName();
     }
 
     public function getGuid(): ?int
