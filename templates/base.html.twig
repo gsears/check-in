@@ -25,6 +25,19 @@
 			<nav class="navbar navbar-light bg-white shadow navbar-expand-lg">
 				<div class="container">
 					<a class="navbar-brand" href="/">Check In</a>
+					{% if app.user %}
+							<span class="lead">
+								Current User: {{app.user.fullname}}
+								(
+								{% if is_granted((constant('App\\Security\\Roles::STUDENT'))) %}
+									Student
+								{% endif %}
+								{% if is_granted((constant('App\\Security\\Roles::INSTRUCTOR'))) %}
+									Instructor
+								{% endif %}
+								)
+							</span>
+					{% endif %}
 					<ul class="navbar-nav list-group list-group-horizontal">
 						<li class="nav-item list-group-item border-0">
 							<button id="tour-button" class="btn btn-primary">
