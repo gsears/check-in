@@ -58,7 +58,7 @@
 		<table id="recent-lab-list" class="table table-sm">
 			<thead>
 				<tr>
-					<th data-sort-default data-sort-method='datesort'>Date</th>
+					<th data-sort-default data-sort-method='datesort' aria-sort='ascending'>Date</th>
 					<th>Course</th>
 					<th>Lab</th>
 				</tr>
@@ -96,7 +96,7 @@ tourStep(tour, {
 		on: 'top'
 	},
 	title: 'Your course list',
-	text: 'Here are all the courses your instruct.',
+	text: 'Here are all the courses your instruct.'
 });
 
 tourStep(tour, {
@@ -134,6 +134,5 @@ finalTourStep(tour, {
 	title: 'Lab summary links',
 	text: 'Click the link to view a summary of student responses for that lab, including student risk factors.'
 });
-
 </script>
 {% endblock %}
