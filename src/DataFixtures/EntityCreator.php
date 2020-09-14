@@ -66,7 +66,7 @@ final class EntityCreator
         return $entity;
     }
 
-    public function createUser(string $forename, string $surname, string $email, string $password): User
+    public function createUser(string $forename, string $surname, string $email, string $password = self::PASSWORD): User
     {
         $user = (new User())
             ->setForename($forename)

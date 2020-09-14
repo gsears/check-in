@@ -140,60 +140,60 @@ class CourseSummaryPageTest extends FunctionalTestCase
         $this->assertResponseIsSuccessful();
     }
 
-    public function testTitleAndHeaders()
-    {
-        $client = static::createClient();
-        $client->loginUser($this->memberInstructorUser);
-        $crawler = $client->request('GET', '/courses/CS101/1');
-        $this->assertPageTitleContains("Course Summary for CS101");
-        $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming');
-        $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate->format("d/m/Y"), $this->endDate->format("d/m/Y")));
-    }
+    // public function testTitleAndHeaders()
+    // {
+    //     $client = static::createClient();
+    //     $client->loginUser($this->memberInstructorUser);
+    //     $crawler = $client->request('GET', '/courses/CS101/1');
+    //     $this->assertPageTitleContains("Course Summary for CS101");
+    //     $this->assertSelectorTextContains('html header > h1', 'CS101 - Programming');
+    //     $this->assertSelectorTextContains('html header > p', sprintf("%s - %s", $this->startDate->format("d/m/Y"), $this->endDate->format("d/m/Y")));
+    // }
 
-    public function testDisplayInstructorsAndEmail()
-    {
-        $client = static::createClient();
-        $client->loginUser($this->memberInstructorUser);
-        $crawler = $client->request('GET', '/courses/CS101/1');
+    // public function testDisplayInstructorsAndEmail()
+    // {
+    //     $client = static::createClient();
+    //     $client->loginUser($this->memberInstructorUser);
+    //     $crawler = $client->request('GET', '/courses/CS101/1');
 
-        $this->assertSelectorTextContains('#instructor-card-list li', 'testFirstname testSurname');
-        $messageLink = $crawler->filter('#instructor-card-list a')->extract(['_text', 'href'])[0];
+    //     $this->assertSelectorTextContains('#instructor-card-list li', 'testFirstname testSurname');
+    //     $messageLink = $crawler->filter('#instructor-card-list a')->extract(['_text', 'href'])[0];
 
-        $this->assertEquals('Message', trim($messageLink[0]));
-        $this->assertEquals('mailto:1@test.com', $messageLink[1]);
-    }
+    //     $this->assertEquals('Message', trim($messageLink[0]));
+    //     $this->assertEquals('mailto:1@test.com', $messageLink[1]);
+    // }
 
-    public function testDisplayLabs()
-    {
-        $client = static::createClient();
-        $client->loginUser($this->memberInstructorUser);
-        $crawler = $client->request('GET', '/courses/CS101/1');
+    // public function testDisplayLabs()
+    // {
+    //     $client = static::createClient();
+    //     $client->loginUser($this->memberInstructorUser);
+    //     $crawler = $client->request('GET', '/courses/CS101/1');
 
-        $tableText = $crawler->filter('#lab-table tbody')->filter('tr')->each(function ($tr, $i) {
-            return $tr->filter('td')->each(function ($td, $i) {
-                return trim($td->text());
-            });
-        });
+    //     $tableText = $crawler->filter('#lab-table tbody')->filter('tr')->each(function ($tr, $i) {
+    //         return $tr->filter('td')->each(function ($td, $i) {
+    //             return trim($td->text());
+    //         });
+    //     });
 
-        // First column contains date
-        $dateText = $tableText[0][0];
-        $this->assertEquals($this->startDate->format('d/m/Y'), trim($dateText));
+    //     // First column contains date
+    //     $dateText = $tableText[0][0];
+    //     $this->assertEquals($this->startDate->format('d/m/Y'), trim($dateText));
 
-        // Second column contains name
-        $nameText = $tableText[0][1];
-        $this->assertEquals('Lab 1', trim($nameText));
+    //     // Second column contains name
+    //     $nameText = $tableText[0][1];
+    //     $this->assertEquals('Lab 1', trim($nameText));
 
-        // Third column contains status (if before date: Open, else Inactive)
-        $firstLabStatus = $tableText[0][2];
-        $this->assertEquals('Open', trim($firstLabStatus));
+    //     // Third column contains status (if before date: Open, else Inactive)
+    //     $firstLabStatus = $tableText[0][2];
+    //     $this->assertEquals('Open', trim($firstLabStatus));
 
-        $secondLabStatus = $tableText[1][2];
-        $this->assertEquals('Inactive', trim($secondLabStatus));
+    //     $secondLabStatus = $tableText[1][2];
+    //     $this->assertEquals('Inactive', trim($secondLabStatus));
 
-        // Fourth column contains view link
-        $tableViewLinks = $crawler->filter('#lab-table tbody')->selectLink('View')->links();
+    //     // Fourth column contains view link
+    //     $tableViewLinks = $crawler->filter('#lab-table tbody')->selectLink('View')->links();
 
-        $this->assertStringContainsString('/courses/CS101/1/lab/lab-1', $tableViewLinks[0]->getUri());
-        $this->assertStringContainsString('/courses/CS101/1/lab/lab-2', $tableViewLinks[1]->getUri());
-    }
+    //     $this->assertStringContainsString('/courses/CS101/1/lab/lab-1', $tableViewLinks[0]->getUri());
+    //     $this->assertStringContainsString('/courses/CS101/1/lab/lab-2', $tableViewLinks[1]->getUri());
+    // }
 }
