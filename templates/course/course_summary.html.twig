@@ -181,10 +181,11 @@
 {% endmacro %}
 
 {% block javascripts %}
-	{{parent()}}
-	<script>
-
-		/**
+	
+{{parent()}}
+	
+<script>
+/**
  * Used to allow a checkbox to filter table rows using a particular predicate function.
  * @param {HTMLElement} tableElement
  * @param {HTMLElement} checkboxElement
