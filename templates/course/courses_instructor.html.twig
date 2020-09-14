@@ -1,17 +1,48 @@
 {% extends "column_template.html.twig" %}
 
 {% block header %}
-	<h1>My Courses</h1>
-	<p class="lead">These are the courses that you instruct.</p>
+	<div class="jumbotron">
+	<h1 class="display-4">Check In</h1>
+	<p class="lead">
+		A feedback platform which is designed to help instructors provide support to students quickly.
+	</p>
+	<p> 
+		This platform allows students to submit short feedback surveys following their labs. 
+		Their responses are 
+		<a href="#"
+		data-trigger="focus hover" 
+		data-toggle="popover"
+		data-placement="top"
+		data-content="This is done using sentiment analysis and risk thresholds which you can configure on the course and lab pages."
+		> 
+			automatically analysed to detect problematic areas 
+		</a>
+		. If the analysis indicates that a student may require extra support for a course, the software will notify you and your student. 
+	 	Alternatively, you can manually signal to the student and other instructors that the student needs additional support using 
+		 <a href="#"
+		data-trigger="focus hover" 
+		data-toggle="popover"
+		data-placement="top"
+		data-content="This is found on a course page."
+		> 
+		 a course's 'manual flag' feature. 
+		 </a>
+	</p>
+	<p class="font-italic">
+		Click the 'Explain this page' button in the menu to access additional documentation for the page you are on.
+	</p>
+	</div>
 {% endblock %}
 
 {% block first_column %}
 	<h2>My Courses</h2>
+	<p> These are the courses you instruct </p>
 	{{_self.instructorCoursesTable(courseInstances)}}
 {% endblock %}
 
 {% block second_column %}
 	<h2>Recent Labs</h2>
+	<p> These are your most recently started labs </p>
 	{{_self.recentLabsTable(recentLabs)}}
 {% endblock %}
 
