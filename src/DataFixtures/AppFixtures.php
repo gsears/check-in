@@ -16,9 +16,10 @@ use App\Entity\LabXYQuestion;
 use App\Containers\XYCoordinates;
 use App\Entity\SentimentQuestion;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 use App\Entity\LabSentimentQuestion;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -27,7 +28,7 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  *
  * Generally it is good Symfony practice to put these in one file so that variables can be passed around.
  */
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements FixtureGroupInterface
 {
     const TEST_STUDENT_USERNAME = 'test@student.gla.ac.uk';
     const TEST_INSTUCTOR_USERNAME = 'test@glasgow.ac.uk';
@@ -167,16 +168,24 @@ class AppFixtures extends Fixture
     private $manager;
     private $faker;
     private $creator;
-    private $passwordEncoder;
     private $projectDirectory;
 
     /**
      * Dependency inject the root directory via services.yaml config
      */
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder, string $projectDirectory)
+    public function __construct(string $projectDirectory)
     {
-        $this->passwordEncoder = $passwordEncoder;
         $this->projectDirectory = $projectDirectory;
+    }
+
+    /**
+     * Returns the group for this fixture, which allows selective loading (e.g 'app' fixtures vs 'test' fixtures)
+     *
+     * @return array
+     */
+    public static function getGroups(): array
+    {
+        return ['app'];
     }
 
     public function load(ObjectManager $manager)
