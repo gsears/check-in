@@ -15,6 +15,9 @@ use App\Tests\Functional\FunctionalTestCase;
 class SecurityControllerTest extends FunctionalTestCase
 {
 
+    /**
+     * Assert root path redirects to courses
+     */
     public function testRootRedirectsToCourses()
     {
         $client = static::createClient();
@@ -26,7 +29,7 @@ class SecurityControllerTest extends FunctionalTestCase
     /**
      * Assert that users are redirected to their courses page on login
      */
-    public function testLoginRedirect()
+    public function testLoginRedirectToCoursesPage()
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
@@ -37,7 +40,6 @@ class SecurityControllerTest extends FunctionalTestCase
             'test',
             'test@test.com'
         );
-
 
         $client->submit($form, [
             'email' => $testUser->getEmail(),
@@ -60,7 +62,6 @@ class SecurityControllerTest extends FunctionalTestCase
             'test@test.com'
         );
 
-        // simulate $testUser being logged in
         $client->loginUser($testUser);
         $crawler = $client->request('GET', '/login');
         $this->assertResponseRedirects('/courses', 302);
@@ -94,5 +95,44 @@ class SecurityControllerTest extends FunctionalTestCase
 
         // Use full path as we are redirecting from firewall in security.yaml
         $this->assertResponseRedirects('http://localhost/login', 302);
+    }
+
+
+    public function invalidCredentialsProvider()
+    {
+        yield ['goodusername@test.com', 'badpassword'];
+        yield ['badusername@test.com', 'goodpassword'];
+    }
+
+    /**
+     * @dataProvider invalidCredentialsProvider
+     * Invalid login displays message to user
+     */
+    public function testInvalidCredentials($email, $password)
+    {
+        $client = static::createClient();
+
+        $testUser = $this->getEntityCreator()->createUser(
+            'test',
+            'test',
+            'goodusername@test.com',
+            'goodpassword'
+        );
+
+        $crawler = $client->request('GET', '/login');
+        $form = $crawler->selectButton('Sign in')->form();
+
+        $client->submit($form, [
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        // Assert redirect back to login page
+        $this->assertResponseRedirects('/login', 302);
+        $crawler = $client->followRedirect();
+        // Assert shows message
+        $errorNode = $crawler->filterXPath("//text()[contains(.,'Invalid credentials.')]");
+
+        $this->assertEquals(1, count($errorNode));
     }
 }
