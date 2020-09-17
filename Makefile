@@ -23,7 +23,7 @@ dev-hot:
 
 fixtures:
 	make reset_db
-	php bin/console doctrine:fixtures:load --no-interaction
+	php -d memory_limit=512M bin/console doctrine:fixtures:load --no-interaction
 
 test:
 	./bin/phpunit
