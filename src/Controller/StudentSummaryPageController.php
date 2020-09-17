@@ -24,7 +24,7 @@ class StudentSummaryPageController extends AbstractCourseController
     const ROUTE = 'student_summary';
 
     /**
-     * @Route("courses/{courseId}/{instanceIndex}/{studentId}",
+     * @Route("/courses/{courseId}/{instanceIndex}/{studentId}",
      * name=StudentSummaryPageController::ROUTE)
      */
     public function viewCourseStudentSummary(

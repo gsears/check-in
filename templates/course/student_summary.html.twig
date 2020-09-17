@@ -182,7 +182,7 @@ Support Status
 	{% if isInstructor %}
 		{% set courseInstance = lab.courseInstance %}
 		{% set href = path(
-			constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+			constant('App\\Controller\\LabSummaryPageController::ROUTE'),
 			{
 				courseId: courseInstance.course.code,
 				instanceIndex: courseInstance.indexInCourse,

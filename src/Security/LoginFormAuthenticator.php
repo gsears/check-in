@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Controller\CourseController;
 use App\Controller\CoursesPageController;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
