@@ -62,10 +62,26 @@ class EnrolmentRepository extends ServiceEntityRepository
         $query->setMaxResults($consecutiveLabCount);
         $labs = $query->getResult();
 
-        // If there aren't enough labs to make a calculation, return nothing.
+        // If the number of consecutive labs are less than required, simply
+        // return empty enrolment risk objects
         if (count($labs) < $consecutiveLabCount) {
-            return [];
+            // Get all enrolments for this course
+            $enrolments = $this->findBy(['courseInstance' => $courseInstance]);
+
+            // Return empty wrappers with the enrolment.
+            return array_map(function ($enrolment) {
+                return new EnrolmentRisk([], $enrolment);
+            }, $enrolments);
         }
+
+        // Get lab responses from
+        $query = $this->getEntityManager()->createQuery('
+            SELECT lr FROM App\Entity\LabResponse lr
+            WHERE lr.lab IN (:labs)
+            ORDER BY lr.student ASC
+        ');
+        $query->setParameter('labs', $labs);
+        $labResponses = $query->getResult();
 
         // Get the student responses for each of the labs returned above
         $query = $this->getEntityManager()->createQuery('

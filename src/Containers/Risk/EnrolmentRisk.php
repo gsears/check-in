@@ -116,6 +116,10 @@ class EnrolmentRisk
      */
     public function areAllRisksAbove(float $riskFactor): bool
     {
+        if (count($this->labResponseRisks) === 0) {
+            return false;
+        }
+
         foreach ($this->labResponseRisks as $labResponseRisk) {
             if ($labResponseRisk->getWeightedRiskFactor() < $riskFactor) {
                 return false;
