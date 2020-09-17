@@ -53,7 +53,7 @@
 				{% for lab in labs %}
 					{% set courseInstance = lab.courseInstance %}
 					{% set href = path(
-						constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+						constant('App\\Controller\\LabSummaryPageController::ROUTE'),
 						{
 							courseId: courseInstance.course.code,
 							instanceIndex: courseInstance.indexInCourse,
@@ -105,7 +105,7 @@
 					{% set enrolment = enrolmentRisk.enrolment %}
 					{% set student = enrolment.student %}
 					{% set href = path(
-						constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+						constant('App\\Controller\\StudentSummaryPageController::ROUTE'),
 						{
 							courseId: courseInstance.course.code,
 							instanceIndex: courseInstance.indexInCourse,

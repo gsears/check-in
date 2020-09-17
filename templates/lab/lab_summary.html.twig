@@ -35,7 +35,7 @@
 					{% for risk in labResponseRisks %}
 						{% set student = risk.labResponse.student %}
 						{% set href = path(
-						constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+						constant('App\\Controller\\StudentSummaryPageController::ROUTE'),
 						{
 							courseId: courseInstance.course.code,
 							instanceIndex: courseInstance.indexInCourse,

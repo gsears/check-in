@@ -65,7 +65,7 @@
 					{% set courseInstance = enrolment.courseInstance %}
 
 					{% set href = path(
-					constant('App\\Controller\\CourseController::STUDENT_SUMMARY_PAGE'),
+					constant('App\\Controller\\StudentSummaryPageController::ROUTE'),
 					{
 						courseId: courseInstance.course.code,
 						instanceIndex: courseInstance.indexInCourse,
@@ -108,12 +108,14 @@
 			</thead>
 			<tbody>
 				{% for lab in recentLabs %}
-					{% set href = path('lab_survey_response', {
-						courseId: lab.courseInstance.course.code,
-						instanceIndex: lab.courseInstance.indexInCourse,
-						labSlug: lab.slug,
-						studentId: studentId,
-						page: 1
+					{% set href = path(
+						constant('App\\Controller\\LabSurveyPageController::ROUTE'), 
+						{
+							courseId: lab.courseInstance.course.code,
+							instanceIndex: lab.courseInstance.indexInCourse,
+							labSlug: lab.slug,
+							studentId: studentId,
+							page: 1
 					}) %}
 					<tr>
 						<td>{{lab.startDateTime | date("d/m/Y")}}</td>

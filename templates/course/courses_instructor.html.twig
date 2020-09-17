@@ -61,7 +61,7 @@
 				{% for courseInstance in courseInstances %}
 
 					{% set href = path(
-					constant('App\\Controller\\CourseController::COURSE_SUMMARY_PAGE'),
+					constant('App\\Controller\\CourseSummaryPageController::ROUTE'),
 					{
 						courseId: courseInstance.course.code,
 						instanceIndex: courseInstance.indexInCourse
@@ -97,7 +97,7 @@
 			<tbody>
 				{% for lab in recentLabs %}
 					{% set href = path(
-						constant('App\\Controller\\CourseController::LAB_SUMMARY_PAGE'),
+						constant('App\\Controller\\LabSummaryPageController::ROUTE'),
 						{
 							courseId: lab.courseInstance.course.code,
 							instanceIndex: lab.courseInstance.indexInCourse,

@@ -68,7 +68,16 @@
 						<td>{{lab.startDateTime | date("H:i")}}</td>
 						{% if not isInstructor %}
 							<td>
-							<a class="btn btn-primary" href="{{path('lab_survey_response', { courseId: courseInstance.course.code, instanceIndex: courseInstance.indexInCourse, labSlug: lab.slug, studentId: student.guid, page: 1 })}}">
+							<a class="btn btn-primary" href="{{path(
+								constant('App\\Controller\\LabSurveyPageController::ROUTE'), 
+								{ 
+									courseId: courseInstance.course.code, 
+									instanceIndex: courseInstance.indexInCourse, 
+									labSlug: lab.slug, 
+									studentId: student.guid, 
+									page: 1 
+								}
+							)}}">
 								Complete Survey
 							</a>
 						</td>
