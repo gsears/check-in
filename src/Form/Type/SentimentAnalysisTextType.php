@@ -17,7 +17,6 @@ class SentimentAnalysisTextType extends AbstractType
 {
     public function getBlockPrefix()
     {
-        dump('here!');
         return 'sentiment_text';
     }
 
