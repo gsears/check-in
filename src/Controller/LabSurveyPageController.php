@@ -25,9 +25,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\Type\LabSentimentQuestionResponseType;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-/**
- * @Route("/courses")
- */
 class LabSurveyPageController extends AbstractCourseController
 {
     const ROUTE = 'lab_survey_page';
@@ -57,7 +54,7 @@ class LabSurveyPageController extends AbstractCourseController
         // Check if question exists. Out of bounds exception means it doesn't.
         try {
             $question = $lab->getQuestions()->toArray()[$page - 1];
-        } catch (\OutOfBoundsException $e) {
+        } catch (\Exception $e) {
             throw $this->createNotFoundException('This lab survey question does not exist');
         }
 
@@ -73,6 +70,10 @@ class LabSurveyPageController extends AbstractCourseController
         $questionCount = $lab->getQuestionCount();
         $isLastQuestion = $page === $questionCount;
         $labResponse = $labResponseRepo->findOneByLabAndStudent($lab, $student);
+
+        if ($labResponse->getSubmitted()) {
+            throw $this->createAccessDeniedException('Cannot resubmit a lab survey.');
+        }
 
         $form = $this->generateLabSurveyForm($question, $labResponse, [
             'submitText' => $isLastQuestion ? 'Submit' : 'Next Question',

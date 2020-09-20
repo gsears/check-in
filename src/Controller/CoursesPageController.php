@@ -14,6 +14,9 @@ use App\Repository\EnrolmentRepository;
 use App\Repository\CourseInstanceRepository;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Renders the courses page (the home page).
+ */
 class CoursesPageController extends AbstractCourseController
 {
     const ROUTE = 'course_instances';
@@ -56,6 +59,7 @@ class CoursesPageController extends AbstractCourseController
         }
 
         // If an unknown user type, simply deny.
+        // Code should never reach here.
         $this->createAccessDeniedException("Invalid user role");
     }
 }
