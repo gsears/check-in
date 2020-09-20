@@ -199,11 +199,15 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $testStudent = $testUsers['student'];
         $testInstructor = $testUsers['instructor'];
 
+        printf("Loaded test users\n");
+
         // Create students
         $students = $this->loadStudents();
         $allStudents = array_merge($students, [$testStudent]);
         // For evaluation testing
         $this->outputUsernamesCSV($students, 'students.csv');
+
+        printf("Loaded students\n");
 
         // Create instructors
         $instructors = $this->loadInstructors();
@@ -211,8 +215,12 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         // For evaluation testing
         $this->outputUsernamesCSV($instructors, 'instructors.csv');
 
+        printf("Loaded instructors\n");
+
         // Create courses
         $courses = $this->loadCourses();
+
+        printf("Loaded courses\n");
 
         // Create course instances, assign instructors and students. Return wrappers
         // ['courseInstance' => ... , 'students' => [...], 'instructors' => [...]]
@@ -224,17 +232,27 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             $testInstructor
         );
 
+        printf("Loaded course instances\n");
+
         // Create affective fields for XY questions
         $affectiveFields = $this->loadAffectiveFields();
+
+        printf("Loaded affective fields\n");
 
         // Create XY questions
         $xyQuestions = $this->loadXYQuestions($affectiveFields);
 
+        printf("Loaded xy questions\n");
+
         // Create Sentiment questions
         $sentimentQuestions = $this->loadSentimentQuestions();
 
+        printf("Loaded sentiment questions\n");
+
         // Create lab surveys and populate responses
         $labs = $this->loadLabs($courseInstanceWrappers, $xyQuestions, $sentimentQuestions);
+
+        printf("Loaded labs ...flushing...\n");
 
         $manager->flush();
         $manager->clear();
@@ -250,14 +268,14 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             "Gareth",
             "Sears",
             $testStudentGuid,
-            $testStudentEmail,
+            $testStudentEmail
         );
 
         $testInstructorEmail = self::TEST_INSTUCTOR_USERNAME;
         $testInstructor = $this->creator->createInstructor(
             $this->faker->firstName(),
             $this->faker->lastName(),
-            $testInstructorEmail,
+            $testInstructorEmail
         );
 
         return [
@@ -274,7 +292,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             $student = $this->creator->createStudent(
                 $this->faker->firstName(),
                 $this->faker->lastName(),
-                $this->faker->unique()->randomNumber(7),
+                $this->faker->unique()->randomNumber(7)
             );
 
             $students[] = $student;
@@ -290,7 +308,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         for ($i = 0; $i < self::INSTRUCTOR_COUNT; $i++) {
             $instructor = $this->creator->createInstructor(
                 $this->faker->firstName(),
-                $this->faker->lastName(),
+                $this->faker->lastName()
             );
             $instructors[] = $instructor;
         }
@@ -339,7 +357,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
                         $endDate,
                         self::DEFAULT_RISK_THRESHOLD_PERCENT,
                         self::DEFAULT_RISK_CONSECUTIVE_LABS,
-                        $courseIndex, // Manually set course index to prevent db query.
+                        $courseIndex // Manually set course index to prevent db query.
                     ),
                     'students' => [],
                     'instructors' => [],
