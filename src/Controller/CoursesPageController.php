@@ -46,9 +46,7 @@ class CoursesPageController extends AbstractCourseController
                 'recentLabs' => $labRepo->findLatestPendingByStudent($student, 5),
                 'breadcrumbArray' => $breadcrumbs,
             ]);
-        }
-
-        if ($user->isInstructor()) {
+        } else {
             $instructor = $user->getInstructor();
 
             return $this->render('course/courses_instructor.html.twig', [
@@ -57,9 +55,5 @@ class CoursesPageController extends AbstractCourseController
                 'breadcrumbArray' => $breadcrumbBuilder->build()
             ]);
         }
-
-        // If an unknown user type, simply deny.
-        // Code should never reach here.
-        $this->createAccessDeniedException("Invalid user role");
     }
 }

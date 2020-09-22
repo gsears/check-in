@@ -11,9 +11,27 @@ use App\Entity\Enrolment;
 use PHPUnit\Framework\TestCase;
 use App\Containers\Risk\EnrolmentRisk;
 use App\Containers\Risk\LabResponseRisk;
+use App\Entity\CourseInstance;
 
 class EnrolmentRiskTest extends TestCase
 {
+
+    public function testGetEnrolment()
+    {
+        $mockLabResponseRisks = $this->createLabResponseRiskMocks([1, 1, 1]);
+        $mockEnrolment = $this->createMock(Enrolment::class);
+        $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
+        $this->assertSame($mockEnrolment, $enrolmentRisk->getEnrolment());
+    }
+
+    public function testGetLabResponseRisks()
+    {
+        $mockLabResponseRisks = $this->createLabResponseRiskMocks([1, 1, 1]);
+        $mockEnrolment = $this->createMock(Enrolment::class);
+        $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
+        $this->assertSame($mockLabResponseRisks, $enrolmentRisk->getLabResponseRisks());
+    }
+
     public function averageRiskFactorProvider()
     {
         yield [[1, 1, 1], 1.0];
@@ -65,6 +83,7 @@ class EnrolmentRiskTest extends TestCase
         yield [[1.0, 0.2, 0.7], 0.21];
         yield [[1.7, 3.5, 2.5], 4.0];
         yield [[-0.1, -0.1, 0.1], 0.1];
+        yield [[], 0.1]; // No risk responses
     }
 
     /**
@@ -106,11 +125,16 @@ class EnrolmentRiskTest extends TestCase
 
         $enrolmentRiskOrderThree = new EnrolmentRisk($mockLabResponseRisksFour, $mockEnrolmentFour);
 
+        // Same risks as mock enrolment one, should test equality
+        $mockEnrolmentFive = $this->createMock(Enrolment::class);
+        $enrolmentRiskOrderFive = new EnrolmentRisk($mockLabResponseRisksOne, $mockEnrolmentFive);
+
         $testArray = [
             $enrolmentRiskOrderFour,
             $enrolmentRiskOrderTwo,
             $enrolmentRiskOrderOne,
-            $enrolmentRiskOrderThree
+            $enrolmentRiskOrderThree,
+            $enrolmentRiskOrderFive
         ];
 
         EnrolmentRisk::sortByAverageRisk($testArray);
@@ -119,8 +143,39 @@ class EnrolmentRiskTest extends TestCase
             $enrolmentRiskOrderOne,
             $enrolmentRiskOrderTwo,
             $enrolmentRiskOrderThree,
-            $enrolmentRiskOrderFour
+            $enrolmentRiskOrderFour,
+            $enrolmentRiskOrderFive
         ], $testArray);
+    }
+
+    public function testIsAtRisk()
+    {
+        $mockLabResponseRisks = $this->createLabResponseRiskMocks([3.0]);
+
+        $mockCourseInstance = $this->createMock(CourseInstance::class);
+        $mockCourseInstance->method('getRiskThreshold')->willReturn(1.0);
+
+        $mockEnrolment = $this->createMock(Enrolment::class);
+        $mockEnrolment->method('getCourseInstance')->willReturn($mockCourseInstance);
+
+        $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
+
+        $this->assertTrue($enrolmentRisk->isAtRisk());
+    }
+
+    public function testNotAtRisk()
+    {
+        $mockLabResponseRisks = $this->createLabResponseRiskMocks([1.0]);
+
+        $mockCourseInstance = $this->createMock(CourseInstance::class);
+        $mockCourseInstance->method('getRiskThreshold')->willReturn(3.0);
+
+        $mockEnrolment = $this->createMock(Enrolment::class);
+        $mockEnrolment->method('getCourseInstance')->willReturn($mockCourseInstance);
+
+        $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
+
+        $this->assertFalse($enrolmentRisk->isAtRisk());
     }
 
     private function createLabResponseRiskMocks(array $weightedRiskFactorsToReturn)
