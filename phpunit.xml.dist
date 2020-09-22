@@ -30,6 +30,9 @@
 
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
+
+        <listener class="Symfony\Bridge\PhpUnit\CoverageListener" />
+
     </listeners>
     <!-- Add the Doctrine Test Bundle -->
     <extensions>
