@@ -1,7 +1,12 @@
+# annotations.yaml
+# Gareth Sears - 2493194S
+
+# Set controllers to use annotations for routes
+# rather than setting in a config file
 controllers:
-    resource: ../../src/Controller/
-    type: annotation
+  resource: ../../src/Controller/
+  type: annotation
 
 kernel:
-    resource: ../../src/Kernel.php
-    type: annotation
+  resource: ../../src/Kernel.php
+  type: annotation

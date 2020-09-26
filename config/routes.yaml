@@ -1,6 +1,8 @@
 # routes.yaml
 # Gareth Sears - 2493194S
 
+# Other routes are set in annotations
+
 index:
   path: /
   # Redirect index to the courses page

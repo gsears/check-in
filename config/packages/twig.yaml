@@ -1,8 +1,15 @@
+# twig.yaml
+# Gareth Sears - 2493194S
+# Twig configuration
+
 twig:
-    default_path: "%kernel.project_dir%/templates"
-    form_themes:
-        - "form/custom_types.html.twig"
-        - "bootstrap_4_layout.html.twig"
-    globals:
-        global_xy_icon: "fa-thumbtack"
-        global_sentiment_icon: "fa-comment"
+  default_path: "%kernel.project_dir%/templates"
+  form_themes:
+    # link to custom types for XY form components etc.
+    - "form/custom_types.html.twig"
+    # Use bootstrap layout for forms
+    - "bootstrap_4_layout.html.twig"
+  # Globals for response icons
+  globals:
+    global_xy_icon: "fa-thumbtack"
+    global_sentiment_icon: "fa-comment"
