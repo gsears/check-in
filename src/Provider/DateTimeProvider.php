@@ -2,14 +2,14 @@
 
 namespace App\Provider;
 
-use App\DataFixtures\AppFixtures;
+use App\DataFixtures\EvaluationFixtures;
 use DateTime;
 
 class DateTimeProvider
 {
-    public function getCurrentDateTime() : DateTime
+    public function getCurrentDateTime(): DateTime
     {
         // return new DateTime();
-        return date_create(AppFixtures::SIMULATED_CURRENT_DATE);
+        return date_create(EvaluationFixtures::SIMULATED_CURRENT_DATE);
     }
 }

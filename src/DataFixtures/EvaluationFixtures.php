@@ -24,16 +24,16 @@ use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
  * Generally it is good Symfony practice to put these in one file so that variables can be passed around,
  * as multiple flushes and database calls can make generation VERY slow.
  */
-class AppFixtures extends Fixture implements FixtureGroupInterface
+class EvaluationFixtures extends Fixture implements FixtureGroupInterface
 {
-    const TEST_STUDENT_USERNAME = 'test@student.gla.ac.uk';
-    const TEST_INSTUCTOR_USERNAME = 'test@glasgow.ac.uk';
 
     const STUDENT_COUNT = 300;
     const INSTRUCTOR_COUNT = 30;
     const COURSE_COUNT = 5;
     const MIN_COURSE_MEMBERSHIP = 8;
     const MAX_COURSE_MEMBERSHIP = 10;
+
+    const SIMULATED_CURRENT_DATE = "2pm 20 November 2020";
 
     const COURSE_TITLE_TEMPLATES = [
         '%s Theory and Applications',
@@ -56,81 +56,6 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         'Quantum Computing',
         'Systems',
         'Networking',
-    ];
-
-    const TERM_DATES = [
-        'firstTerm' => [
-            'start' => '21 September 2020',
-            'end' => '04 December 2020',
-        ],
-        'secondTerm' => [
-            'start' => '11 January 2021',
-            'end' => '26 March 2021',
-        ]
-    ];
-
-    const DEFAULT_RISK_THRESHOLD_PERCENT =  70;
-    const DEFAULT_RISK_CONSECUTIVE_LABS = 2;
-
-    const SIMULATED_CURRENT_DATE = "2pm 20 November 2020";
-
-    const AFFECTIVE_FIELD_INTEREST = 'interest';
-    const AFFECTIVE_FIELD_DIFFICULTY = 'difficulty';
-    const AFFECTIVE_FIELD_FAMILIARITY = 'familiarity';
-    const AFFECTIVE_FIELD_PLAN = 'ability to plan';
-    const AFFECTIVE_FIELD_IMPROVEMENT = 'improvement';
-    const AFFECTIVE_FIELD_SATISFACTION = 'satisfaction';
-
-    const AFFECTIVE_FIELDS = [
-        self::AFFECTIVE_FIELD_DIFFICULTY => [
-            'high' => 'easy',
-            'low' => 'hard'
-        ],
-        self::AFFECTIVE_FIELD_INTEREST => [
-            'high' => 'interesting',
-            'low' => 'boring'
-        ],
-        self::AFFECTIVE_FIELD_FAMILIARITY => [
-            'high' => 'familiar',
-            'low' => 'unfamiliar'
-        ],
-        self::AFFECTIVE_FIELD_PLAN  => [
-            'high' => 'easy to plan',
-            'low' => 'unable to plan'
-        ],
-        self::AFFECTIVE_FIELD_IMPROVEMENT => [
-            'high' => 'skills improved',
-            'low' => 'skills not improved'
-        ],
-        self::AFFECTIVE_FIELD_SATISFACTION => [
-            'high' => 'triumphant',
-            'low' => 'frustrated'
-        ]
-    ];
-
-    const XY_QUESTIONS = [
-        "interest-difficulty" => [
-            "index" => 1,
-            "text" => "How interesting did you find the task? How difficult did you *personally* find it?",
-            "fields" => [self::AFFECTIVE_FIELD_INTEREST, self::AFFECTIVE_FIELD_DIFFICULTY],
-        ],
-        'planning-familiarity' => [
-            "index" => 2,
-            "text" => "How easy was it to plan how you'd execute the task? How familiar was the material?",
-            "fields" => [self::AFFECTIVE_FIELD_PLAN, self::AFFECTIVE_FIELD_FAMILIARITY],
-        ],
-        'satisfaction-improvement' => [
-            "index" => 3,
-            "text" => "How did you feel while executing the task? Do you feel like your skills have improved?",
-            "fields" =>  [self::AFFECTIVE_FIELD_SATISFACTION, self::AFFECTIVE_FIELD_IMPROVEMENT],
-        ]
-    ];
-
-    const SENTIMENT_QUESTIONS = [
-        "journal" => [
-            "index" => 4,
-            "text" => "Reflect on the course so far. Think about Course Materials, Workload, Time Management, Communication with Faculty, Coursework, Lectures and anything else you want to communicate.",
-        ]
     ];
 
     const MOCK_SENTIMENT_RESPONSES = [
@@ -161,7 +86,6 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         ],
     ];
 
-    private $manager;
     private $faker;
     private $creator;
     private $projectDirectory;
@@ -181,13 +105,11 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
      */
     public static function getGroups(): array
     {
-        return ['app'];
+        return ['evaluation'];
     }
 
     public function load(ObjectManager $manager)
     {
-        $this->manager = $manager;
-
         // Turn off auto-flushing with the entity creator as this can be slow.
         $this->creator = new EntityCreator($manager);
         $this->creator->setAutoflush(false);
@@ -195,25 +117,26 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         // Creates faker for mocking data
         $this->faker = Faker\Factory::create('en_GB');
 
-        $testUsers = $this->loadFunctionalTestUsers();
-        $testStudent = $testUsers['student'];
-        $testInstructor = $testUsers['instructor'];
+        $testStudent = $this->loadStudentTestAccount();
+        $testInstructor = $this->loadInstructorTestAccount();
 
         printf("Loaded test users\n");
 
         // Create students
         $students = $this->loadStudents();
         $allStudents = array_merge($students, [$testStudent]);
-        // For evaluation testing
-        $this->outputUsernamesCSV($students, 'students.csv');
+
+        // List of student usernames for evaluation testing
+        $this->outputUsernamesCSV($students, 'docs/evaluation/students.csv');
 
         printf("Loaded students\n");
 
         // Create instructors
         $instructors = $this->loadInstructors();
         $allInstructors = array_merge($instructors, [$testInstructor]);
-        // For evaluation testing
-        $this->outputUsernamesCSV($instructors, 'instructors.csv');
+
+        // For of instructor usernames for evaluation testing
+        $this->outputUsernamesCSV($instructors, 'docs/evaluation/instructors.csv');
 
         printf("Loaded instructors\n");
 
@@ -255,33 +178,32 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         printf("Loaded labs ...flushing...\n");
 
         $manager->flush();
+
+        printf("Flush complete\n");
+
         $manager->clear();
     }
 
-    private function loadFunctionalTestUsers(): array
+    private function loadStudentTestAccount(): Student
     {
         // Passwords default to 'password'
-
         $testStudentGuid = $this->faker->unique()->passthrough(1234567);
-        $testStudentEmail = self::TEST_STUDENT_USERNAME;
-        $testStudent = $this->creator->createStudent(
-            "Gareth",
-            "Sears",
-            $testStudentGuid,
-            $testStudentEmail
-        );
 
-        $testInstructorEmail = self::TEST_INSTUCTOR_USERNAME;
-        $testInstructor = $this->creator->createInstructor(
+        return $this->creator->createStudent(
             $this->faker->firstName(),
             $this->faker->lastName(),
-            $testInstructorEmail
+            $testStudentGuid,
+            Config::TEST_STUDENT_EMAIL
         );
+    }
 
-        return [
-            'student' => $testStudent,
-            'instructor' => $testInstructor
-        ];
+    private function loadInstructorTestAccount(): Instructor
+    {
+        return $this->creator->createInstructor(
+            $this->faker->firstName(),
+            $this->faker->lastName(),
+            Config::TEST_INSTUCTOR_EMAIL
+        );
     }
 
     private function loadStudents(): array
@@ -343,7 +265,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         // Create a course instance of a course in both terms
         foreach ($courses as $course) {
             $courseIndex = 1;
-            foreach (self::TERM_DATES as $term) {
+            foreach (Config::TERM_DATES as $term) {
                 $startDate = date_create($term['start']);
                 $endDate = date_create($term['end']);
 
@@ -355,8 +277,6 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
                         $course,
                         $startDate,
                         $endDate,
-                        self::DEFAULT_RISK_THRESHOLD_PERCENT,
-                        self::DEFAULT_RISK_CONSECUTIVE_LABS,
                         $courseIndex // Manually set course index to prevent db query.
                     ),
                     'students' => [],
@@ -410,11 +330,11 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         return $courseInstanceWrappers;
     }
 
-    public function loadAffectiveFields(): array
+    private function loadAffectiveFields(): array
     {
         $affectiveFields = [];
 
-        foreach (self::AFFECTIVE_FIELDS as $name => $labels) {
+        foreach (Config::AFFECTIVE_FIELDS as $name => $labels) {
             $affectiveField = $this->creator->createAffectiveField(
                 $name,
                 $labels['low'],
@@ -427,11 +347,11 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         return $affectiveFields;
     }
 
-    public function loadXYQuestions($affectiveFields): array
+    private function loadXYQuestions($affectiveFields): array
     {
         $xyQuestions = [];
 
-        foreach (self::XY_QUESTIONS as $name => $props) {
+        foreach (Config::XY_QUESTIONS as $name => $props) {
             $xyQuestion = $this->creator->createXYQuestion(
                 $name,
                 $props['text'],
@@ -445,11 +365,11 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         return $xyQuestions;
     }
 
-    public function loadSentimentQuestions(): array
+    private function loadSentimentQuestions(): array
     {
         $sentimentQuestions = [];
 
-        foreach (self::SENTIMENT_QUESTIONS as $name => $props) {
+        foreach (Config::SENTIMENT_QUESTIONS as $name => $props) {
             $sentimentQuestion = $this->creator->createSentimentQuestion(
                 $name,
                 $props['text'],
@@ -461,7 +381,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         return $sentimentQuestions;
     }
 
-    public function loadLabs(array $courseInstanceWrappers, array $xyQuestions, array $sentimentQuestions): array
+    private function loadLabs(array $courseInstanceWrappers, array $xyQuestions, array $sentimentQuestions): array
     {
         $labs = [];
 
@@ -489,7 +409,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
                 foreach ($xyQuestions as $name => $xyQuestion) {
                     $labXYQuestion = $this->creator->createLabXYQuestion(
-                        self::XY_QUESTIONS[$name]['index'],
+                        Config::XY_QUESTIONS[$name]['index'],
                         $xyQuestion,
                         $lab
                     );
@@ -530,7 +450,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
                 foreach ($sentimentQuestions as $name => $sentimentQuestion) {
                     $labSentimentQuestion = $this->creator->createLabSentimentQuestion(
-                        self::SENTIMENT_QUESTIONS[$name]['index'],
+                        Config::SENTIMENT_QUESTIONS[$name]['index'],
                         $sentimentQuestion,
                         $lab
                     );

@@ -25,6 +25,19 @@ class LabResponseRepository extends ServiceEntityRepository
         parent::__construct($registry, LabResponse::class);
     }
 
+    public function findByCourseInstanceAndStudent($courseInstance, $student): array
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.lab', 'l')
+            ->andWhere('l.courseInstance = :courseInstance')
+            ->setParameter('courseInstance', $courseInstance)
+            ->andWhere('r.student = :student')
+            ->setParameter('student', $student)
+            ->orderBy('l.startDateTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * Gets the lab response for a given student and lab.
      *
