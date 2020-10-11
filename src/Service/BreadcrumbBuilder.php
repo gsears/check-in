@@ -1,11 +1,21 @@
 <?php
 
+/*
+BreadcrumbBuilder.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Service;
 
 use App\Containers\Breadcrumb;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Implements the builder pattern to assist with creating a consumable 'breadcrumb' context array
+ * for use inside twig templates (see base.html.twig's Breadcrumb macro). Useful for conditional
+ * breadcrumb generation based on user permissions and to provide a clean API.
+ */
 class BreadcrumbBuilder
 {
     private $router;

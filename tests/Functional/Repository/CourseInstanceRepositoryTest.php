@@ -11,6 +11,9 @@ use DateTime;
 use App\Entity\CourseInstance;
 use App\Tests\Functional\FunctionalTestCase;
 
+/**
+ * Tests database query methods
+ */
 class CourseInstanceRepositoryTest extends FunctionalTestCase
 {
     public function testFindAllActive()

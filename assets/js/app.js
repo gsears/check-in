@@ -6,10 +6,10 @@ This is the apps main javascript file. It uses webpack to build and inject it.
 */
 
 import "../css/app.scss"; // The (SASS) CSS styles for the app.
-import "./boostrap"; // Bootstrap import
-import "./tour"; // Shepherd js tour library import
-import "./tables"; // Tablesort library and methods.
-import "./xy"; // Custom XY component and Vue libraries
+import "./lib/boostrap"; // Bootstrap import
+import "./lib/tour"; // Shepherd js tour library import
+import "./lib/tables"; // Tablesort library and methods.
+import "./vue/xy"; // Custom XY component and Vue libraries
 
 /**
  * Add loading UI for lengthy serverside database operations / external api calls.

@@ -1,39 +1,34 @@
 <?php
 
+/*
+LabXYQuestionResponseType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
-use App\Entity\XYQuestion;
-use App\Form\Type\XYCoordinates;
-use App\Entity\LabResponse;
 use App\Form\Type\XYCoordinatesType;
-use App\Entity\LabXYQuestion;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormInterface;
 use App\Entity\LabXYQuestionResponse;
-use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
+/**
+ * Generates a form for giving an XY response which can be bound to a LabXYQuestionResponse entity.
+ */
 class LabXYQuestionResponseType extends SurveyQuestionResponseType
 {
     public function buildFormBody(FormBuilderInterface $builder, array $options): FormBuilderInterface
     {
-        // Get the data so we can query it for its XY Question
+        // Get the XYQuestionResponse bound to this form.
         $xyQuestionResponse = $builder->getData();
 
+        // Get the question information for displaying.
         $xyQuestion = $xyQuestionResponse->getLabXYQuestion()->getXYQuestion();
         $xField = $xyQuestion->getXField();
         $yField = $xyQuestion->getYField();
 
-        // Add hidden types for XY responses. These will be filled via the js component.
+        // Bind an XYCoordinatesType (sub)form to the coordinates property of the
+        // LabXYQuestionResponse bound to this form. Set labels.
         $builder
-            // Do not map the xy form component to the entity.
             ->add('coordinates', XYCoordinatesType::class, [
                 'label' => $xyQuestion->getQuestionText(),
                 'help' => sprintf(
@@ -54,6 +49,7 @@ class LabXYQuestionResponseType extends SurveyQuestionResponseType
     public function getOptionDefaults(): array
     {
         return [
+            // Bind this form type to a LabXYQuestionResponse entity.
             'data_class' => LabXYQuestionResponse::class,
         ];
     }

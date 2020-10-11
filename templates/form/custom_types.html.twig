@@ -1,3 +1,16 @@
+{#
+custom_types.html.twig
+Gareth Sears - 2493194S
+
+This file provides view templates for custom form *Type.php classes.
+Specifically it is used for rendering the Vue XY component as the view
+portion of an XYQuestionType and adding a 'nudge' UI to sentiment
+responses.
+
+See https://symfony.com/doc/current/form/create_custom_field_type.html for 
+more info.
+#}
+
 {# A custom template for rendering the xy_coordinates form widget #}
 {% block xy_coordinates_widget %}
 
@@ -19,6 +32,7 @@
 	{% set jsonElement = form[jsonFieldLabel].vars.id %}
 
 	// Waits until js and everything else is ready and loads an instance of the XY selector.
+	// This is required because this <script> tag will be inserted in line.
 	addLoadEvent(() => {
 		const jsonField = {{jsonElement}};
 
@@ -62,6 +76,7 @@
 	{% set jsonElement = form[jsonFieldLabel].vars.id %}
 
 	// Waits until js and everything else is ready and loads an instance of the XY selector.
+	// This is required because this <script> tag will be inserted in line.
 	addLoadEvent(() => {
 		const jsonField = {{jsonElement}};
 

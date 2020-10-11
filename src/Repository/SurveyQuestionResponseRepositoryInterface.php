@@ -1,10 +1,19 @@
 <?php
 
+/*
+SurveyQuestionResponseRepositoryInterface.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\SurveyQuestionResponseInterface;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 
+/**
+ * An interface which requires survey question response implementations to return risk
+ * wrapper objects.
+ */
 interface SurveyQuestionResponseRepositoryInterface
 {
     /**

@@ -15,6 +15,8 @@ use App\Containers\Risk\LabSentimentQuestionResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method LabSentimentQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabSentimentQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
  * @method LabSentimentQuestionResponse[]    findAll()
@@ -27,6 +29,14 @@ class LabSentimentQuestionResponseRepository extends ServiceEntityRepository imp
         parent::__construct($registry, LabSentimentQuestionResponse::class);
     }
 
+    /**
+     * Returns a SurveyQuestionResponseRisk container for a lab sentiment question.
+     * It queries the database to see if the sentiment question lies within danger
+     * zones and returns the corresponding risk factor before wrapping it in the container.
+     *
+     * @param SurveyQuestionResponseInterface $questionResponse
+     * @return SurveyQuestionResponseRisk
+     */
     public function getSurveyQuestionResponseRisk(SurveyQuestionResponseInterface $questionResponse): SurveyQuestionResponseRisk
     {
         $entityManager = $this->getEntityManager();

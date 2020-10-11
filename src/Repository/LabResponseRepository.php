@@ -13,6 +13,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method LabResponse|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabResponse|null findOneBy(array $criteria, array $orderBy = null)
  * @method LabResponse[]    findAll()
@@ -25,6 +27,9 @@ class LabResponseRepository extends ServiceEntityRepository
         parent::__construct($registry, LabResponse::class);
     }
 
+    /**
+     * Returns all lab responses for a particular course instance and student.
+     */
     public function findByCourseInstanceAndStudent($courseInstance, $student): array
     {
         return $this->createQueryBuilder('r')

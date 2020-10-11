@@ -1,3 +1,10 @@
+# .symfony.cloud.yaml
+# Gareth Sears - 2493194S
+
+# This includes the configuration for the symfony cloud
+# deployment of the evaluation application.
+# https://symfony.com/doc/current/cloud/intro.html
+
 name: app
 
 type: php:7.4
@@ -46,7 +53,7 @@ timezone: Europe/London
 
 crons:
   ts_task:
-    # every 5 minutes
+    # every 5 minutes, although this fluctuates +-3min on symfony cloud
     # minimum interval https://symfony.com/doc/current/cloud/cookbooks/crons.html
     spec: "*/5 * * * *"
     cmd: croncape bin/console ts:run

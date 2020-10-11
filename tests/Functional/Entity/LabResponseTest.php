@@ -10,6 +10,9 @@ namespace App\Tests\Functional\Entity;
 use App\Entity\LabResponse;
 use App\Tests\Functional\FunctionalTestCase;
 
+/**
+ * Tests automatic generation of timestamps on database hooks.
+ */
 class LabResponseTest extends FunctionalTestCase
 {
     public function testTimestampsSetOnCreateAndUpdate()

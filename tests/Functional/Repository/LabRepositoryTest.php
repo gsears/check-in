@@ -11,6 +11,9 @@ use DateTime;
 use App\Entity\Lab;
 use App\Tests\Functional\FunctionalTestCase;
 
+/**
+ * Tests database query methods
+ */
 class LabRepositoryTest extends FunctionalTestCase
 {
     public function testFindByCourseInstanceBeforeDate()

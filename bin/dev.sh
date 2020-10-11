@@ -17,9 +17,25 @@ wait "Make sure dependencies are up to date with 'make deps' in a new terminal"
 wait "Create the database container by running 'make docker/start' in a new terminal."
 make db/reset backend/start
 
+echo "Which fixtures would you like to install? Note: Evaluation fixtures may take a while..."
+select fix in "Test" "Evaluation"; do
+    case $fix in
+        Test ) make fixtures/test; break;;
+        Evaluation ) make fixtures/evaluation break;;
+    esac
+done
+
+echo "Would you like to set up the cron functionality? Requires cron / crontable."
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) make backend/cron_setup; break;;
+        No ) break;;
+    esac
+done
+
 wait "Run 'make frontend/start' in a new terminal."
 
 echo
 echo "🎉 Environment ready 🎉"
-echo "Run 'make backend/cron_setup' to set up the cron functionality."
+echo "Type make backend/status to view the port the server is running from."
 echo

@@ -18,7 +18,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 
 /**
- * TODO: Document
+ * Generates a form for setting danger zones which can be bound to a LabXYQuestionDangerZone entity.
+ *
+ * This extends the AbstractXYComponentType, as we'll be using our Vue XY Component as the UI.
  */
 class LabXYQuestionDangerZoneType extends AbstractXYComponentType
 {
@@ -28,7 +30,7 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
     {
         // This uses a custom normalizer which allows us to access the private properties
         // of the object. This way, we can bypass the 'setBound' method, which can cause
-        // some problems when denormalizing. Array denormalizer helps us map the result to
+        // some problems when denormalizing from JSON. Array denormalizer helps us map the result to
         // a collection.
 
         // TODO: Write a custom denormalizer which handles setBound.
@@ -50,6 +52,10 @@ class LabXYQuestionDangerZoneType extends AbstractXYComponentType
         return 'xy_danger_zones';
     }
 
+    /**
+     * Passes the required variables into the twig template context for consumption
+     * in the JS component.
+     */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);

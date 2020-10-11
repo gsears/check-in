@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+phpunit.xml.dist
+Gareth Sears - 2493194S
+-->
+
 <!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="bin/.phpunit/phpunit.xsd" backupGlobals="false" colors="true" bootstrap="tests/bootstrap.php">
     <php>
@@ -10,6 +15,7 @@
         <server name="SYMFONY_PHPUNIT_VERSION" value="7.5" />
     </php>
 
+    <!-- Allows selective running of tests using a phpunit flag -->
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
@@ -30,11 +36,12 @@
 
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
-
         <listener class="Symfony\Bridge\PhpUnit\CoverageListener" />
-
     </listeners>
+
     <!-- Add the Doctrine Test Bundle -->
+    <!-- This rollsback any transactions made in a test -->
+    <!-- https://github.com/dmaicher/doctrine-test-bundle -->
     <extensions>
         <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
     </extensions>

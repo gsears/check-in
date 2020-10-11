@@ -1,3 +1,11 @@
+{#
+macros.html.twig
+Gareth Sears - 2493194S
+
+Functions for generating common components in Twig templates
+#}
+
+{# Generates traffic lights from surveyQuestionResponseRisk objects #}
 {% macro surveyQuestionResponseRisksToTrafficLights(surveyQuestionResponseRisks) %}
 	{% if surveyQuestionResponseRisks %}
 		{% for risk in surveyQuestionResponseRisks %}
@@ -11,6 +19,7 @@
 	{% endif %}
 {% endmacro %}
 
+{# Generates an instructor card list with email links #}
 {% macro instructorCardList(instructors) %}
 	<div id="instructor-card-list" class="card mb-4">
 		<h2 class="card-header h5">
@@ -38,6 +47,7 @@
 	</div>
 {% endmacro %}
 
+{# Generates a response key for question response icons #}
 {% macro responseKey() %}
 	<div class="card my-4 border-left-0 border-right-0">
 		<div class="card-body p-1">
@@ -54,6 +64,7 @@
 	</div>
 {% endmacro %}
 
+{# Generates a valid risk view based on a risk flag #}
 {% macro riskStatus(riskFlag) %}
 	{% if riskFlag %}
 		<span class="text-danger">

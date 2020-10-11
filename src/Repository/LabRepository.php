@@ -1,5 +1,10 @@
 <?php
 
+/*
+LabRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use DateTime;
@@ -15,6 +20,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method Lab|null find($id, $lockMode = null, $lockVersion = null)
  * @method Lab|null findOneBy(array $criteria, array $orderBy = null)
  * @method Lab[]    findAll()
@@ -28,6 +35,8 @@ class LabRepository extends ServiceEntityRepository
     }
 
     /**
+     * Finds all labs for a course instance before a given date. Defaults to the current date.
+     * 
      * @return Lab[] Returns an array of Lab objects
      */
 
@@ -45,6 +54,14 @@ class LabRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Finds labs by course and the course instance index. Can optionally query if the results are before
+     * a particular datetime.
+     *
+     * @param Course $course
+     * @param integer $instanceIndex
+     * @param DateTime $beforeDateTime
+     */
     public function findByCourseAndInstanceIndex(Course $course, int $instanceIndex, DateTime $beforeDateTime = null)
     {
         $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();
@@ -62,6 +79,12 @@ class LabRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Returns the most recently started labs for an instructor.
+     *
+     * @param Instructor $instructor
+     * @param integer $maxResults
+     */
     public function findLatestByInstructor(Instructor $instructor, int $maxResults)
     {
         $beforeDateTime = (new DateTimeProvider())->getCurrentDateTime();
@@ -79,6 +102,12 @@ class LabRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Returns the most recent labs for a student which they have yet to respond to.
+     *
+     * @param Student $student
+     * @param integer $maxResults
+     */
     public function findLatestPendingByStudent(Student $student, int $maxResults)
     {
         $beforeDateTime = (new DateTimeProvider())->getCurrentDateTime();
@@ -96,6 +125,12 @@ class LabRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Returns the labs which a student has responded to for a particular student in a particular course.
+     *
+     * @param CourseInstance $courseInstance
+     * @param Student $student
+     */
     public function findCompletedSurveysByCourseInstanceAndStudent(CourseInstance $courseInstance, Student $student)
     {
         return $this->createQueryBuilder('l')
@@ -110,6 +145,13 @@ class LabRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+      * Returns the labs which a student has yet to respond to for a particular student in a particular course.
+     *
+     * @param CourseInstance $courseInstance
+     * @param Student $student
+     * @param DateTime $beforeDateTime
+     */
     public function findPendingSurveysByCourseInstanceAndStudent(CourseInstance $courseInstance, Student $student, DateTime $beforeDateTime = null)
     {
         $beforeDateTime = $beforeDateTime ? $beforeDateTime : (new DateTimeProvider())->getCurrentDateTime();

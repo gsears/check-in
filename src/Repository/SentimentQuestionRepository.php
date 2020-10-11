@@ -12,6 +12,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method SentimentQuestion|null find($id, $lockMode = null, $lockVersion = null)
  * @method SentimentQuestion|null findOneBy(array $criteria, array $orderBy = null)
  * @method SentimentQuestion[]    findAll()

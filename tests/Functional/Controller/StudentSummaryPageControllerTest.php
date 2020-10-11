@@ -1,7 +1,7 @@
 <?php
 
 /*
-CourseSummaryPageTest.php
+StudentSummaryPageControllerTest.php
 Gareth Sears - 2493194S
 */
 
@@ -17,7 +17,6 @@ class StudentSummaryPageControllerTest extends FunctionalTestCase
 {
     private $courseInstance;
     private $student;
-    private $response;
 
     /**
      * Creates the course instance under test.

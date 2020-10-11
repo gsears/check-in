@@ -1,7 +1,7 @@
 # Makefile
 # Gareth Sears - 2493194S
 
-# This file contains aliases for the main interactions with symfony
+# This file contains aliases for the main scripts in symfony and otherwise
 
 .PHONY: help
 help:
@@ -13,13 +13,12 @@ help:
 ## Meta
 #### Excecute shell development script
 .PHONY: dev
-dev: @./bin/dev.sh
+dev:
+	@./bin/dev.sh
 
 #### Build dependencies
 .PHONY: deps
-deps:
-	backend/deps
-	frontend/deps
+deps: backend/deps frontend/deps
 
 ## Docker DB containers
 .PHONY: docker/start
@@ -33,9 +32,8 @@ docker/stop:
 ## DB
 .PHONY: db/create
 db/create:
-	bin/console doctrine:database:create --if-not-exists
-	db/make_migration
-	db/migrate
+	./bin/console doctrine:database:create --if-not-exists
+	./bin/console doctrine:migrations:migrate -n --allow-no-migration
 
 .PHONY: db/make_migration
 db/make_migration:
@@ -50,8 +48,7 @@ db/drop:
 	./bin/console doctrine:schema:drop --full-database --force
 
 .PHONY: db/reset
-db/reset:
-	db/drop db/create db/migrate
+db/reset: db/drop db/create
 
 ## DB fixtures
 .PHONY: fixtures/evaluation
@@ -77,7 +74,7 @@ backend/status:
 
 .PHONY: backend/stop
 backend/stop:
-	./bin/console server:stop
+	symfony server:stop
 
 .PHONY: backend/cron_setup
 backend/cron_setup:
@@ -88,8 +85,8 @@ backend/cron_setup:
 frontend/deps:
 	yarn install --frozen-lockfile
 
-.PHONY: frontend/dev
-frontend/dev:
+.PHONY: frontend/start
+frontend/start:
 	yarn watch
 
 .PHONY: frontend/build
@@ -98,7 +95,7 @@ frontend/build:
 
 ## Tests
 .PHONY: test/all
-test:
+test/all:
 	./bin/phpunit
 
 .PHONY: test/unit
@@ -111,4 +108,4 @@ test/functional:
 
 .PHONY: test/coverage
 test/coverage:
-	./bin/phpunit --coverage-html docs/coverage
+	./bin/phpunit --coverage-html docs/testing/coverage

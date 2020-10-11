@@ -1,5 +1,10 @@
 <?php
 
+/*
+CourseRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\Course;
@@ -7,6 +12,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method Course|null find($id, $lockMode = null, $lockVersion = null)
  * @method Course|null findOneBy(array $criteria, array $orderBy = null)
  * @method Course[]    findAll()

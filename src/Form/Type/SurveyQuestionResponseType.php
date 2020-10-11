@@ -1,5 +1,10 @@
 <?php
 
+/*
+SurveyQuestionResponseType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
 use App\Entity\SurveyQuestionResponseInterface;
@@ -8,6 +13,12 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * An abstract form type which is used by all survey questions.
+ * It ensures that they have skip and submit questions. It uses the
+ * abstract template method pattern to allow inserting custom form
+ * elements before the buttons and mixing in custom options for subclasses.
+ */
 abstract class SurveyQuestionResponseType extends AbstractType
 {
     const SKIP_BUTTON_NAME = 'skip';

@@ -11,6 +11,10 @@ use PHPUnit\Framework\TestCase;
 use App\Entity\LabXYQuestionDangerZone;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 
+/**
+ * Tests to ensure methods for LabXYQuestionDangerZone
+ * have checks to ensure valid state in database.
+ */
 class LabXYQuestionDangerZoneTest extends TestCase
 {
     public function riskLevelProvider()

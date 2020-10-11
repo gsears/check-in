@@ -5,6 +5,9 @@ namespace App\Tests\Functional\Repository;
 use App\Entity\Instructor;
 use App\Tests\Functional\FunctionalTestCase;
 
+/**
+ * Tests database query methods
+ */
 class InstructorRepositoryTest extends FunctionalTestCase
 {
     public function testFindByStudent()
@@ -81,10 +84,5 @@ class InstructorRepositoryTest extends FunctionalTestCase
 
         $this->assertEquals([$instructor1, $instructor2], $repo->findByStudent($student1));
         $this->assertEquals([$instructor2], $repo->findByStudent($student2));
-    }
-
-    private function isEvenFunction(int $i)
-    {
-        return $i % 2 === 0;
     }
 }

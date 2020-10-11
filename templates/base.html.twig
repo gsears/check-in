@@ -1,3 +1,10 @@
+{#
+base.html.twig
+Gareth Sears - 2493194S
+
+The base class for all templates.
+#}
+
 {% from 'macros.html.twig' import breadcrumbs %}
 
 {% set _title = block('title') %}
@@ -6,17 +13,22 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		{# Title can be changed by title block #}
 		<title>
 			{% block title %}{% endblock %}
 			{% if _title is not empty %}
 				|
-			{% endif %}Check In</title>
+			{% endif %}Check In
+		</title>
+
+		{# Load CSS #}
 		{% block stylesheets %}
 			{{ encore_entry_link_tags('app') }}
 		{% endblock %}
 
-		{# Custom onload function to allow inline JS from symfony custom form components #}
-		<script type="text/javascript" src="{{asset('head.js')}}"></script>
+		{# Loads the entry point preload.js for essential preload javascript #}
+		{{ encore_entry_script_tags('preload') }}
+		
 	</head>
 	<body>
 
@@ -30,6 +42,8 @@
 			<nav class="navbar navbar-light bg-white shadow navbar-expand-lg">
 				<div class="container">
 					<a class="navbar-brand" href="/">Check In</a>
+
+					{# Display current user #}
 					{% if app.user %}
 							<span class="lead">
 								Current User: {{app.user.fullname}}
@@ -43,12 +57,16 @@
 								)
 							</span>
 					{% endif %}
+
+					{# Always have an explain this page tour for a page #}
 					<ul class="navbar-nav list-group list-group-horizontal">
 						<li class="nav-item list-group-item border-0">
 							<button id="tour-button" class="btn btn-primary">
 								<i class="fa fa-info-circle mr-1" aria-hidden="true"></i>
 								Explain this page</button>
 						</li>
+
+						{# Login / Logout link #}
 						<li class="nav-item list-group-item border-0">
 							{% if app.user %}
 								<a class="nav-link" href="{{path('app_logout')}}">Logout</a>
@@ -62,14 +80,19 @@
 		{% endblock %}
 
 		<main class="container pt-4">
+
+			{# Any context with breadcrumb array generates breadcrumbs #}
 			{% if breadcrumbArray is defined %}
 				{{_self.breadcrumbs(breadcrumbArray)}}
 			{% endif %}
 
+			{# Body content #}
 			{% block body %}{% endblock %}
 		</main>
 
+		{# Javascripts #}
 		{% block javascripts %}
+			{# Include app.js code in every page #}
 			{{ encore_entry_script_tags('app') }}
 		{% endblock %}
 
@@ -95,6 +118,7 @@
 			})
 		</script>
 
+		{# A block for including tours on a page #}
 		{% block tour_script %}
 		<script>
 			finalTourStep(tour, {
@@ -111,6 +135,7 @@
 	</body>
 </html>
 
+{# Breadcrumbs function #}
 {% macro breadcrumbs(breadcrumbs) %}
 	<nav class="breadcrumb bg-white	border-bottom">
 		{% for breadcrumb in breadcrumbs %}

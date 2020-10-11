@@ -1,5 +1,10 @@
 <?php
 
+/*
+AppExtension.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Twig;
 
 use Twig\Environment;
@@ -7,6 +12,12 @@ use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
 use App\Containers\Risk\RiskInterface;
 
+/**
+ * This class defines custom extensions for twig templates.
+ * 
+ * Specifically, it is used to define the renderRisk() twig function
+ * which provides a similar API to symfony forms for risk containers.
+ */
 class AppExtension extends AbstractExtension
 {
     public function __construct(Environment $twig)

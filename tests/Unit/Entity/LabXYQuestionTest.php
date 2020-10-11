@@ -11,30 +11,44 @@ use App\Entity\LabXYQuestion;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Checks that SurveyQuestionInterface classes have valid state
+ * Tests to ensure methods for LabXYQuestion
+ * have checks to ensure valid state in database.
  */
 class LabXYQuestionTest extends TestCase
 {
     public function indexProvider()
     {
         yield [0, true];
-        yield [-2, false];
         yield [5, true];
-        yield [-1, false];
     }
 
     /**
      * @dataProvider indexProvider
      */
-    public function testEnsureValidIndex($index, $expectedPass)
+    public function testValidIndex($index)
     {
-        if (!$expectedPass) {
-            $this->expectException(\InvalidArgumentException::class);
-        }
-
         $labXYQuestion = new LabXYQuestion();
         $labXYQuestion->setIndex($index);
 
         $this->assertTrue(true);
+    }
+
+    public function invalidIndexProvider()
+    {
+        yield [-2, false];
+        yield [-1, false];
+    }
+
+    /**
+     * @dataProvider invalidIndexProvider
+     */
+    public function testInvalidIndex($index)
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $labXYQuestion = new LabXYQuestion();
+        $labXYQuestion->setIndex($index);
+
+        $this->fail();
     }
 }

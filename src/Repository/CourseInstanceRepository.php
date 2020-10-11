@@ -15,6 +15,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method CourseInstance|null find($id, $lockMode = null, $lockVersion = null)
  * @method CourseInstance|null findOneBy(array $criteria, array $orderBy = null)
  * @method CourseInstance[]    findAll()
@@ -27,6 +29,13 @@ class CourseInstanceRepository extends ServiceEntityRepository
         parent::__construct($registry, CourseInstance::class);
     }
 
+    /**
+     * Returns all course instances after a particular date, defaulting to the 
+     * current date in the application.
+     *
+     * @param DateTime|null $currentDate
+     * @return void
+     */
     public function findAllActive(?DateTime $currentDate = null)
     {
         if (!$currentDate) {
@@ -46,7 +55,6 @@ class CourseInstanceRepository extends ServiceEntityRepository
      * Finds all CourseInstance objects which match the student.
      * @return CourseInstance[] Returns an array of CourseInstance objects
      */
-
     public function findByStudent($student)
     {
         return $this->createQueryBuilder('c')
@@ -62,7 +70,6 @@ class CourseInstanceRepository extends ServiceEntityRepository
      * Finds all CourseInstance objects which match the instructor.
      * @return CourseInstance[] Returns an array of CourseInstance objects
      */
-
     public function findByInstructor($instructor)
     {
         return $this->createQueryBuilder('c')

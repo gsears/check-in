@@ -1,5 +1,10 @@
 <?php
 
+/*
+AbstractXYComponentType.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Form\Type;
 
 use Symfony\Component\Form\FormView;
@@ -20,12 +25,10 @@ abstract class AbstractXYComponentType extends AbstractType implements DataMappe
 {
     const EMPTY_ERROR_MESSAGE = "You must select a point on the graph.";
     const JSON_FIELD = 'jsonContent';
+
     /**
      * Dynamically builds the form. In this case, we use symfony's form builder to create
      * a hidden form field to which we map the json provided by our Vue.js xy component in
-     *
-     *
-     * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

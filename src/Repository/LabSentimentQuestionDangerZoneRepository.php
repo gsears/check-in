@@ -12,6 +12,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method LabSentimentQuestionDangerZone|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabSentimentQuestionDangerZone|null findOneBy(array $criteria, array $orderBy = null)
  * @method LabSentimentQuestionDangerZone[]    findAll()

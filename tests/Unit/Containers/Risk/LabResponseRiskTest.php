@@ -13,6 +13,9 @@ use PHPUnit\Framework\TestCase;
 use App\Containers\Risk\LabResponseRisk;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 
+/**
+ * Tests risk calculation methods and that the wrapper preserves the objects it contains.
+ */
 class LabResponseRiskTest extends TestCase
 {
     public function testGetLabResponse()

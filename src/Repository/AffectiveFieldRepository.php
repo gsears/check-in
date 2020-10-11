@@ -1,5 +1,10 @@
 <?php
 
+/*
+AffectiveFieldRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\AffectiveField;
@@ -7,6 +12,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ *
  * @method AffectiveField|null find($id, $lockMode = null, $lockVersion = null)
  * @method AffectiveField|null findOneBy(array $criteria, array $orderBy = null)
  * @method AffectiveField[]    findAll()

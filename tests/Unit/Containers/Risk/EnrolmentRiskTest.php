@@ -13,6 +13,9 @@ use App\Containers\Risk\EnrolmentRisk;
 use App\Containers\Risk\LabResponseRisk;
 use App\Entity\CourseInstance;
 
+/**
+ * Tests risk calculation methods and that the wrapper preserves the objects it contains.
+ */
 class EnrolmentRiskTest extends TestCase
 {
 
@@ -50,9 +53,7 @@ class EnrolmentRiskTest extends TestCase
     {
         $mockLabResponseRisks = $this->createLabResponseRiskMocks($weightedRiskFactors);
         $mockEnrolment = $this->createMock(Enrolment::class);
-
         $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
-
         $this->assertEquals($expectedResult, $enrolmentRisk->getAverageRiskFactor());
     }
 
@@ -72,9 +73,7 @@ class EnrolmentRiskTest extends TestCase
     {
         $mockLabResponseRisks = $this->createLabResponseRiskMocks($weightedRiskFactors);
         $mockEnrolment = $this->createMock(Enrolment::class);
-
         $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
-
         $this->assertTrue($enrolmentRisk->areAllRisksAbove($areAbove));
     }
 
@@ -93,9 +92,7 @@ class EnrolmentRiskTest extends TestCase
     {
         $mockLabResponseRisks = $this->createLabResponseRiskMocks($weightedRiskFactors);
         $mockEnrolment = $this->createMock(Enrolment::class);
-
         $enrolmentRisk = new EnrolmentRisk($mockLabResponseRisks, $mockEnrolment);
-
         $this->assertFalse($enrolmentRisk->areAllRisksAbove($areAbove));
     }
 

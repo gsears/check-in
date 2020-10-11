@@ -1,7 +1,7 @@
 <?php
 
 /*
-CoursesPageTest.php
+CoursesPageControllerTest.php
 Gareth Sears - 2493194S
 */
 

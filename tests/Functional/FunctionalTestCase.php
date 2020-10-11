@@ -13,6 +13,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
+/**
+ * An abstract class for implementing helper methods for functional tests.
+ */
 abstract class FunctionalTestCase extends WebTestCase
 {
     private static $databaseCreated;

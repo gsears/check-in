@@ -14,6 +14,9 @@ use App\Entity\LabSentimentQuestionResponse;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 
+/**
+ * Tests database query methods
+ */
 class LabSentimentQuestionResponseRepositoryTest extends FunctionalTestCase
 {
 

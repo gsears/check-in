@@ -14,6 +14,9 @@ use App\Entity\SentimentQuestion;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 
+/**
+ * Tests database query methods
+ */
 class LabResponseRepositoryTest extends FunctionalTestCase
 {
     public function testFindOneByLabAndStudentMatch()

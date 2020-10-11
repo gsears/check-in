@@ -11,57 +11,43 @@ use App\Entity\Lab;
 use App\Entity\LabXYQuestion;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Tests for the LabTest entity.
+ */
 class LabTest extends TestCase
 {
-    public function questionProvider()
-    {
-        yield [
-            [
-                [
-                    'type' => LabXYQuestion::class,
-                    'index' => 2
-                ],
-                [
-                    'type' => LabXYQuestion::class,
-                    'index' => 1
-                ],
-                [
-                    'type' => LabXYQuestion::class,
-                    'index' => 0
-                ]
-            ],
-            [0, 1, 2],
-            3
-
-        ];
-    }
     /**
-     * @dataProvider questionProvider
+     * Ensure questions are returned in index order.
      */
-    public function testQuestionsReturnedInIndexOrder(array $questions, array $expectedOrder, int $count)
+    public function testQuestionsReturnedInIndexOrder()
     {
         $lab = new Lab();
 
-        foreach ($questions as $question) {
+        $questionMockOrder3 = $this->createMock(LabXYQuestion::class);
+        $questionMockOrder3
+            ->method('getIndex')
+            ->willReturn(3);
 
-            if ($question['type'] === LabXYQuestion::class) {
-                $labXYQuestion = $this->createMock(LabXYQuestion::class);
-                $labXYQuestion
-                    ->method('getIndex')
-                    ->willReturn($question['index']);
+        $questionMockOrder2 = $this->createMock(LabXYQuestion::class);
+        $questionMockOrder2
+            ->method('getIndex')
+            ->willReturn(2);
 
-                $lab->addLabXYQuestion($labXYQuestion);
-            }
-        }
+        $questionMockOrder1 = $this->createMock(LabXYQuestion::class);
+        $questionMockOrder1
+            ->method('getIndex')
+            ->willReturn(1);
 
-        $questions = $lab->getQuestions()->toArray();
-        $indices = [];
+        $lab->addLabXYQuestion($questionMockOrder3);
+        $lab->addLabXYQuestion($questionMockOrder1);
+        $lab->addLabXYQuestion($questionMockOrder2);
 
-        foreach ($questions as $question) {
-            $indices[] = $question->getIndex();
-        }
+        $this->assertEquals([
+            $questionMockOrder1,
+            $questionMockOrder2,
+            $questionMockOrder3
+        ], $lab->getQuestions()->toArray());
 
-        $this->assertEquals($expectedOrder, $indices);
-        $this->assertEquals($count, $lab->getQuestionCount());
+        $this->assertEquals(3, $lab->getQuestionCount());
     }
 }

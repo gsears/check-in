@@ -9,15 +9,10 @@ namespace App\Tests\Unit\Security;
 
 use App\Entity\User;
 use App\Entity\Student;
-use App\Security\Roles;
-use App\Entity\Enrolment;
 use App\Entity\Instructor;
-use App\Entity\CourseInstance;
 use App\Repository\InstructorRepository;
 use PHPUnit\Framework\TestCase;
-use App\Security\Voter\CourseInstanceVoter;
 use App\Security\Voter\StudentVoter;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;

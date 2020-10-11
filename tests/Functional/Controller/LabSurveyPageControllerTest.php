@@ -1,7 +1,7 @@
 <?php
 
 /*
-CourseSummaryPageTest.php
+LabSurveyPageControllerTest.php
 Gareth Sears - 2493194S
 */
 

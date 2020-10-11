@@ -2,155 +2,32 @@
 
 Check in is an online web platform for administering surveys for CS labs and analysing the responses, with the goal of flagging students at risk and assisting instructors with interventions.
 
+## Demo Application
+An evaluation version of the application is hosted at https://qlitmnms3a-vioxgpwe4okw6.eu.s5y.io/ . It will be available until November 30th, then it will be taken down.
+
+Login using the credentials below for the test instructor and user.
+  - Student: `test@student.gla.ac.uk` Pass: `password`
+  - Instructor: `test@glasgow.ac.uk` Pass: `password`
+
 ## Requirements
 
 This project is developed using the [Symfony framework](symfony.com). It is recommended that you follow their [setup instructions and install their CLI tool](https://symfony.com/doc/current/setup.html).
 
 The main dependencies for backend development are:
 
-- [Make](https://www.gnu.org/software/make/manual/make.html)
+- [Make](https://www.gnu.org/software/make/manual/make.html): For running the developer build scripts.
 - [PHP 7.4 or above](https://www.php.net/manual/en/install.php)
-- [Composer](https://getcomposer.org/)
-- [Symfony CLI](https://symfony.com/download)
-- [Cron / Crontab](https://man7.org/linux/man-pages/man8/cron.8.html)
-
-In addition, this project uses Symfony Encore, which is a [webpack](https://webpack.js.org/) variant specifically for Symfony. Instructions for its [installation can be found on the symfony site](https://symfony.com/doc/current/frontend/encore/installation.html).
+- [Composer](https://getcomposer.org/): For managing PHP dependencies.
+- [Symfony CLI](https://symfony.com/download): For serving the Symfony application.
+- [Docker / Docker Compose](https://docs.docker.com/compose/install/): For containerising the DB.
+- [Cron / Crontab](https://man7.org/linux/man-pages/man8/cron.8.html): For running the application cron tasks.
 
 The main dependencies for frontend development are:
 
 - [Node JS 14.2.0 or above](https://nodejs.org/)
 - [Yarn](https://yarnpkg.com/)
 
-Other dependencies are fetched using the Composer and Yarn package managers.
-
-## Directory Structure
-
-The directory is structured according to Symfony best practices, with additions added to facilitate development. The structure is provided below with annotations for important or customised additions:
-
-**📦.github
-┗ 📂workflows
-┃ ┗ 📜php.yml**
-<sup>_This contains a continuous integration script which automates builds and testing when pushing to the GitHub repository._ </sup>
-**📦.symfony**
-<sup>_This contains configuration used for hosting the evaluation application using [Symfony Cloud](https://symfony.com/cloud/)_</sup>
-**📦assets**
-<sup>_This contains the frontend files_</sup>
-**┣ 📂css**
-<sup>_This contains the [SASS CSS](https://sass-lang.com/) files_</sup>
-**┗ 📂js
-┃ ┣ 📂components**
-<sup>_This contains [Vue.js](https://vuejs.org/) components_</sup>
-**┃ ┣ ...
-┃ ┣ 📜app.js**
-<sup>_This is Webpack's main entry point. Other JS is imported here._</sup>
-**📦bin**
-<sup>_This contains shell and php scripts_</sup>
-**┣ ...
-┣ 📜dev.sh**
-<sup>_This script guides the user through development setup_</sup>
-**┗ 📜setup_cron.sh**
-<sup>_This script sets up a `crontab` entry for the application_</sup>
-**📦config**
-<sup>_Configuration files for symfony and its bundles_</sup>
-**┣ 📂packages**
-<sup>_Contains Symfony bundle configurations for different environments_</sup>
-**┃ ┣ ...
-┃ ┣ 📜twig.yaml**
-<sup>_Contains Twig globals and links to custom form renderers for XY components_</sup>
-**┣ 📂routes**
-<sup>_Route configuration is here. It is set up to use annotations on controller methods._</sup>
-**┣ 📂secrets
-┃ ┗ 📂dev**
-<sup>_Contains encrypted sentiment analysis API credentials so other developers can use the api. The private key is NOT included in the source code._</sup>
-**┣ 📜bundles.php**
-<sup>_This lists and imports all external bundles used in this application._</sup>
-**┣ 📜routes.yaml**
-<sup>_Adds global routing. Namely redirecting '/' to '/courses'._</sup>
-**┗ 📜services.yaml**
-<sup>_Sets up [Symfony's service container](https://symfony.com/doc/current/service_container.html) which is used for dependency injection._</sup>
-**📦docs**
-<sup>_Contains all project documentation._</sup>
-**┗ 📂coverage
-┃ ┗ 📜index.html**
-<sup>_This is entry point for the HTML test coverage report._</sup>
-**┗ 📂evaluation**
-<sup>_Contains evaluation fixture user accounts in .csv form_</sup>
-**📦public
-┣ 📜head.js**
-<sup>_Essential javascript functions which need to be loaded in a web page header._</sup>
-**┗ 📜index.php**
-<sup>_Entry point for the application._</sup>
-**📦src**
-<sup>_The backend source code_</sup>
-**┣ 📂Containers
-┃ ┣ 📂Risk**
-<sup>_Wrapper classes used for storage and calculations on entities. Risk calculation takes place here._</sup>
-**┣ 📂Controller**
-<sup>_The route and page logic is contained in these classes_</sup>
-**┣ 📂DataFixtures**
-<sup>_These classes generate mock data_</sup>
-**┣ 📂Entity**
-<sup>_These classes implement the ORM_</sup>
-**┣ 📂Form
-┃ ┗ 📂Type**
-<sup>_These classes are used to map entities to forms_</sup>
-**┣ 📂Migrations
-┣ 📂Provider
-┃ ┗ 📜DateTimeProvider.php**
-<sup>_This class provides the application date and time. It is used to generate an artificial date time for evaluation._</sup>
-**┣ 📂Repository**
-<sup>_These classes are used to fetch entities from the database using Doctrine Query Language queries_</sup>
-**┣ 📂Security
-┃ ┣ 📂Voter**
-<sup>_Provides the security classes for determining user permissions to routes_</sup>
-**┣ 📂Service
-┃ ┗ 📜BreadcrumbBuilder.php**
-<sup>_A utility service for building breadcrumbs_</sup>
-**┣ 📂Task
-┃ ┗ 📜FlagStudentsTask.php**
-<sup>_Runs a periodic cron job which flags students based on course instance configurations_</sup>
-**┣ 📂Twig
-┃ ┗ 📜AppExtension.php**
-<sup>_Custom Twig functions are created here, namely the `renderRisk()` function which renders `SurveyQuestionResponseRisk` subclasses on the webpage_</sup>
-**┗ 📜Kernel.php**
-<sup>_The Symfony kernel which handles all requests and responses._</sup>
-**📦templates
-┣ 📂course**
-<sup>_Course page HTML view templates._</sup>
-**┣ 📂form
-┃ ┗ 📜custom_types.html.twig**
-<sup>_HTML view template partials for custom XY component forms._</sup>
-**┣ 📂lab**
-<sup>_Lab page HTML view templates._</sup>
-**┣ 📂risk_summary**
-<sup>_HTML view template partials for displaying `SurveyQuestionResponseRisk` subclasses._</sup>
-**┣ 📂security**
-<sup>_Login page HTML view templates._</sup>
-**┣ ...
-┗ 📜macros.html.twig**
-<sup>_Common template partials encapsulated as macro functions._</sup>
-**📦tests**
-<sup>_Classes for unit and functional tests._</sup>
-**┣ 📜.env
-┣ 📜.env.test**
-<sup>_Environment variables are defined in these files._</sup>
-**┣ 📜.symfony.cloud.yaml**
-<sup>_Symfony cloud configuration._</sup>
-**┣ 📜Makefile**
-<sup>_Contains aliases for common commands._</sup>
-**┣ 📜README.md
-┣ 📜composer.json**
-<sup>_Contains PHP dependencies for backend code._</sup>
-**┣ 📜docker-compose.yml**
-<sup>_Contains docker compose script for database container creation._</sup>
-**┣ 📜package.json**
-<sup>_Contains node dependencies for frontend code._</sup>
-**┣ 📜php.ini**
-<sup>_PHP configuration for the project._</sup>
-**┣ 📜phpunit.xml.dist**
-<sup>_PHPUnit configuration for the project._</sup>
-**┗ 📜webpack.config.js**
-<sup>_Webpack configuration for building frontend assets._</sup>
+In addition, this project uses Symfony Encore, which is a [webpack](https://webpack.js.org/) variant specifically for Symfony. This is installed via the Composer / Yarn package managers, as are other dependencies.
 
 ## Installation
 
@@ -167,12 +44,157 @@ Note: Though the evaluation fixtures have been optimised as much as possible, it
 ## Usage
 
 - Navigate to the local web server in your browser (see **Installation**). You can check the port that the Local Web Server is using using `make backend/status`.
-- Login using the credentials below, for the test instructor and user.
+- Login using the credentials below for the test instructor and user.
   - Student: `test@student.gla.ac.uk` Pass: `password`
   - Instructor: `test@glasgow.ac.uk` Pass: `password`
 - The evaluation fixtures also produce .csv files in the root directory with all generated user emails. You can use any email from these with the password `password` to login.
 - You can stop the server by running `make backend/stop`.
 - See `docs/UserGuide.pdf` for a comprehensive user guide.
+
+## Code
+
+All code has been written to be as self documenting as possible. However, comments are included where necessary and to describe key methods
+
+The directory is structured according to Symfony best practices, with additional files and folders specific to this project. The structure is provided below with annotations for important or customised additions.
+
+### Directory Structure and Key Items
+
+**📦.github
+┗ 📂workflows
+┃ ┗ 📜php.yml**
+<sup>_This contains a continuous integration script which automates builds and tests when creating a pull request on the GitHub repository._ </sup>
+**📦.symfony**
+<sup>_This contains configuration used for hosting the evaluation application on [Symfony Cloud](https://symfony.com/cloud/)._</sup>
+**📦assets**
+<sup>_This contains the frontend source code._</sup>
+**┣ 📂css**
+<sup>_This contains the [SASS CSS](https://sass-lang.com/) files for additional frontend styling._</sup>
+**┗ 📂js
+┃ ┣ 📂lib**
+<sup>_This contains javascript libraries and custom code used by the project._</sup>
+**┃ ┣ 📂vue**
+<sup>_This contains custom [Vue.js](https://vuejs.org/) components for building the XY grid interface._</sup>
+**┃ ┣ 📜app.js**
+<sup>_This is the first of Webpack's entry points. All javascript to be inserted at the bottom of each page's \<body> tag is imported here._</sup>
+**┃ ┗ 📜preload.js**
+<sup>_This is the second of Webpack's entry points. All javascript to be inserted at the \<head> of each page is imported here._</sup>
+**📦bin**
+<sup>_This contains shell and php scripts_</sup>
+**┣ ...
+┣ 📜dev.sh**
+<sup>_This script guides the user through the setup process for development._</sup>
+**┗ 📜setup_cron.sh**
+<sup>_This script sets up a `crontab` entry for the application._</sup>
+**📦config**
+<sup>_Configuration files for symfony and its bundles_</sup>
+**┣ 📂packages**
+<sup>_Contains Symfony bundle configurations for different environments_</sup>
+**┃ ┣ ...
+┃ ┣ 📜twig.yaml**
+<sup>_Contains Twig globals and points the application to [custom form object templates](https://symfony.com/doc/current/form/form_themes.html#creating-your-own-form-theme)_</sup>
+**┣ 📂routes**
+<sup>_Route configuration is here. It is set up to use annotations on controller methods._</sup>
+**┣ 📂secrets
+┃ ┗ 📂dev**
+<sup>_Contains encrypted [sentiment analysis API](https://monkeylearn.com/) credentials so [other developers can use the api](https://symfony.com/doc/current/configuration/secrets.html). The private key is NOT included in this repository._</sup>
+**┣ 📜bundles.php**
+<sup>_This lists and imports all external [Symfony bundles](https://symfony.com/doc/current/bundles.html) used in this application._</sup>
+**┣ 📜routes.yaml**
+<sup>_Adds global routing. Namely redirecting '/' to '/courses'._</sup>
+**┗ 📜services.yaml**
+<sup>_Sets up [Symfony's service container](https://symfony.com/doc/current/service_container.html) which is used for dependency injection._</sup>
+**📦docs**
+<sup>_Contains all project documentation._</sup>
+**┗ 📂testing
+┃ ┣ 📂coverage
+┃ ┃ ┗ 📜index.html**
+<sup>_This is entry point for the HTML test coverage report._</sup>
+**┃ ┗ 📜ManualAcceptanceTests.pdf**
+<sup>_This is the manual acceptance testing report._</sup>
+**┗ 📂evaluation**
+<sup>_Contains evaluation fixture user accounts in .csv form_</sup>
+**📦public
+┗ 📜index.php**
+<sup>_Entry point for the application._</sup>
+**📦src**
+<sup>_The backend source code_</sup>
+**┣ 📂Containers
+┃ ┣ 📂Risk**
+<sup>_Classes for wrapping entities associated with risk calculation and providing helper methods for calculating risk, rendering, etc._</sup>
+**┣ 📂Controller**
+<sup>_Classes for [page routing and logic](https://symfony.com/doc/current/controller.html)._</sup>
+**┣ 📂DataFixtures**
+<sup>_Classes for [generating mock data](https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html)._</sup>
+**┣ 📂Entity**
+<sup>_[ORM classes](https://symfony.com/doc/current/doctrine.html)_</sup>
+**┣ 📂Form
+┃ ┗ 📂Type**
+<sup>_[Custom form classes](https://symfony.com/doc/current/form/create_custom_field_type.html) to bind forms to entities_</sup>
+**┣ 📂Migrations
+┣ 📂Provider
+┃ ┗ 📜DateTimeProvider.php**
+<sup>_A class to provide (and mock) the application's current date and time._</sup>
+**┣ 📂Repository**
+<sup>_Classes for [implementing database queries and returning populated entities](https://symfony.com/doc/current/doctrine.html#querying-for-objects-the-repository)._</sup>
+**┣ 📂Security
+┃ ┣ 📂Voter**
+<sup>_Classes for [determining user permissions to routes](https://symfony.com/doc/current/security/voters.html)._</sup>
+**┣ 📂Service
+┃ ┗ 📜BreadcrumbBuilder.php**
+<sup>_A utility service for building breadcrumbs._</sup>
+**┣ 📂Task
+┃ ┗ 📜FlagStudentsTask.php**
+<sup>_Runs a [periodic cron job](https://github.com/rewieer/TaskSchedulerBundle) which flags students based on course instance configurations_</sup>
+**┣ 📂Twig
+┃ ┗ 📜AppExtension.php**
+<sup>_[Custom Twig functions](https://symfony.com/doc/current/templating/twig_extension.html) are created here, namely the `renderRisk()` function which renders `SurveyQuestionResponseRisk` subclasses on the webpage_</sup>
+**┗ 📜Kernel.php**
+<sup>_[The Symfony kernel](https://symfony.com/doc/current/configuration/front_controllers_and_kernel.html#the-kernel-class) which configures bundles, the [symfony container](https://symfony.com/doc/current/service_container.html) and routes._</sup>
+**📦templates**
+<sup>_[Twig view templates](https://twig.symfony.com/doc/3.x/) for forms, risk, and pages are here._</sup>
+**┣ 📂course**
+<sup>_Course page HTML view templates._</sup>
+**┣ 📂form
+┃ ┗ 📜custom_types.html.twig**
+<sup>_HTML view template partials for custom forms._</sup>
+**┣ 📂lab**
+<sup>_Lab page HTML view templates._</sup>
+**┣ 📂risk_summary**
+<sup>_HTML view template partials for rendering `SurveyQuestionResponseRisk` objects._</sup>
+**┣ 📂security**
+<sup>_Login page HTML view templates._</sup>
+**┣ ...
+┗ 📜macros.html.twig**
+<sup>_Common template partials encapsulated as macro functions._</sup>
+**📦tests**
+<sup>_Classes for unit and functional tests._</sup>
+**📜.env
+📜.env.test**
+<sup>_Environment variables are defined in these files._</sup>
+**📜.symfony.cloud.yaml**
+<sup>_Symfony cloud configuration for hosting the evaluation app._</sup>
+**📜Makefile**
+<sup>_Contains aliases for development commands._</sup>
+**📜README.md
+📜composer.json**
+<sup>_Contains PHP dependencies for backend code._</sup>
+**📜docker-compose.yml**
+<sup>_Contains docker compose script for database container creation._</sup>
+**📜package.json**
+<sup>_Contains node dependencies for frontend code._</sup>
+**📜php.ini**
+<sup>_PHP configuration for the project._</sup>
+**📜phpunit.xml.dist**
+<sup>_PHPUnit configuration for the project._</sup>
+**📜webpack.config.js**
+<sup>_Webpack configuration for building frontend assets._</sup>
+
+## Symfony Bundle Code vs Project Code
+
+Some code is automatically generated by particular Symfony bundles. All code which has been created / modified by myself is annotated with a comment at the top containing:
+
+- The file name
+- `Gareth Sears - 2493194S`
 
 ## Testing
 
@@ -207,15 +229,6 @@ This suite currently tests:
 - Route permissions and security handling in the `Controller` classes. This is done by automating logins and page navigation and testing if (in)valid responses are given.
 - `Entity` classes which use annotation hooks to run methods during a database transaction.
 - `Repository` classes, whose methods are responsible for querying the database and fetching entities.
-
-## Source code
-
-Some code is automatically generated by particular Symfony bundles. All code which has been created and modified by myself is annotated with a comment at the top containing:
-
-- The file name
-- `Gareth Sears - 2493194S`
-
-All code has been written to be as self documenting as possible. However, comments are included where necessary and to describe key methods.
 
 ## Additional Documentation
 

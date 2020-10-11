@@ -13,6 +13,11 @@ use App\Containers\Risk\SurveyQuestionResponseRisk;
 use App\Entity\QuestionInterface;
 use App\Entity\SurveyQuestionInterface;
 
+/**
+ * Tests risk calculation methods and that the wrapper preserves the objects it contains.
+ * Additionally checks the default contexts passed to the SurveyQuestionResponseRisks' twig
+ * templates.
+ */
 class SurveyQuestionResponseRiskTest extends TestCase
 {
     public function validRiskLevelProvider()

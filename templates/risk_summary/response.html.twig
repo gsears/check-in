@@ -1,3 +1,11 @@
+{#
+response.html.twig
+Gareth Sears - 2493194S
+
+A base class for generating a question response traffic light button and the containing response information.
+Used by the other risk_summary templates.
+#}
+
 {% set isWarning = riskLevel == constant('App\\Containers\\Risk\\SurveyQuestionResponseRisk::LEVEL_WARNING') %}
 {% set isDanger = riskLevel == constant('App\\Containers\\Risk\\SurveyQuestionResponseRisk::LEVEL_DANGER') %}
 

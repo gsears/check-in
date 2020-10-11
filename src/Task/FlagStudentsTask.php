@@ -1,5 +1,10 @@
 <?php
 
+/*
+FlagStudentsTask.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Task;
 
 use App\Entity\CourseInstance;
@@ -8,6 +13,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Rewieer\TaskSchedulerBundle\Task\AbstractScheduledTask;
 use Rewieer\TaskSchedulerBundle\Task\Schedule;
 
+/**
+ * This class uses the TaskSchedulerBundle (https://github.com/rewieer/TaskSchedulerBundle)
+ * to run a Cron job task within Symfony. Currently, it flags any students at risk every
+ * 5 minutes in the app. This would change to a larger interval in practice, potentially
+ * configurable by the user.
+ */
 class FlagStudentsTask extends AbstractScheduledTask
 {
     const CRON_EXPRESSION = "*/5 * * * *";
@@ -31,6 +42,9 @@ class FlagStudentsTask extends AbstractScheduledTask
         $schedule->getCron()->setExpression(self::CRON_EXPRESSION);
     }
 
+    /**
+     * Goes through all courses and flags any students meeting the 'at risk' criteria.
+     */
     public function run()
     {
         /**

@@ -1,3 +1,9 @@
+# docker-compose.yml
+# Gareth Sears - 2493194S
+
+# Downloads and creates a postgres container for use
+# in the application.
+
 version: "3"
 services:
   db:

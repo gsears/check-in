@@ -1,14 +1,19 @@
 <?php
 
+/*
+StudentRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
-use App\Entity\Lab;
-use App\Entity\LabResponse;
 use App\Entity\Student;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method Student|null find($id, $lockMode = null, $lockVersion = null)
  * @method Student|null findOneBy(array $criteria, array $orderBy = null)
  * @method Student[]    findAll()
@@ -21,6 +26,11 @@ class StudentRepository extends ServiceEntityRepository
         parent::__construct($registry, Student::class);
     }
 
+    /**
+     * Returns all students in a particular course instance
+     *
+     * @param [type] $courseInstance
+     */
     public function findByCourseInstance($courseInstance)
     {
         return $this->createQueryBuilder('s')

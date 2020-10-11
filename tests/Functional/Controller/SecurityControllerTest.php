@@ -10,7 +10,7 @@ namespace App\Tests\Functional\Controller;
 use App\Tests\Functional\FunctionalTestCase;
 
 /**
- * Tests for the SecurityController
+ * Tests for redirection to and from login pages and logging out.
  */
 class SecurityControllerTest extends FunctionalTestCase
 {

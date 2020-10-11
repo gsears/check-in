@@ -1,5 +1,10 @@
 <?php
 
+/*
+LabXYQuestionResponseRepository.php
+Gareth Sears - 2493194S
+*/
+
 namespace App\Repository;
 
 use App\Entity\LabXYQuestionResponse;
@@ -9,8 +14,9 @@ use App\Containers\Risk\LabXYQuestionResponseRisk;
 use App\Containers\Risk\SurveyQuestionResponseRisk;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
-
 /**
+ * Default symfony methods provided via annotations
+ *
  * @method LabXYQuestionResponse|null find($id, $lockMode = null, $lockVersion = null)
  * @method LabXYQuestionResponse|null findOneBy(array $criteria, array $orderBy = null)
  * @method LabXYQuestionRespons e[]    findAll()

@@ -17,6 +17,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
+ * Default symfony methods provided via annotations.
+ * 
  * @method Enrolment|null find($id, $lockMode = null, $lockVersion = null)
  * @method Enrolment|null findOneBy(array $criteria, array $orderBy = null)
  * @method Enrolment[]    findAll()

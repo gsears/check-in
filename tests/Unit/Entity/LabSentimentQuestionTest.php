@@ -10,6 +10,10 @@ namespace App\Tests\Unit\Entity;
 use App\Entity\LabSentimentQuestion;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Tests to ensure methods for LabSentimentQuestion
+ * have checks to ensure valid state in database.
+ */
 class LabSentimentQuestionTest extends TestCase
 {
     public function indexProvider()
