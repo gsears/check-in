@@ -15,6 +15,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\CourseInstanceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+/**
+ * Provides fetch methods for obtaining entities from route parameters.
+ * Performs the security checks required.
+ */
 abstract class AbstractCourseController extends AbstractController
 {
     protected $entityManager;

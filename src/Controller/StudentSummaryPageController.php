@@ -19,6 +19,10 @@ use App\Security\Voter\StudentVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Renders a summary of student responses and references to pending surveys.
+ * Also includes risk flagging form.
+ */
 class StudentSummaryPageController extends AbstractCourseController
 {
     const ROUTE = 'student_summary';

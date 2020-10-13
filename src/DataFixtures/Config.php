@@ -2,6 +2,9 @@
 
 namespace App\DataFixtures;
 
+/**
+ * Shared constants used for fixture generation
+ */
 class Config
 {
     const TEST_STUDENT_EMAIL = 'test@student.gla.ac.uk';

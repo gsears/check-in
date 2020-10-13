@@ -14,6 +14,9 @@ use App\Security\Voter\CourseInstanceVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Renders the lab summary page for instructors
+ */
 class LabSummaryPageController extends AbstractCourseController
 {
     const ROUTE = 'lab_summary';

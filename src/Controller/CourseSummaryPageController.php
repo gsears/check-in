@@ -16,6 +16,9 @@ use App\Security\Voter\CourseInstanceVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Renders the course summary page for instructors.
+ */
 class CourseSummaryPageController extends AbstractCourseController
 {
     const ROUTE = 'course_instance_summary';

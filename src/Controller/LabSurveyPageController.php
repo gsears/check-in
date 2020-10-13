@@ -25,6 +25,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Form\Type\LabSentimentQuestionResponseType;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+/**
+ * Renders lab survey pages for students
+ */
 class LabSurveyPageController extends AbstractCourseController
 {
     const ROUTE = 'lab_survey_page';
