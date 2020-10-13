@@ -66,10 +66,10 @@ jobs:
       run: yarn encore production --progress
 
     - name: Reset db
-      run: make reset_db
+      run: make db/reset
 
     - name: Create fixtures
-      run: make fixtures
+      run: make fixtures/test
 
     - name: Run test suite
-      run: make test
+      run: make test/all
