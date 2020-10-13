@@ -33,9 +33,9 @@ In addition, this project uses Symfony Encore, which is a [webpack](https://webp
 
 All of the below commands should be run from the root of the `check-in` folder, as all commands use relative paths.
 
-1. Run `make dev` for an interactive guide to setting up the development environment.
-2. Run `make backend/cron_setup` to add a cron task that symfony uses for running the `src/Task/FlagStudentsTask.php` task. This may require administrator privileges. It can be omitted, but student flagging will not function as expected.
-3. Create application fixtures (fake data). There are two variants:
+1. Run `make dev` for an interactive guide to setting up the development environment. This will prompt you to open terminal windows and run additional commands. Also it will ask you for decisions regarding the following:
+   1. Running `make backend/cron_setup` to add a cron task that symfony uses for running the `src/Task/FlagStudentsTask.php` task. This may require administrator privileges / chmod-ing the file for execution. It can be omitted, but student flagging will not function as intended.
+   2. Creating application fixtures (fake data). There are two variants:
    - `make fixtures/test`: This creates fixed data which was used for manual acceptance tests (see **Testing** section). The corresponding fixture class is `src/DataFixtures/TestFixtures.php`.
    - `make fixtures/evaluation`: This creates randomised data representative of a computer science programme at a university. The corresponding fixture class is `src/DataFixtures/EvaluationFixtures.php`.
 
