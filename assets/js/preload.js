@@ -1,5 +1,5 @@
 /*
-head.js
+preload.js
 Gareth Sears - 2493194S
 */
 
@@ -17,7 +17,7 @@ addLoadEvent = (func) => {
   if (typeof window.onload != "function") {
     window.onload = func;
   } else {
-    window.onload = function() {
+    window.onload = function () {
       if (oldonload) {
         oldonload();
       }
