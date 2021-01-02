@@ -111,6 +111,9 @@
     "dragonmantank/cron-expression": {
         "version": "v3.0.0"
     },
+    "friendsofphp/proxy-manager-lts": {
+        "version": "v1.0.1"
+    },
     "fzaninotto/faker": {
         "version": "v1.9.1"
     },

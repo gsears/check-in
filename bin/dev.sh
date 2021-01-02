@@ -21,7 +21,7 @@ echo "Which fixtures would you like to install? Note: Evaluation fixtures may ta
 select fix in "Test" "Evaluation"; do
     case $fix in
         Test ) make fixtures/test; break;;
-        Evaluation ) make fixtures/evaluation break;;
+        Evaluation ) make fixtures/evaluation; break;;
     esac
 done
 
