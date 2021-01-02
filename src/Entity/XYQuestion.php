@@ -33,13 +33,13 @@ class XYQuestion implements QuestionInterface
     private $questionText;
 
     /**
-     * @ORM\ManyToOne(targetEntity=AffectiveField::class)
+     * @ORM\ManyToOne(targetEntity=AffectiveField::class, fetch="EAGER")
      * @ORM\JoinColumn(nullable=false)
      */
     private $xField;
 
     /**
-     * @ORM\ManyToOne(targetEntity=AffectiveField::class)
+     * @ORM\ManyToOne(targetEntity=AffectiveField::class, fetch="EAGER")
      * @ORM\JoinColumn(nullable=false)
      */
     private $yField;
