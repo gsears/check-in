@@ -59,134 +59,265 @@ The directory is structured according to Symfony best practices, with additional
 
 ### Directory Structure and Key Items
 
-**📦.github
-┗ 📂workflows
-┃ ┗ 📜php.yml**
+**📦.github**
+
+**┗ 📂workflows**
+
+**┃ ┗ 📜php.yml**
+
 <sup>_This contains a continuous integration script which automates builds and tests when creating a pull request on the GitHub repository._ </sup>
+
 **📦.symfony**
+
 <sup>_This contains configuration used for hosting the evaluation application on [Symfony Cloud](https://symfony.com/cloud/)._</sup>
+
 **📦assets**
+
 <sup>_This contains the frontend source code._</sup>
+
 **┣ 📂css**
+
 <sup>_This contains the [SASS CSS](https://sass-lang.com/) files for additional frontend styling._</sup>
-**┗ 📂js
-┃ ┣ 📂lib**
+
+**┗ 📂js**
+
+**┃ ┣ 📂lib**
+
 <sup>_This contains javascript libraries and custom code used by the project._</sup>
+
 **┃ ┣ 📂vue**
+
 <sup>_This contains custom [Vue.js](https://vuejs.org/) components for building the XY grid interface._</sup>
+
 **┃ ┣ 📜app.js**
+
 <sup>_This is the first of Webpack's entry points. All javascript to be inserted at the bottom of each page's \<body> tag is imported here._</sup>
+
 **┃ ┗ 📜preload.js**
+
 <sup>_This is the second of Webpack's entry points. All javascript to be inserted at the \<head> of each page is imported here._</sup>
+
 **📦bin**
+
 <sup>_This contains shell and php scripts_</sup>
+
 **┣ ...
+
 ┣ 📜dev.sh**
+
 <sup>_This script guides the user through the setup process for development._</sup>
+
 **┗ 📜setup_cron.sh**
+
 <sup>_This script sets up a `crontab` entry for the application._</sup>
+
 **📦config**
+
 <sup>_Configuration files for symfony and its bundles_</sup>
+
 **┣ 📂packages**
+
 <sup>_Contains Symfony bundle configurations for different environments_</sup>
-**┃ ┣ ...
-┃ ┣ 📜twig.yaml**
-<sup>_Contains Twig globals and points the application to [custom form object templates](https://symfony.com/doc/current/form/form_themes.html#creating-your-own-form-theme)_</sup>
+
+**┃ ┣ ...**
+
+**┃ ┣ 📜twig.yaml**
+
+<sup>_Contains Twig globals and points the application to [custom form object templates](https://symfony.com/doc/current/form/form_themes.html#creating-your-
+ own-form-theme)_</sup>
+
 **┣ 📂routes**
+
 <sup>_Route configuration is here. It is set up to use annotations on controller methods._</sup>
-**┣ 📂secrets
-┃ ┗ 📂dev**
-<sup>_Contains encrypted [sentiment analysis API](https://monkeylearn.com/) credentials so [other developers can use the api](https://symfony.com/doc/current/configuration/secrets.html). The private key is NOT included in this repository._</sup>
+
+**┣ 📂secrets**
+
+**┃ ┗ 📂dev**
+
+<sup>_Contains encrypted [sentiment analysis API](https://monkeylearn.com/) credentials so [other developers can use the api]
+ (https://symfony.com/doc/current/configuration/secrets.html). The private key is NOT included in this repository._</sup>
+
 **┣ 📜bundles.php**
+
 <sup>_This lists and imports all external [Symfony bundles](https://symfony.com/doc/current/bundles.html) used in this application._</sup>
+
 **┣ 📜routes.yaml**
+
 <sup>_Adds global routing. Namely redirecting '/' to '/courses'._</sup>
+
 **┗ 📜services.yaml**
+
 <sup>_Sets up [Symfony's service container](https://symfony.com/doc/current/service_container.html) which is used for dependency injection._</sup>
+
 **📦docs**
+
 <sup>_Contains all project documentation._</sup>
-**┗ 📂testing
-┃ ┣ 📂coverage
-┃ ┃ ┗ 📜index.html**
+
+**┗ 📂testing**
+
+**┃ ┣ 📂coverage**
+
+**┃ ┃ ┗ 📜index.html**
+
 <sup>_This is entry point for the HTML test coverage report._</sup>
+
 **┃ ┗ 📜ManualAcceptanceTests.pdf**
+
 <sup>_This is the manual acceptance testing report._</sup>
+
 **┗ 📂evaluation**
+
 <sup>_Contains evaluation fixture user accounts in .csv form_</sup>
-**📦public
-┗ 📜index.php**
+
+**📦public**
+
+**┗ 📜index.php**
+
 <sup>_Entry point for the application._</sup>
+
 **📦src**
+
 <sup>_The backend source code_</sup>
-**┣ 📂Containers
-┃ ┣ 📂Risk**
+
+**┣ 📂Containers**
+
+**┃ ┣ 📂Risk**
+
 <sup>_Classes for wrapping entities associated with risk calculation and providing helper methods for calculating risk, rendering, etc._</sup>
+
 **┣ 📂Controller**
+
 <sup>_Classes for [page routing and logic](https://symfony.com/doc/current/controller.html)._</sup>
+
 **┣ 📂DataFixtures**
+
 <sup>_Classes for [generating mock data](https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html)._</sup>
+
 **┣ 📂Entity**
+
 <sup>_[ORM classes](https://symfony.com/doc/current/doctrine.html)_</sup>
-**┣ 📂Form
-┃ ┗ 📂Type**
+
+**┣ 📂Form**
+
+**┃ ┗ 📂Type**
+
 <sup>_[Custom form classes](https://symfony.com/doc/current/form/create_custom_field_type.html) to bind forms to entities_</sup>
-**┣ 📂Migrations
-┣ 📂Provider
-┃ ┗ 📜DateTimeProvider.php**
+
+**┣ 📂Migrations**
+
+**┣ 📂Provider**
+
+**┃ ┗ 📜DateTimeProvider.php**
+
 <sup>_A class to provide (and mock) the application's current date and time._</sup>
+
 **┣ 📂Repository**
+
 <sup>_Classes for [implementing database queries and returning populated entities](https://symfony.com/doc/current/doctrine.html#querying-for-objects-the-repository)._</sup>
-**┣ 📂Security
-┃ ┣ 📂Voter**
+
+**┣ 📂Security**
+
+**┃ ┣ 📂Voter**
+
 <sup>_Classes for [determining user permissions to routes](https://symfony.com/doc/current/security/voters.html)._</sup>
-**┣ 📂Service
-┃ ┗ 📜BreadcrumbBuilder.php**
+
+**┣ 📂Service**
+
+**┃ ┗ 📜BreadcrumbBuilder.php**
+
 <sup>_A utility service for building breadcrumbs._</sup>
-**┣ 📂Task
-┃ ┗ 📜FlagStudentsTask.php**
+
+**┣ 📂Task**
+
+**┃ ┗ 📜FlagStudentsTask.php**
+
 <sup>_Runs a [periodic cron job](https://github.com/rewieer/TaskSchedulerBundle) which flags students based on course instance configurations_</sup>
-**┣ 📂Twig
-┃ ┗ 📜AppExtension.php**
+
+**┣ 📂Twig**
+
+**┃ ┗ 📜AppExtension.php**
+
 <sup>_[Custom Twig functions](https://symfony.com/doc/current/templating/twig_extension.html) are created here, namely the `renderRisk()` function which renders `SurveyQuestionResponseRisk` subclasses on the webpage_</sup>
+
 **┗ 📜Kernel.php**
+
 <sup>_[The Symfony kernel](https://symfony.com/doc/current/configuration/front_controllers_and_kernel.html#the-kernel-class) which configures bundles, the [symfony container](https://symfony.com/doc/current/service_container.html) and routes._</sup>
+
 **📦templates**
+
 <sup>_[Twig view templates](https://twig.symfony.com/doc/3.x/) for forms, risk, and pages are here._</sup>
+
 **┣ 📂course**
+
 <sup>_Course page HTML view templates._</sup>
-**┣ 📂form
-┃ ┗ 📜custom_types.html.twig**
+
+**┣ 📂form**
+
+**┃ ┗ 📜custom_types.html.twig**
+
 <sup>_HTML view template partials for custom forms._</sup>
+
 **┣ 📂lab**
+
 <sup>_Lab page HTML view templates._</sup>
+
 **┣ 📂risk_summary**
+
 <sup>_HTML view template partials for rendering `SurveyQuestionResponseRisk` objects._</sup>
+
 **┣ 📂security**
+
 <sup>_Login page HTML view templates._</sup>
-**┣ ...
-┗ 📜macros.html.twig**
+
+**┣ ...**
+
+**┗ 📜macros.html.twig**
+
 <sup>_Common template partials encapsulated as macro functions._</sup>
+
 **📦tests**
+
 <sup>_Classes for unit and functional tests._</sup>
-**📜.env
-📜.env.test**
+
+**📜.env**
+
+**📜.env.test**
+
 <sup>_Environment variables are defined in these files._</sup>
+
 **📜.symfony.cloud.yaml**
+
 <sup>_Symfony cloud configuration for hosting the evaluation app._</sup>
+
+
 **📜Makefile**
+
 <sup>_Contains aliases for development commands._</sup>
-**📜README.md
-📜composer.json**
+
+**📜README.md**
+
+**📜composer.json**
+
 <sup>_Contains PHP dependencies for backend code._</sup>
+
 **📜docker-compose.yml**
+
 <sup>_Contains docker compose script for database container creation._</sup>
+
 **📜package.json**
+
 <sup>_Contains node dependencies for frontend code._</sup>
+
 **📜php.ini**
+
 <sup>_PHP configuration for the project._</sup>
+
 **📜phpunit.xml.dist**
+
 <sup>_PHPUnit configuration for the project._</sup>
+
 **📜webpack.config.js**
+
 <sup>_Webpack configuration for building frontend assets._</sup>
 
 ## Symfony Bundle Code vs Project Code
