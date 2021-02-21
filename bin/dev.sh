@@ -18,10 +18,11 @@ wait "Create the database container by running 'make docker/start' in a new term
 make db/reset backend/start
 
 echo "Which fixtures would you like to install? Note: Evaluation fixtures may take a while..."
-select fix in "Test" "Evaluation"; do
+select fix in "Test" "Evaluation" "Trial"; do
     case $fix in
         Test ) make fixtures/test; break;;
         Evaluation ) make fixtures/evaluation; break;;
+        Trial ) make fixtures/trial; break;;
     esac
 done
 

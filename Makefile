@@ -59,6 +59,11 @@ fixtures/evaluation:
 fixtures/test:
 	php -d memory_limit=512M bin/console doctrine:fixtures:load --group=test --no-interaction
 
+.PHONY: fixtures/trial
+fixtures/test:
+	php -d memory_limit=512M bin/console doctrine:fixtures:load --group=trial --no-interaction
+
+
 ## Backend
 .PHONY: backend/deps
 backend/deps:
